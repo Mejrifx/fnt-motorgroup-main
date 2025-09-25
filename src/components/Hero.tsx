@@ -263,10 +263,10 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           {/* Welcome Text - Bigger and more dominant */}
           <div className="lg:-mt-24" style={{ marginTop: window.innerWidth < 768 ? '120px' : '0px' }}>
             <div className="mb-8 md:mb-12">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tight px-2 lg:glow-effect" style={{ fontFamily: 'Outfit, sans-serif', textShadow: window.innerWidth < 768 ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none' }}>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tight px-2" style={{ fontFamily: 'Outfit, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
                 <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
-          </h1>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-6 md:mb-8 px-2" style={{ textShadow: window.innerWidth < 768 ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none' }}>
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-6 md:mb-8 px-2" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
                 Find your dream car
               </p>
             </div>
