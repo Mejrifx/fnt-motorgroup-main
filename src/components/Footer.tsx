@@ -90,14 +90,14 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-300 text-sm">
-              © 2024 <button 
-                onClick={handleAdminAccess}
-                className="hover:text-fnt-red transition-colors duration-300 cursor-pointer"
-              >
-                FNT Motor Group
-              </button>. All rights reserved.
-            </p>
+                <p className="text-gray-300 text-sm">
+                  © 2025 <button 
+                    onClick={handleAdminAccess}
+                    className="hover:text-fnt-red transition-colors duration-300 cursor-pointer"
+                  >
+                    FNT Motor Group
+                  </button>. All rights reserved.
+                </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-300 hover:text-fnt-red text-sm transition-colors duration-300">Privacy Policy</a>
               <a href="#" className="text-blue-100 hover:text-amber-500 text-sm transition-colors duration-300">Terms of Service</a>
