@@ -261,31 +261,31 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           </div>
           
           {/* Welcome Text - Bigger and more dominant */}
-          <div className="lg:-mt-24" style={{ marginTop: window.innerWidth < 768 ? '100px' : '0px' }}>
-            <div className="mb-6 md:mb-12">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-4 md:mb-8 leading-tight tracking-tight px-2 lg:glow-effect" style={{ fontFamily: 'Outfit, sans-serif', textShadow: window.innerWidth < 768 ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none' }}>
+          <div className="lg:-mt-24" style={{ marginTop: window.innerWidth < 768 ? '120px' : '0px' }}>
+            <div className="mb-8 md:mb-12">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tight px-2 lg:glow-effect" style={{ fontFamily: 'Outfit, sans-serif', textShadow: window.innerWidth < 768 ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none' }}>
                 <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
-              </h1>
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-4 md:mb-8 px-2" style={{ textShadow: window.innerWidth < 768 ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none' }}>
+          </h1>
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-6 md:mb-8 px-2" style={{ textShadow: window.innerWidth < 768 ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none' }}>
                 Find your dream car
               </p>
             </div>
             
             {/* Car Filter Section */}
-            <div className="mb-6 relative z-50">
+            <div className="mb-8 relative z-50">
               <CarFilter onFilterChange={handleFilterChange} />
             </div>
             
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center items-center px-4 pb-8">
-              <button
-                onClick={scrollToInventory}
+            <button
+              onClick={scrollToInventory}
                 className="bg-fnt-red text-white px-6 sm:px-6 md:px-10 py-3 sm:py-3 md:py-5 rounded-xl font-bold text-sm sm:text-lg md:text-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center w-full sm:w-auto"
-              >
-                Explore Collection
-              </button>
+            >
+              Explore Collection
+            </button>
               <button className="border-2 border-white text-white bg-white/10 backdrop-blur-xl hover:bg-white hover:text-fnt-black px-6 sm:px-6 md:px-10 py-3 sm:py-3 md:py-5 rounded-xl font-bold text-sm sm:text-lg md:text-xl transition-all duration-300 w-full sm:w-auto shadow-lg">
-                Schedule Test Drive
-              </button>
+              Schedule Test Drive
+            </button>
             </div>
           </div>
         </div>
