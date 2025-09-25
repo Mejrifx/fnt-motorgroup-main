@@ -14,16 +14,31 @@ const AdminDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    console.log('AdminDashboard - checking auth:', { user, authLoading });
+    
+    // Don't redirect while auth is still loading
+    if (authLoading) {
+      console.log('AdminDashboard - auth still loading, waiting...');
+      return;
+    }
+    
+    // Only redirect if auth is complete and no user
+    if (!authLoading && !user) {
+      console.log('AdminDashboard - no user found, redirecting to login');
       navigate('/admin/login');
       return;
     }
-    fetchCars();
-  }, [user, navigate]);
+
+    // User is authenticated, fetch cars
+    if (user) {
+      console.log('AdminDashboard - user authenticated, fetching cars');
+      fetchCars();
+    }
+  }, [user, authLoading, navigate]);
 
   const fetchCars = async () => {
     try {
@@ -69,6 +84,19 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
+  // Show loading screen while auth is loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading screen while fetching data
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
