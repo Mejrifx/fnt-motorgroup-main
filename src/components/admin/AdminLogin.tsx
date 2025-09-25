@@ -33,12 +33,14 @@ const AdminLogin = () => {
 
       if (data.user) {
         console.log('Login successful, navigating to dashboard');
-        // Force navigation with window.location as backup
-        navigate('/admin/dashboard');
+        // Use replace to avoid history issues
+        navigate('/admin/dashboard', { replace: true });
         // Backup navigation method
         setTimeout(() => {
-          window.location.href = '/admin/dashboard';
-        }, 100);
+          if (window.location.pathname !== '/admin/dashboard') {
+            window.location.href = '/admin/dashboard';
+          }
+        }, 500);
       }
     } catch (err: any) {
       console.error('Unexpected error:', err);

@@ -38,6 +38,8 @@ function App() {
         <Route path="/" element={<MainSite />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        {/* Catch all route - redirect to home */}
+        <Route path="*" element={<MainSite />} />
       </Routes>
     </Router>
   );
