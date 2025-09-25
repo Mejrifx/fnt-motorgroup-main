@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Hero from './components/Hero';
 import WhatWouldYouLikeToDo from './components/WhatWouldYouLikeToDo';
 import FeaturedCars from './components/FeaturedCars';
@@ -6,8 +7,11 @@ import Services from './components/Services';
 import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import AdminLogin from './components/admin/AdminLogin';
+import AdminDashboard from './components/admin/AdminDashboard';
 
-function App() {
+// Main Site Component
+const MainSite = () => {
   const [searchFilters, setSearchFilters] = useState(null);
 
   const handleFilterChange = (filters) => {
@@ -24,6 +28,18 @@ function App() {
       <Contact />
       <Footer />
     </div>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainSite />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      </Routes>
+    </Router>
   );
 }
 

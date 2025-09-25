@@ -1,18 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Fuel, Settings, Calendar, Eye } from 'lucide-react';
-
-interface Car {
-  id: number;
-  name: string;
-  brand: string;
-  year: number;
-  price: string;
-  mileage: string;
-  transmission: string;
-  fuelType: string;
-  image: string;
-  category: string;
-}
+import { supabase, type Car } from '../lib/supabase';
 
 interface FeaturedCarsProps {
   searchFilters?: {
@@ -26,8 +14,32 @@ interface FeaturedCarsProps {
 
 const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   const [activeFilter, setActiveFilter] = useState('All');
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const cars: Car[] = [
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchCars = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*')
+        .eq('is_available', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCars(data || []);
+    } catch (error) {
+      console.error('Error fetching cars:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Legacy cars array for fallback (keeping original data structure)
+  const fallbackCars = [
     {
       id: 1,
       name: "AMG GT 63S",
@@ -110,18 +122,18 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
     
     return carList.filter(car => {
       // Check make (only if not "Any Make")
-      if (searchFilters.make && searchFilters.make.trim() !== '' && !car.brand.toLowerCase().includes(searchFilters.make.toLowerCase())) {
+      if (searchFilters.make && searchFilters.make.trim() !== '' && !car.make.toLowerCase().includes(searchFilters.make.toLowerCase())) {
         return false;
       }
       
       // Check model (only if not "Any Model")
-      if (searchFilters.model && searchFilters.model.trim() !== '' && !car.name.toLowerCase().includes(searchFilters.model.toLowerCase())) {
+      if (searchFilters.model && searchFilters.model.trim() !== '' && !car.model.toLowerCase().includes(searchFilters.model.toLowerCase())) {
         return false;
       }
       
       // Check price range
       if (searchFilters.priceFrom || searchFilters.priceTo) {
-        const carPrice = parseInt(car.price.replace(/[£,]/g, ''));
+        const carPrice = car.price;
         const priceFrom = searchFilters.priceFrom ? parseInt(searchFilters.priceFrom) : 0;
         const priceTo = searchFilters.priceTo ? parseInt(searchFilters.priceTo) : Infinity;
         
@@ -131,7 +143,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       }
       
       // Check fuel type (only if not "Any Fuel Type")
-      if (searchFilters.fuelType && searchFilters.fuelType.trim() !== '' && !car.fuelType.toLowerCase().includes(searchFilters.fuelType.toLowerCase())) {
+      if (searchFilters.fuelType && searchFilters.fuelType.trim() !== '' && !car.fuel_type.toLowerCase().includes(searchFilters.fuelType.toLowerCase())) {
         return false;
       }
       
@@ -142,6 +154,19 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   const filteredCars = activeFilter === 'All' 
     ? applySearchFilters(cars)
     : applySearchFilters(cars.filter(car => car.category === activeFilter));
+
+  if (loading) {
+    return (
+      <section id="inventory" className="py-20" style={{ backgroundColor: '#171819' }}>
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
+            <p className="text-white">Loading cars...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="inventory" className="py-20" style={{ backgroundColor: '#171819' }}>
@@ -179,9 +204,12 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
             >
               <div className="relative overflow-hidden">
                 <img
-                  src={car.image}
-                  alt={`${car.brand} ${car.name}`}
+                  src={car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'}
+                  alt={`${car.make} ${car.model}`}
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-4 left-4 right-4">
@@ -199,10 +227,10 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               <div className="p-6">
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-fnt-black mb-1">
-                    {car.brand} {car.name}
+                    {car.make} {car.model}
                   </h3>
                   <p className="text-2xl font-bold text-fnt-red">
-                    {car.price}
+                    £{car.price.toLocaleString()}
                   </p>
                 </div>
 
@@ -217,7 +245,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Fuel className="w-4 h-4 text-fnt-red" />
-                    <span>{car.fuelType}</span>
+                    <span>{car.fuel_type}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="w-3 h-3 bg-green-500 rounded-full"></span>

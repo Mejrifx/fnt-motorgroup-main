@@ -1,8 +1,15 @@
 import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import fntLogo from '../assets/fnt-logo.png';
 
 const Footer = () => {
+  const navigate = useNavigate();
+
+  const handleAdminAccess = () => {
+    navigate('/admin/login');
+  };
+
   return (
     <footer className="bg-fnt-black text-white">
       <div className="container mx-auto px-4 py-16">
@@ -84,7 +91,12 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-300 text-sm">
-              © 2024 FNT Motor Group. All rights reserved.
+              © 2024 <button 
+                onClick={handleAdminAccess}
+                className="hover:text-fnt-red transition-colors duration-300 cursor-pointer"
+              >
+                FNT Motor Group
+              </button>. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-300 hover:text-fnt-red text-sm transition-colors duration-300">Privacy Policy</a>
