@@ -244,18 +244,18 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* Desktop FNT Logo - Only show on desktop */}
-          <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '100px' }}>
+          <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '0px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 
               className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-80 lg:h-96"
-              style={{ transform: 'translateY(70px) scale(1)' }}
+              style={{ transform: 'translateY(-30px) scale(1)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(70px) scale(1.05)';
+                e.currentTarget.style.transform = 'translateY(-30px) scale(1.05)';
                 e.currentTarget.style.transition = 'transform 0.3s ease';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(70px) scale(1)';
+                e.currentTarget.style.transform = 'translateY(-30px) scale(1)';
               }}
             />
           </div>
@@ -265,7 +265,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             <div className="mb-8 md:mb-12">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tight px-2" style={{ fontFamily: 'Outfit, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
                 <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
-              </h1>
+          </h1>
               <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-6 md:mb-8 px-2" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
                 Find your dream car
               </p>
