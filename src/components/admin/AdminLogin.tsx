@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,15 +8,24 @@ const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { signIn } = useAuth();
+  const { user, signIn, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    console.log('AdminLogin - checking user status:', { user, loading });
+    if (!loading && user) {
+      console.log('User already authenticated, redirecting to dashboard');
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoginLoading(true);
     setError('');
 
     try {
@@ -46,9 +55,21 @@ const AdminLogin = () => {
       console.error('Unexpected error:', err);
       setError(`An error occurred: ${err.message}`);
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
+
+  // Show loading screen while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-fnt-black via-gray-900 to-fnt-black flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
+          <p className="text-white">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-fnt-black via-gray-900 to-fnt-black flex items-center justify-center px-4">
@@ -124,10 +145,10 @@ const AdminLogin = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loginLoading}
               className="w-full bg-fnt-red hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
-              {loading ? 'Signing in...' : 'Access Dashboard'}
+              {loginLoading ? 'Signing in...' : 'Access Dashboard'}
             </button>
           </form>
 
