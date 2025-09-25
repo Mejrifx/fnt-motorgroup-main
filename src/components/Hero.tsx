@@ -232,7 +232,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           
           <div className="-mt-24">
             <div>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif', transform: 'translateY(-40px)' }}>
                     <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
           </h1>
             </div>
