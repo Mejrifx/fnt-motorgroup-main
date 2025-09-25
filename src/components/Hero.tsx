@@ -18,17 +18,6 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       setIsScrolled(scrollTop > 50);
     };
 
-    // Detect Mac
-    const detectMac = () => {
-      const isMacDevice = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
-                         navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
-      console.log('Platform:', navigator.platform);
-      console.log('User Agent:', navigator.userAgent);
-      console.log('Is Mac:', isMacDevice);
-      setIsMac(isMacDevice);
-    };
-
-    detectMac();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
