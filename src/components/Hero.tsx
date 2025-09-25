@@ -58,7 +58,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             {/* Desktop Address Button - Top Left */}
             <div 
               className="hidden lg:block absolute top-1/2 transform -translate-y-1/2"
-              style={{ left: '80px', pointerEvents: 'auto' }}
+              style={{ left: '120px', pointerEvents: 'auto' }}
             >
               <a 
                 href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7" 
@@ -74,7 +74,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             {/* Desktop Phone Button - Top Right */}
             <div 
               className="hidden lg:block absolute top-1/2 transform -translate-y-1/2"
-              style={{ right: '80px', pointerEvents: 'auto' }}
+              style={{ right: '120px', pointerEvents: 'auto' }}
             >
               <a 
                 href="tel:07735770031"
@@ -232,7 +232,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           
           <div className="-mt-24">
             <div>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif', transform: 'translateY(-40px)' }}>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif', transform: 'translateY(-20px)' }}>
                     <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
           </h1>
             </div>
