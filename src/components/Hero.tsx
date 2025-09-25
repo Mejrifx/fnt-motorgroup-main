@@ -214,7 +214,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* FNT Logo */}
-              <div className="mb-12" style={{ marginTop: '-200px' }}>
+              <div className="mb-12" style={{ marginTop: '-50px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 

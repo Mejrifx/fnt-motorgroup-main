@@ -85,14 +85,14 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const hasActiveFilters = filters.make || filters.model || filters.priceFrom || filters.priceTo || filters.fuelType;
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 relative z-[99999]">
+    <div className="w-full max-w-4xl mx-auto px-4 relative z-[99999]">
       <div className="bg-white backdrop-blur-xl shadow-2xl border border-gray-200/50 rounded-full overflow-visible relative z-[99999]">
-        <div className="flex flex-col lg:flex-row items-center justify-center px-8 py-4 gap-4 lg:gap-0">
+        <div className="flex flex-col lg:flex-row items-center justify-center px-6 py-3 gap-3 lg:gap-0">
           {/* Make Filter */}
           <div className="relative">
             <button
               onClick={() => setIsMakeOpen(!isMakeOpen)}
-              className="px-6 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+              className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <span>{filters.make || 'Any Make'}</span>
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
@@ -133,7 +133,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="relative">
             <button
               onClick={() => setIsModelOpen(!isModelOpen)}
-              className="px-6 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+              className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <span>{filters.model || 'Any Model'}</span>
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
@@ -177,28 +177,28 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
 
           {/* Price From */}
-          <div className="flex items-center px-4">
-            <span className="text-lg text-gray-500 mr-2">£</span>
+          <div className="flex items-center px-3">
+            <span className="text-sm text-gray-500 mr-1">£</span>
             <input
               type="number"
               placeholder="From"
               value={filters.priceFrom}
               onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-              className="w-20 px-2 py-3 text-lg bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold"
+              className="w-16 px-2 py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold"
             />
           </div>
 
           <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
 
           {/* Price To */}
-          <div className="flex items-center px-4">
-            <span className="text-lg text-gray-500 mr-2">£</span>
+          <div className="flex items-center px-3">
+            <span className="text-sm text-gray-500 mr-1">£</span>
             <input
               type="number"
               placeholder="To"
               value={filters.priceTo}
               onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-              className="w-20 px-2 py-3 text-lg bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold"
+              className="w-16 px-2 py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold"
             />
           </div>
 
@@ -208,7 +208,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="relative">
             <button
               onClick={() => setIsFuelOpen(!isFuelOpen)}
-              className="px-6 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+              className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
             >
               <span>{filters.fuelType || 'Any Fuel Type'}</span>
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
@@ -248,9 +248,9 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           {/* Search Button */}
           <button
             onClick={handleSearch}
-            className="bg-fnt-black text-white px-8 py-3 rounded-full text-lg font-bold hover:bg-gray-800 transition-all duration-300 flex items-center gap-2"
+            className="bg-fnt-black text-white px-6 py-2 rounded-full text-base font-bold hover:bg-gray-800 transition-all duration-300 flex items-center gap-2"
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-4 w-4" />
             Search
           </button>
 
