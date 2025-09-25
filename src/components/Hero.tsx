@@ -58,7 +58,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             {/* Desktop Address Button - Top Left */}
             <div 
               className="hidden lg:block absolute top-1/2 transform -translate-y-1/2"
-              style={{ left: '120px', pointerEvents: 'auto' }}
+              style={{ left: '80px', pointerEvents: 'auto' }}
             >
               <a 
                 href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7" 

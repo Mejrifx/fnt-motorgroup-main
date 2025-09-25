@@ -147,10 +147,10 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
     <section id="inventory" className="py-20" style={{ backgroundColor: '#171819' }}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+          <h2 className="text-5xl md:text-6xl font-black text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
             Our Car Collection
           </h2>
-          <p className="text-2xl lg:text-3xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Browse our wide selection of reliable cars, all inspected and ready for their next adventure
           </p>
         </div>
