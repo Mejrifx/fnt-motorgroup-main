@@ -198,7 +198,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
               placeholder="Max Price"
               value={filters.priceTo}
               onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-              className="w-20 lg:w-16 px-2 py-2 lg:py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold text-center lg:text-left"
+              className="w-24 lg:w-16 px-2 py-2 lg:py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold text-center lg:text-left"
             />
           </div>
 

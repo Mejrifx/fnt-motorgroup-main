@@ -214,11 +214,11 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* FNT Logo */}
-              <div className="mb-8 md:mb-12" style={{ marginTop: window.innerWidth < 768 ? '80px' : '-50px' }}>
+              <div className="mb-8 md:mb-12" style={{ marginTop: window.innerWidth < 768 ? '40px' : '-50px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 
-              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-48 sm:h-56 md:h-80 lg:h-96"
+              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-64 sm:h-72 md:h-80 lg:h-96"
               style={{ transform: window.innerWidth < 768 ? 'translateY(0px) scale(1)' : 'translateY(-80px) scale(1)' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-80px) scale(1.05)';
