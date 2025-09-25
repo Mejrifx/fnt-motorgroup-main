@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Fix for display consistency across devices */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    /* Ensure consistent rendering across displays */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* Fix for images and logos across different displays */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+  }
+}
+
+@layer components {
+  .fixed-nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .bg-gradient-luxury {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #f59e0b 100%);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Cross-platform display consistency fixes */
+* {
+  /* Ensure consistent box-sizing */
+  box-sizing: border-box;
+}
+
+/* Fix for color consistency across displays */
+.fnt-red {
+  color: #ff4943 !important;
+}
+
+.fnt-black {
+  color: #000000 !important;
+}
+
+.fnt-white {
+  color: #ffffff !important;
+}
+
+/* Ensure consistent backdrop blur across browsers */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Fix for shadow consistency */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Ensure consistent border rendering */
+.border-gray-200\/50 {
+  border-color: rgba(229, 231, 235, 0.5);
+}
+
+/* Mac-specific fixes for Retina displays and different scaling */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  /* This targets Mac Retina displays specifically */
+  
+  /* Fix address and phone button positioning on Mac */
+  .mac-nav-buttons {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .mac-nav-buttons.left {
+    left: 200px !important; /* Move further from nav bar on Mac */
+  }
+  
+  .mac-nav-buttons.right {
+    right: 200px !important; /* Move further from nav bar on Mac */
+  }
+  
+  /* Fix FNT logo positioning on Mac */
+  .mac-logo-container {
+    margin-top: -100px !important; /* Move logo down on Mac */
+  }
+  
+  /* Adjust navigation bar positioning on Mac */
+  .mac-nav-container {
+    top: 3rem !important; /* Move nav bar down slightly on Mac */
+  }
+}
+
+    /* Additional Mac-specific media query for Safari */
+    @media screen and (min-resolution: 2dppx) {
+      /* Similar fixes for Safari on Mac */
+      .mac-nav-buttons.left {
+        left: 200px !important;
+      }
+      
+      .mac-nav-buttons.right {
+        right: 200px !important;
+      }
+      
+      .mac-logo-container {
+        margin-top: -100px !important;
+      }
+      
+      .mac-nav-container {
+        top: 3rem !important;
+      }
+    }
+
+    /* Subtle red glow with breathing effect */
+    .glow-effect {
+      text-shadow: 
+        0 0 5px rgba(255, 73, 67, 0.3),
+        0 0 10px rgba(255, 73, 67, 0.2),
+        0 0 15px rgba(255, 73, 67, 0.1);
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% {
+        text-shadow: 
+          0 0 5px rgba(255, 73, 67, 0.3),
+          0 0 10px rgba(255, 73, 67, 0.2),
+          0 0 15px rgba(255, 73, 67, 0.1);
+      }
+      50% {
+        text-shadow: 
+          0 0 8px rgba(255, 73, 67, 0.4),
+          0 0 15px rgba(255, 73, 67, 0.3),
+          0 0 20px rgba(255, 73, 67, 0.2);
+      }
+    }
