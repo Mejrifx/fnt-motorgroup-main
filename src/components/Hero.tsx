@@ -43,7 +43,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
         backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll'
       }}
     >
-      {/* Mobile Header - Logo Left, Hamburger Right */}
+      {/* Mobile Header - Phone Left, Logo Center, Hamburger Right */}
       <div 
         className={`lg:hidden w-full px-4 py-4 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{
@@ -56,17 +56,25 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
         }}
       >
         <div className="flex justify-between items-center">
-          {/* Mobile FNT Logo - Top Left */}
+          {/* Mobile Phone Button - Top Left */}
+          <a 
+            href="tel:07735770031"
+            className="p-3 text-white hover:text-fnt-red transition-all duration-300 bg-white/10 backdrop-blur-xl rounded-full shadow-lg"
+          >
+            <Phone className="w-6 h-6" />
+          </a>
+          
+          {/* Mobile FNT Logo - Top Center */}
           <img 
             src={fntLogo} 
             alt="FNT Motor Group" 
-            className="h-12 w-auto drop-shadow-lg"
+            className="h-16 w-auto drop-shadow-lg mx-auto"
           />
           
           {/* Mobile Hamburger Menu - Top Right */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 text-white hover:text-fnt-red transition-all duration-300 bg-white/10 backdrop-blur-xl rounded-full"
+            className="p-3 text-white hover:text-fnt-red transition-all duration-300 bg-white/10 backdrop-blur-xl rounded-full shadow-lg"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -253,7 +261,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           </div>
           
           {/* Welcome Text - Bigger and more dominant */}
-          <div className="lg:-mt-24" style={{ marginTop: window.innerWidth < 768 ? '120px' : '0px' }}>
+          <div className="lg:-mt-24" style={{ marginTop: window.innerWidth < 768 ? '140px' : '0px' }}>
             <div className="mb-8 md:mb-12">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 md:mb-8 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
