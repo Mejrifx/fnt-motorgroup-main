@@ -20,18 +20,29 @@ const AdminLogin = () => {
     setError('');
 
     try {
+      console.log('Attempting login with:', email);
       const { data, error } = await signIn(email, password);
       
+      console.log('Login response:', { data, error });
+      
       if (error) {
-        setError('Invalid credentials. Please try again.');
+        console.error('Login error:', error);
+        setError(`Login failed: ${error.message}`);
         return;
       }
 
       if (data.user) {
+        console.log('Login successful, navigating to dashboard');
+        // Force navigation with window.location as backup
         navigate('/admin/dashboard');
+        // Backup navigation method
+        setTimeout(() => {
+          window.location.href = '/admin/dashboard';
+        }, 100);
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (err: any) {
+      console.error('Unexpected error:', err);
+      setError(`An error occurred: ${err.message}`);
     } finally {
       setLoading(false);
     }
