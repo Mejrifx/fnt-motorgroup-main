@@ -45,7 +45,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
     >
       {/* Mobile Header - Phone Left, Logo Center, Hamburger Right */}
       <div 
-        className={`lg:hidden w-full px-4 py-4 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`lg:hidden w-full px-4 py-2 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{
           position: 'fixed',
           top: 0,
@@ -283,7 +283,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                 >
                   Explore Collection
                 </button>
-                <button className="border-2 border-white text-white hover:bg-white hover:text-fnt-black px-8 sm:px-6 md:px-10 py-4 sm:py-3 md:py-5 rounded-xl font-bold text-base sm:text-lg md:text-xl transition-all duration-300 w-full sm:w-auto">
+                <button className="border-2 border-white text-white bg-white/10 backdrop-blur-xl hover:bg-white hover:text-fnt-black px-8 sm:px-6 md:px-10 py-4 sm:py-3 md:py-5 rounded-xl font-bold text-base sm:text-lg md:text-xl transition-all duration-300 w-full sm:w-auto shadow-lg">
                   Schedule Test Drive
                 </button>
               </div>
