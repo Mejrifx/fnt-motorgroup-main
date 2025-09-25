@@ -10,7 +10,6 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMac, setIsMac] = useState(false);
   const [searchFilters, setSearchFilters] = useState(null);
 
   useEffect(() => {
@@ -56,29 +55,29 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       }}
     >
       {/* Fixed Navigation Bar */}
-      <div 
-        className={`w-full px-4 transition-all duration-300 mac-nav-container ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-        style={{
-          position: 'fixed',
-          top: isMac ? '3rem' : '2rem',
-          left: 0,
-          right: 0,
-          zIndex: 9999,
-          pointerEvents: 'none'
-        }}
-      >
+          <div 
+            className={`w-full px-4 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            style={{
+              position: 'fixed',
+              top: '1.5rem',
+              left: 0,
+              right: 0,
+              zIndex: 9999,
+              pointerEvents: 'none'
+            }}
+          >
             {/* Desktop Address Button - Top Left */}
             <div 
               className="hidden lg:block absolute top-1/2 transform -translate-y-1/2"
-              style={{ left: isMac ? '120px' : '240px', pointerEvents: 'auto' }}
+              style={{ left: '80px', pointerEvents: 'auto' }}
             >
               <a 
                 href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-5 py-3 flex items-center gap-2 text-base font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
+                className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
               >
-                <MapPin className="w-5 h-5" />
+                <MapPin className="w-4 h-4" />
                 <span>Manchester M12 4RX</span>
               </a>
             </div>
@@ -86,13 +85,13 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             {/* Desktop Phone Button - Top Right */}
             <div 
               className="hidden lg:block absolute top-1/2 transform -translate-y-1/2"
-              style={{ right: isMac ? '200px' : '240px', pointerEvents: 'auto' }}
+              style={{ right: '80px', pointerEvents: 'auto' }}
             >
               <a 
                 href="tel:07735770031"
-                className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-5 py-3 flex items-center gap-2 text-base font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
+                className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
               >
-                <Phone className="w-5 h-5" />
+                <Phone className="w-4 h-4" />
                 <span>07735770031</span>
               </a>
             </div>
@@ -102,47 +101,47 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             className="bg-white backdrop-blur-xl shadow-2xl border border-gray-200/50 rounded-full overflow-hidden"
             style={{ pointerEvents: 'auto' }}
           >
-            <div className="flex items-center justify-center px-4 lg:px-8 py-3 lg:py-4">
+                <div className="flex items-center justify-center px-6 py-3">
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center">
                 <button
                   onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-5 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Home
                 </button>
                 <div className="h-6 w-px bg-fnt-red mx-2"></div>
                 <button
                   onClick={() => document.getElementById('inventory')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-5 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Showroom
                 </button>
                 <div className="h-6 w-px bg-fnt-red mx-2"></div>
                 <button
                   onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-5 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Sell Your Car
                 </button>
                 <div className="h-6 w-px bg-fnt-red mx-2"></div>
                 <button
                   onClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-5 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Reviews
                 </button>
                 <div className="h-6 w-px bg-fnt-red mx-2"></div>
                 <button
                   onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-5 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   About Us
                 </button>
                 <div className="h-6 w-px bg-fnt-red mx-2"></div>
                 <button
                   onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-5 py-3 text-lg font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Contact
                 </button>
@@ -226,15 +225,11 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* FNT Logo */}
-              <div className="mb-12" style={{ marginTop: isMac ? '-80px' : '-350px' }}>
+              <div className="mb-12" style={{ marginTop: '-200px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 
-              className={`w-auto mx-auto mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 ${
-                isMac 
-                  ? 'h-80 md:h-96 lg:h-[28rem] xl:h-[32rem] 2xl:h-[36rem]' 
-                  : 'h-96 md:h-[28rem] lg:h-[32rem] xl:h-[36rem] 2xl:h-[40rem]'
-              }`}
+              className="w-auto mx-auto mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-64 md:h-80 lg:h-96"
               style={{ transform: 'translateY(-80px) scale(1)' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-80px) scale(1.05)';
@@ -248,7 +243,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           
           <div className="-mt-24">
             <div>
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black mb-4 md:mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif', transform: 'translateY(-40px)' }}>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif' }}>
                     <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
           </h1>
             </div>
