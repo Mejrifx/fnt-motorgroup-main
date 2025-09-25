@@ -3,30 +3,94 @@
 @tailwind utilities;
 
 @layer base {
+  /* Critical: Reset and normalize everything */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
   html {
+    /* Force consistent font size - this is key! */
+    font-size: 16px !important;
+    line-height: 1.5;
     scroll-behavior: smooth;
+    /* Prevent zoom on mobile */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     /* Fix for display consistency across devices */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
   }
   
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    /* Force consistent font size */
+    font-size: 16px !important;
+    line-height: 1.5;
     margin: 0;
     padding: 0;
     background-color: #000000;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
     /* Ensure consistent rendering across displays */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Force consistent text sizing */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Force root div to behave consistently */
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
   }
   
   /* Fix for images and logos across different displays */
   img {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Reset all headings to prevent browser defaults */
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+    font-weight: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  
+  /* Reset paragraphs */
+  p {
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Reset buttons */
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+  
+  /* Reset inputs */
+  input, textarea, select {
+    font: inherit;
+    margin: 0;
+    padding: 0;
   }
 }
 
@@ -84,6 +148,25 @@
   /* Ensure consistent box-sizing */
   box-sizing: border-box;
 }
+
+/* Critical: Force consistent container sizes in production */
+.container {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Force consistent text rendering across all environments */
+.text-3xl, .text-4xl, .text-5xl, .text-6xl, .text-7xl, .text-8xl {
+  font-size: var(--tw-text-size) !important;
+}
+
+/* Ensure consistent spacing */
+.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.px-8 { padding-left: 2rem !important; padding-right: 2rem !important; }
+.py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.py-8 { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+.py-20 { padding-top: 5rem !important; padding-bottom: 5rem !important; }
+.py-24 { padding-top: 6rem !important; padding-bottom: 6rem !important; }
 
 /* Fix for color consistency across displays */
 .fnt-red {
