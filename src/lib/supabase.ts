@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://wqbuznxglexyijlwvjmi.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxYnV6bnhnbGV4eWlqbHd2am1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MTcwMTgsImV4cCI6MjA3NDM5MzAxOH0.xzAqG6EVQFmFtEIc4hgdesL__pwuFXf-kzUjMH5WFtA'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables')
+}
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -24,9 +28,4 @@ export interface Car {
   updated_at: string
 }
 
-export interface User {
-  id: string
-  email: string
-  role: 'admin' | 'employee'
-  created_at: string
-}
+// Using Supabase's built-in User type from @supabase/supabase-js

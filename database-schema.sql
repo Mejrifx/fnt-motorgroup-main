@@ -27,17 +27,6 @@ CREATE TABLE cars (
 );
 
 -- =============================================
--- Users Table (for admin authentication)
--- =============================================
-CREATE TABLE admin_users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    role VARCHAR(20) DEFAULT 'employee' CHECK (role IN ('admin', 'employee')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- =============================================
 -- Indexes for Performance
 -- =============================================
 CREATE INDEX idx_cars_make ON cars(make);
@@ -50,7 +39,6 @@ CREATE INDEX idx_cars_created_at ON cars(created_at);
 -- Row Level Security (RLS)
 -- =============================================
 ALTER TABLE cars ENABLE ROW LEVEL SECURITY;
-ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
 -- Public can read available cars
 CREATE POLICY "Anyone can view available cars" ON cars
@@ -59,16 +47,6 @@ CREATE POLICY "Anyone can view available cars" ON cars
 -- Only authenticated users can manage cars
 CREATE POLICY "Authenticated users can manage cars" ON cars
     FOR ALL USING (auth.role() = 'authenticated');
-
--- Only authenticated users can view admin_users
-CREATE POLICY "Only authenticated users can view admin users" ON admin_users
-    FOR SELECT USING (auth.role() = 'authenticated');
-
--- =============================================
--- Insert Default Admin User
--- =============================================
-INSERT INTO admin_users (email, password_hash, role) VALUES 
-('admin@fntmotorgroup.com', crypt('FarisandTawhid', gen_salt('bf')), 'admin');
 
 -- =============================================
 -- Sample Car Data (for testing)
