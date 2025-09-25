@@ -68,7 +68,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           <img 
             src={fntLogo} 
             alt="FNT Motor Group" 
-            className="h-16 w-auto drop-shadow-lg mx-auto"
+            className="h-40 w-auto drop-shadow-lg mx-auto"
           />
           
           {/* Mobile Hamburger Menu - Top Right */}

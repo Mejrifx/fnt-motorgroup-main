@@ -86,7 +86,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 relative z-[99999]">
-      <div className="bg-white/80 lg:bg-white backdrop-blur-xl shadow-2xl border border-gray-200/50 rounded-2xl lg:rounded-full overflow-visible relative z-[99999]">
+      <div className="bg-white/20 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative z-[99999]">
         <div className="flex flex-col lg:flex-row items-center justify-center px-4 lg:px-6 py-4 lg:py-3 gap-4 lg:gap-0">
           {/* Make Filter */}
           <div className="relative">
@@ -177,7 +177,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
 
           {/* Price From */}
-          <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-3 py-2 lg:py-0 bg-white/60 lg:bg-transparent rounded-xl lg:rounded-none">
+          <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-3 py-2 lg:py-0 bg-white/20 lg:bg-transparent rounded-xl lg:rounded-none">
             <span className="text-sm text-gray-500 mr-2">£</span>
             <input
               type="number"
@@ -191,7 +191,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
 
           {/* Price To */}
-          <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-3 py-2 lg:py-0 bg-white/60 lg:bg-transparent rounded-xl lg:rounded-none">
+          <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-3 py-2 lg:py-0 bg-white/20 lg:bg-transparent rounded-xl lg:rounded-none">
             <span className="text-sm text-gray-500 mr-2">£</span>
             <input
               type="number"
