@@ -40,7 +40,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
         backgroundImage: 'url("https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
+        backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll'
       }}
     >
       {/* Fixed Navigation Bar */}
@@ -48,7 +48,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             className={`w-full px-4 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
             style={{
               position: 'fixed',
-              top: '1.5rem',
+              top: '1rem',
               left: 0,
               right: 0,
               zIndex: 9999,
@@ -214,12 +214,12 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* FNT Logo */}
-              <div className="mb-12" style={{ marginTop: '-50px' }}>
+              <div className="mb-8 md:mb-12" style={{ marginTop: window.innerWidth < 768 ? '80px' : '-50px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 
-              className="w-auto mx-auto mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-64 md:h-80 lg:h-96"
-              style={{ transform: 'translateY(-80px) scale(1)' }}
+              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-48 sm:h-56 md:h-80 lg:h-96"
+              style={{ transform: window.innerWidth < 768 ? 'translateY(0px) scale(1)' : 'translateY(-80px) scale(1)' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-80px) scale(1.05)';
                 e.currentTarget.style.transition = 'transform 0.3s ease';
@@ -232,7 +232,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           
           <div className="-mt-24">
             <div>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif', transform: 'translateY(-20px)' }}>
+                  <h1 className="text-2xl sm:text-3xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight tracking-tight px-2 glow-effect" style={{ fontFamily: 'Outfit, sans-serif', transform: window.innerWidth < 768 ? 'translateY(0px)' : 'translateY(-20px)' }}>
                     <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
           </h1>
             </div>
@@ -243,17 +243,17 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                   <CarFilter onFilterChange={handleFilterChange} />
                 </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center px-4">
-            <button
-              onClick={scrollToInventory}
-                className="bg-fnt-red text-white px-6 md:px-10 py-3 md:py-5 rounded-xl font-bold text-lg md:text-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center w-full sm:w-auto"
-            >
-              Explore Collection
-            </button>
-              <button className="border-2 border-white text-white hover:bg-white hover:text-fnt-black px-6 md:px-10 py-3 md:py-5 rounded-xl font-bold text-lg md:text-xl transition-all duration-300 w-full sm:w-auto">
-              Schedule Test Drive
-            </button>
-            </div>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center items-center px-4">
+                <button
+                  onClick={scrollToInventory}
+                  className="bg-fnt-red text-white px-8 sm:px-6 md:px-10 py-4 sm:py-3 md:py-5 rounded-xl font-bold text-base sm:text-lg md:text-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center w-full sm:w-auto"
+                >
+                  Explore Collection
+                </button>
+                <button className="border-2 border-white text-white hover:bg-white hover:text-fnt-black px-8 sm:px-6 md:px-10 py-4 sm:py-3 md:py-5 rounded-xl font-bold text-base sm:text-lg md:text-xl transition-all duration-300 w-full sm:w-auto">
+                  Schedule Test Drive
+                </button>
+              </div>
           </div>
         </div>
       </div>
