@@ -202,15 +202,19 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               key={car.id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group"
             >
-              <div className="relative overflow-hidden">
-                <img
-                  src={car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'}
-                  alt={`${car.make} ${car.model}`}
-                  className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
-                  }}
-                />
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={
+                        car.cover_image_path 
+                          ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
+                          : car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'
+                      }
+                      alt={`${car.make} ${car.model}`}
+                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
+                      }}
+                    />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-4 left-4 right-4">
                     <button className="w-full bg-fnt-red text-white py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300">

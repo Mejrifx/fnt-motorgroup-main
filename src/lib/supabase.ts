@@ -22,7 +22,9 @@ export interface Car {
   category: string
   description: string
   cover_image_url: string
+  cover_image_path: string | null
   gallery_images: string[]
+  gallery_image_paths: string[]
   is_available: boolean
   created_at: string
   updated_at: string

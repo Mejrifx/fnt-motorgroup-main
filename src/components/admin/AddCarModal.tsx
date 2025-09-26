@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Upload, Car } from 'lucide-react';
 import { supabase, type Car } from '../../lib/supabase';
+import ImageUpload from './ImageUpload';
 
 interface AddCarModalProps {
   onClose: () => void;
@@ -19,6 +20,8 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     category: 'Luxury',
     description: '',
     cover_image_url: '',
+    cover_image_path: '',
+    gallery_image_paths: [] as string[],
     is_available: true
   });
   const [loading, setLoading] = useState(false);
@@ -30,11 +33,28 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     setError('');
 
     try {
+      // Validate that at least one image is provided
+      if (!formData.cover_image_path && !formData.cover_image_url) {
+        setError('Please upload a cover image or provide an image URL.');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('cars')
         .insert([{
-          ...formData,
-          price: parseFloat(formData.price)
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
+          price: parseFloat(formData.price),
+          mileage: formData.mileage,
+          fuel_type: formData.fuel_type,
+          transmission: formData.transmission,
+          category: formData.category,
+          description: formData.description,
+          cover_image_url: formData.cover_image_url || null,
+          cover_image_path: formData.cover_image_path || null,
+          gallery_image_paths: formData.gallery_image_paths,
+          is_available: formData.is_available
         }])
         .select()
         .single();
@@ -54,6 +74,31 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+  };
+
+  // Handle cover image upload
+  const handleCoverImageUploaded = (imagePath: string) => {
+    setFormData(prev => ({
+      ...prev,
+      cover_image_path: imagePath,
+      cover_image_url: '' // Clear URL if image is uploaded
+    }));
+  };
+
+  const handleCoverImageRemoved = () => {
+    setFormData(prev => ({
+      ...prev,
+      cover_image_path: '',
+      cover_image_url: ''
+    }));
+  };
+
+  // Handle gallery images upload
+  const handleGalleryImagesUploaded = (imagePaths: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery_image_paths: imagePaths
     }));
   };
 
@@ -191,19 +236,44 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
             </div>
           </div>
 
-          {/* Image URL */}
+          {/* Cover Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
-            <input
-              type="url"
-              name="cover_image_url"
-              value={formData.cover_image_url}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-              placeholder="https://example.com/car-image.jpg"
+            <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
+            <ImageUpload
+              onImageUploaded={handleCoverImageUploaded}
+              onImageRemoved={handleCoverImageRemoved}
+              currentImagePath={formData.cover_image_path}
+              carId="new-car"
+            />
+            
+            {/* Fallback URL input */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Or paste image URL</label>
+              <input
+                type="url"
+                name="cover_image_url"
+                value={formData.cover_image_url}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+                placeholder="https://example.com/car-image.jpg"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Use this if you have a direct link to an image
+              </p>
+            </div>
+          </div>
+
+          {/* Gallery Images Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Images (Optional)</label>
+            <ImageUpload
+              onMultipleImagesUploaded={handleGalleryImagesUploaded}
+              carId="new-car"
+              multiple={true}
+              maxImages={5}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Paste a direct link to the car's main image
+              Upload additional photos to showcase the car (up to 5 images)
             </p>
           </div>
 

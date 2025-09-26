@@ -216,7 +216,11 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img 
-                          src={car.cover_image_url || 'https://via.placeholder.com/60x40'} 
+                          src={
+                            car.cover_image_path 
+                              ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
+                              : car.cover_image_url || 'https://via.placeholder.com/60x40'
+                          } 
                           alt={`${car.make} ${car.model}`}
                           className="w-15 h-10 rounded object-cover"
                         />

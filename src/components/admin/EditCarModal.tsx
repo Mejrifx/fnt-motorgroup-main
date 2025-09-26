@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Car } from 'lucide-react';
 import { supabase, type Car } from '../../lib/supabase';
+import ImageUpload from './ImageUpload';
 
 interface EditCarModalProps {
   car: Car;
@@ -20,6 +21,8 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
     category: car.category,
     description: car.description || '',
     cover_image_url: car.cover_image_url || '',
+    cover_image_path: car.cover_image_path || '',
+    gallery_image_paths: car.gallery_image_paths || [],
     is_available: car.is_available
   });
   const [loading, setLoading] = useState(false);
@@ -34,8 +37,19 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
       const { data, error } = await supabase
         .from('cars')
         .update({
-          ...formData,
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
           price: parseFloat(formData.price),
+          mileage: formData.mileage,
+          fuel_type: formData.fuel_type,
+          transmission: formData.transmission,
+          category: formData.category,
+          description: formData.description,
+          cover_image_url: formData.cover_image_url || null,
+          cover_image_path: formData.cover_image_path || null,
+          gallery_image_paths: formData.gallery_image_paths,
+          is_available: formData.is_available,
           updated_at: new Date().toISOString()
         })
         .eq('id', car.id)
@@ -60,6 +74,39 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
     }));
   };
 
+  // Handle cover image upload
+  const handleCoverImageUploaded = (imagePath: string) => {
+    setFormData(prev => ({
+      ...prev,
+      cover_image_path: imagePath,
+      cover_image_url: '' // Clear URL if image is uploaded
+    }));
+  };
+
+  const handleCoverImageRemoved = () => {
+    setFormData(prev => ({
+      ...prev,
+      cover_image_path: '',
+      cover_image_url: ''
+    }));
+  };
+
+  // Handle gallery images upload
+  const handleGalleryImagesUploaded = (imagePaths: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery_image_paths: imagePaths
+    }));
+  };
+
+  // Get current image URL for display
+  const getCurrentImageUrl = (): string => {
+    if (formData.cover_image_path) {
+      return supabase.storage.from('car-images').getPublicUrl(formData.cover_image_path).data.publicUrl;
+    }
+    return formData.cover_image_url || '';
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -79,20 +126,47 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Current Image Preview */}
-          {formData.cover_image_url && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Current Image</label>
-              <img
-                src={formData.cover_image_url}
-                alt={`${formData.make} ${formData.model}`}
-                className="w-full h-48 object-cover rounded-lg border"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=No+Image';
-                }}
+          {/* Cover Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image</label>
+            <ImageUpload
+              onImageUploaded={handleCoverImageUploaded}
+              onImageRemoved={handleCoverImageRemoved}
+              currentImagePath={formData.cover_image_path}
+              currentImageUrl={getCurrentImageUrl()}
+              carId={car.id}
+            />
+            
+            {/* Fallback URL input */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Or paste image URL</label>
+              <input
+                type="url"
+                name="cover_image_url"
+                value={formData.cover_image_url}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+                placeholder="https://example.com/car-image.jpg"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Use this if you have a direct link to an image
+              </p>
             </div>
-          )}
+          </div>
+
+          {/* Gallery Images Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Gallery Images (Optional)</label>
+            <ImageUpload
+              onMultipleImagesUploaded={handleGalleryImagesUploaded}
+              carId={car.id}
+              multiple={true}
+              maxImages={5}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Upload additional photos to showcase the car (up to 5 images)
+            </p>
+          </div>
 
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,18 +279,6 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
             </div>
           </div>
 
-          {/* Image URL */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
-            <input
-              type="url"
-              name="cover_image_url"
-              value={formData.cover_image_url}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-              placeholder="https://example.com/car-image.jpg"
-            />
-          </div>
 
           {/* Description */}
           <div>
