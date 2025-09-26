@@ -79,7 +79,7 @@ const AdminLogin = () => {
           <img 
             src={fntLogo} 
             alt="FNT Motor Group" 
-            className="h-32 sm:h-40 lg:h-48 w-auto mx-auto mb-6 drop-shadow-2xl"
+            className="h-64 sm:h-80 lg:h-96 w-auto mx-auto mb-6 drop-shadow-2xl"
           />
           <h1 className="text-3xl font-black text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
             Admin Portal
