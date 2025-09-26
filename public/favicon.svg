@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#000000" rx="4"/>
+  
+  <!-- FNT Text - Bold and Clear -->
+  <text x="16" y="22" font-family="Arial, sans-serif" font-size="16" font-weight="900" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="0.5">FNT</text>
+  
+  <!-- Optional: Small accent line -->
+  <rect x="8" y="24" width="16" height="1" fill="#dc2626" rx="0.5"/>
+</svg>
