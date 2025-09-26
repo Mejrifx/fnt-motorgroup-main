@@ -19,9 +19,13 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     transmission: 'Automatic',
     category: 'Luxury',
     description: '',
-    cover_image_url: '',
     cover_image_path: '',
     gallery_image_paths: [] as string[],
+    colour: '',
+    engine: '',
+    style: '',
+    doors: '',
+    road_tax: '',
     is_available: true
   });
   const [loading, setLoading] = useState(false);
@@ -34,8 +38,8 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
 
     try {
       // Validate that at least one image is provided
-      if (!formData.cover_image_path && !formData.cover_image_url) {
-        setError('Please upload a cover image or provide an image URL.');
+      if (!formData.cover_image_path) {
+        setError('Please upload a cover image.');
         return;
       }
 
@@ -51,9 +55,13 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
           transmission: formData.transmission,
           category: formData.category,
           description: formData.description,
-          cover_image_url: formData.cover_image_url || null,
           cover_image_path: formData.cover_image_path || null,
           gallery_image_paths: formData.gallery_image_paths,
+          colour: formData.colour || null,
+          engine: formData.engine || null,
+          style: formData.style || null,
+          doors: formData.doors ? parseInt(formData.doors) : null,
+          road_tax: formData.road_tax || null,
           is_available: formData.is_available
         }])
         .select()
@@ -77,20 +85,48 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     }));
   };
 
+  // Car makes and models data
+  const carMakes = [
+    'Audi', 'BMW', 'Mercedes-Benz', 'Porsche', 'Ferrari', 'Lamborghini', 
+    'Bentley', 'Rolls-Royce', 'Maserati', 'Aston Martin', 'McLaren', 'Jaguar',
+    'Land Rover', 'Range Rover', 'Lexus', 'Tesla', 'Volkswagen', 'Ford', 'Toyota', 'Honda'
+  ];
+
+  const carModels: { [key: string]: string[] } = {
+    'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'e-tron'],
+    'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series', '8 Series', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i3', 'i4', 'iX'],
+    'Mercedes-Benz': ['A-Class', 'B-Class', 'C-Class', 'CLA', 'CLS', 'E-Class', 'G-Class', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'S-Class', 'SL', 'SLC', 'AMG GT', 'EQC', 'EQS'],
+    'Porsche': ['911', '718 Boxster', '718 Cayman', 'Cayenne', 'Macan', 'Panamera', 'Taycan'],
+    'Ferrari': ['488', 'F8 Tributo', 'SF90 Stradale', 'Roma', 'Portofino', '812 Superfast', 'LaFerrari'],
+    'Lamborghini': ['Huracán', 'Aventador', 'Urus', 'Gallardo'],
+    'Bentley': ['Continental GT', 'Flying Spur', 'Bentayga', 'Mulsanne'],
+    'Rolls-Royce': ['Phantom', 'Ghost', 'Wraith', 'Dawn', 'Cullinan'],
+    'Land Rover': ['Defender', 'Discovery', 'Discovery Sport', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover'],
+    'Tesla': ['Model S', 'Model 3', 'Model X', 'Model Y'],
+    'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE'],
+    'Lexus': ['IS', 'ES', 'GS', 'LS', 'NX', 'RX', 'GX', 'LX', 'LC', 'UX'],
+    'Toyota': ['Corolla', 'Camry', 'Prius', 'RAV4', 'Highlander', 'Land Cruiser', 'Supra'],
+    'Honda': ['Civic', 'Accord', 'CR-V', 'Pilot', 'Ridgeline', 'HR-V', 'Passport'],
+    'Ford': ['Fiesta', 'Focus', 'Mustang', 'Explorer', 'F-150', 'Escape', 'Edge'],
+    'Volkswagen': ['Golf', 'Jetta', 'Passat', 'Tiguan', 'Atlas', 'Beetle', 'Arteon']
+  };
+
+  const colours = [
+    'White', 'Black', 'Silver', 'Grey', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Brown', 'Gold', 'Purple'
+  ];
+
   // Handle cover image upload
   const handleCoverImageUploaded = (imagePath: string) => {
     setFormData(prev => ({
       ...prev,
-      cover_image_path: imagePath,
-      cover_image_url: '' // Clear URL if image is uploaded
+      cover_image_path: imagePath
     }));
   };
 
   const handleCoverImageRemoved = () => {
     setFormData(prev => ({
       ...prev,
-      cover_image_path: '',
-      cover_image_url: ''
+      cover_image_path: ''
     }));
   };
 
@@ -125,27 +161,41 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Make</label>
-              <input
-                type="text"
+              <select
                 name="make"
                 value={formData.make}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  // Reset model when make changes
+                  setFormData(prev => ({ ...prev, model: '' }));
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-                placeholder="e.g., BMW"
                 required
-              />
+              >
+                <option value="">Select Make</option>
+                {carMakes.map((make) => (
+                  <option key={make} value={make}>{make}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
-              <input
-                type="text"
+              <select
                 name="model"
                 value={formData.model}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-                placeholder="e.g., 3 Series"
                 required
-              />
+                disabled={!formData.make}
+              >
+                <option value="">Select Model</option>
+                {formData.make && carModels[formData.make]?.map((model) => (
+                  <option key={model} value={model}>{model}</option>
+                ))}
+              </select>
+              {!formData.make && (
+                <p className="text-xs text-gray-500 mt-1">Select a make first</p>
+              )}
             </div>
           </div>
 
@@ -246,21 +296,6 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
               carId="new-car"
             />
             
-            {/* Fallback URL input */}
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Or paste image URL</label>
-              <input
-                type="url"
-                name="cover_image_url"
-                value={formData.cover_image_url}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-                placeholder="https://example.com/car-image.jpg"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Use this if you have a direct link to an image
-              </p>
-            </div>
           </div>
 
           {/* Gallery Images Upload */}
@@ -275,6 +310,83 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
             <p className="text-xs text-gray-500 mt-1">
               Upload additional photos to showcase the car (up to 5 images)
             </p>
+          </div>
+
+          {/* Additional Car Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Colour</label>
+              <select
+                name="colour"
+                value={formData.colour}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+              >
+                <option value="">Select Colour</option>
+                {colours.map((colour) => (
+                  <option key={colour} value={colour}>{colour}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Engine</label>
+              <input
+                type="text"
+                name="engine"
+                value={formData.engine}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+                placeholder="e.g., 3.0L V6, 2.0L Turbo, Electric Motor"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Style</label>
+              <select
+                name="style"
+                value={formData.style}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+              >
+                <option value="">Select Style</option>
+                <option value="Saloon">Saloon</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Estate">Estate</option>
+                <option value="SUV">SUV</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Convertible">Convertible</option>
+                <option value="Sports">Sports</option>
+                <option value="MPV">MPV</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Doors</label>
+              <select
+                name="doors"
+                value={formData.doors}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+              >
+                <option value="">Select Doors</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Road Tax</label>
+              <input
+                type="text"
+                name="road_tax"
+                value={formData.road_tax}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
+                placeholder="e.g., £180, £620"
+              />
+            </div>
           </div>
 
           {/* Description */}

@@ -25,6 +25,11 @@ export interface Car {
   cover_image_path: string | null
   gallery_images: string[]
   gallery_image_paths: string[]
+  colour: string | null
+  engine: string | null
+  style: string | null
+  doors: number | null
+  road_tax: string | null
   is_available: boolean
   created_at: string
   updated_at: string

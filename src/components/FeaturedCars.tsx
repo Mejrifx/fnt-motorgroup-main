@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Fuel, Settings, Calendar, Eye } from 'lucide-react';
 import { supabase, type Car } from '../lib/supabase';
 
@@ -16,6 +17,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCars();
@@ -215,14 +217,17 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
                       }}
                     />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <button className="w-full bg-fnt-red text-white py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300">
-                      <Eye className="w-4 h-4" />
-                      <span>View Details</span>
-                    </button>
-                  </div>
-                </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <button 
+                          onClick={() => navigate(`/car/${car.id}`)}
+                          className="w-full bg-fnt-red text-white py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>View Details</span>
+                        </button>
+                      </div>
+                    </div>
                 <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">
                   {car.year}
                 </div>
