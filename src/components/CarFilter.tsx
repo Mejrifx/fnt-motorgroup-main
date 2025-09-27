@@ -85,8 +85,8 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const hasActiveFilters = filters.make || filters.model || filters.priceFrom || filters.priceTo || filters.fuelType;
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 relative z-[99999]">
-      <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative z-[99999]">
+    <div className="w-full max-w-4xl mx-auto px-4 relative z-[999999]">
+      <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative z-[999999]">
         <div className="flex flex-col lg:flex-row items-center justify-center px-3 lg:px-6 py-3 lg:py-3 gap-3 lg:gap-0">
           {/* Make Filter */}
           <div className="relative">
@@ -99,7 +99,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             </button>
             
             {isMakeOpen && (
-              <div className="absolute z-[99999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+              <div className="absolute z-[999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
                 <div className="py-2">
                   <button
                     onClick={() => {
@@ -140,7 +140,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             </button>
             
             {isModelOpen && (
-              <div className="absolute z-[99999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+              <div className="absolute z-[999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
                 <div className="py-2">
                   <button
                     onClick={() => {
@@ -215,7 +215,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             </button>
             
             {isFuelOpen && (
-              <div className="absolute z-[99999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+              <div className="absolute z-[999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
                 <div className="py-2">
                   <button
                     onClick={() => {

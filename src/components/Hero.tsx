@@ -241,8 +241,8 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       </div>
       <div className="absolute inset-0 bg-gradient-to-r from-fnt-black/80 via-fnt-black/60 to-transparent"></div>
       
-      <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
-        <div className="animate-fade-in-up">
+      <div className="relative z-10 text-center max-w-6xl mx-auto px-4 overflow-visible">
+        <div className="animate-fade-in-up overflow-visible">
           {/* Desktop FNT Logo - Only show on desktop */}
           <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '0px' }}>
             <img 
@@ -272,7 +272,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             </div>
             
             {/* Car Filter Section */}
-            <div className="mb-8 relative z-50">
+            <div className="mb-8 relative z-[99999] overflow-visible">
               <CarFilter onFilterChange={handleFilterChange} />
             </div>
             
