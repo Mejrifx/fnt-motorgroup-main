@@ -190,47 +190,47 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             className="bg-white backdrop-blur-xl shadow-2xl border border-gray-200/50 rounded-full overflow-hidden"
             style={{ pointerEvents: 'auto' }}
           >
-            <div className="flex items-center justify-center px-6 py-3">
+            <div className="flex items-center justify-center px-4 py-2">
               {/* Desktop Navigation */}
               <nav className="flex items-center">
                 <button
                   onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Home
                 </button>
-                <div className="h-6 w-px bg-fnt-red mx-2"></div>
+                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
                 <button
                   onClick={() => document.getElementById('inventory')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Showroom
                 </button>
-                <div className="h-6 w-px bg-fnt-red mx-2"></div>
+                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
                 <button
                   onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Sell Your Car
                 </button>
-                <div className="h-6 w-px bg-fnt-red mx-2"></div>
+                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
                 <button
                   onClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Reviews
                 </button>
-                <div className="h-6 w-px bg-fnt-red mx-2"></div>
+                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
                 <button
                   onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   About Us
                 </button>
-                <div className="h-6 w-px bg-fnt-red mx-2"></div>
+                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
                 <button
                   onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-4 py-2 text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
+                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
                 >
                   Contact
                 </button>
@@ -244,18 +244,18 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* Desktop FNT Logo - Only show on desktop */}
-          <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '40px' }}>
+          <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '20px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 
-              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-96 lg:h-[28rem] xl:h-[32rem]"
-              style={{ transform: 'translateY(0px) scale(1)' }}
+              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-80 lg:h-96 xl:h-[28rem]"
+              style={{ transform: 'translateY(-10px) scale(1)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(0px) scale(1.05)';
+                e.currentTarget.style.transform = 'translateY(-10px) scale(1.05)';
                 e.currentTarget.style.transition = 'transform 0.3s ease';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0px) scale(1)';
+                e.currentTarget.style.transform = 'translateY(-10px) scale(1)';
               }}
             />
           </div>
