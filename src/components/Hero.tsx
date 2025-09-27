@@ -68,7 +68,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           <img 
             src={fntLogo} 
             alt="FNT Motor Group" 
-            className="h-40 w-auto drop-shadow-lg mx-auto"
+            className="h-48 sm:h-52 w-auto drop-shadow-lg mx-auto"
           />
           
           {/* Mobile Hamburger Menu - Top Right */}
@@ -244,18 +244,18 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4">
         <div className="animate-fade-in-up">
           {/* Desktop FNT Logo - Only show on desktop */}
-          <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '10px' }}>
+          <div className="hidden lg:block mb-8 md:mb-12" style={{ marginTop: '40px' }}>
             <img 
               src={fntLogo} 
               alt="FNT Motor Group" 
-              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-80 lg:h-96"
-              style={{ transform: 'translateY(-20px) scale(1)' }}
+              className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-96 lg:h-[28rem] xl:h-[32rem]"
+              style={{ transform: 'translateY(0px) scale(1)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-20px) scale(1.05)';
+                e.currentTarget.style.transform = 'translateY(0px) scale(1.05)';
                 e.currentTarget.style.transition = 'transform 0.3s ease';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(-20px) scale(1)';
+                e.currentTarget.style.transform = 'translateY(0px) scale(1)';
               }}
             />
           </div>
