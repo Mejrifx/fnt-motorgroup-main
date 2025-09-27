@@ -249,13 +249,13 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
               src={fntLogo} 
               alt="FNT Motor Group" 
               className="w-auto mx-auto mb-6 md:mb-8 drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 h-80 lg:h-96 xl:h-[28rem]"
-              style={{ transform: 'translateY(-30px) scale(1)' }}
+              style={{ transform: 'translateY(-50px) scale(1)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-30px) scale(1.05)';
+                e.currentTarget.style.transform = 'translateY(-50px) scale(1.05)';
                 e.currentTarget.style.transition = 'transform 0.3s ease';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(-30px) scale(1)';
+                e.currentTarget.style.transform = 'translateY(-50px) scale(1)';
               }}
             />
           </div>
