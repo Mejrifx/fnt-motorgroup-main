@@ -66,7 +66,7 @@ const Services = () => {
           ))}
         </div>
 
-        <div className="mt-16 bg-gradient-to-r from-fnt-black to-gray-800 rounded-3xl p-8 md:p-12 text-center text-white">
+        <div className="mt-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
           <h3 className="text-3xl font-bold mb-4">
             Experience the FNT Difference
           </h3>

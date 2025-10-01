@@ -61,7 +61,7 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-fnt-black to-gray-800 rounded-3xl p-8 text-white">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 text-white shadow-2xl">
               <h3 className="text-xl font-bold mb-4">Ready to Find Your Perfect Vehicle?</h3>
               <p className="mb-6 opacity-90">
                 Our expert consultants are standing by to help you discover the luxury vehicle that matches your lifestyle and preferences.
