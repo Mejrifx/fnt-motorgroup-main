@@ -25,8 +25,8 @@ const Contact = () => {
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Location</h4>
                     <p className="text-gray-600">
-                      123 Luxury Avenue<br />
-                      Premium District, NY 10001
+                      Manchester M12 4RX<br />
+                      United Kingdom
                     </p>
                   </div>
                 </div>
@@ -35,7 +35,7 @@ const Contact = () => {
                   <Phone className="w-6 h-6 text-fnt-red mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Phone</h4>
-                    <p className="text-gray-600">(555) 123-4567</p>
+                    <p className="text-gray-600">07735770031</p>
                   </div>
                 </div>
 
@@ -117,7 +117,7 @@ const Contact = () => {
                 <input
                   type="tel"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                  placeholder="(555) 123-4567"
+                    placeholder="07735770031"
                 />
               </div>
 
