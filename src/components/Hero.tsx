@@ -148,7 +148,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
         className={`hidden lg:block w-full px-4 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{
           position: 'fixed',
-          top: '1rem',
+          top: '1.5rem',
           left: 0,
           right: 0,
           zIndex: 9999,
