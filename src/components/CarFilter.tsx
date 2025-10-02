@@ -181,7 +181,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             <span className="text-sm text-gray-500 mr-2">£</span>
             <input
               type="number"
-              placeholder="Min Price"
+              placeholder="Min"
               value={filters.priceFrom}
               onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
               className="w-20 lg:w-16 px-2 py-2 lg:py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold text-center lg:text-left"
@@ -250,9 +250,9 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 onClick={handleSearch}
                 className="w-full lg:w-auto bg-fnt-black text-white px-4 py-2 lg:py-2 rounded-xl lg:rounded-full text-sm lg:text-base font-bold hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2 mt-2 lg:mt-0"
               >
-            <Search className="h-4 w-4" />
-            Search Cars
-          </button>
+                <Search className="h-4 w-4" />
+                Search
+              </button>
 
           {/* Clear Button - Only show when filters are active */}
           {hasActiveFilters && (

@@ -6,7 +6,7 @@ const About = () => {
     "Over 25 years of trusted car sales",
     "5,000+ happy customers in Manchester",
     "Fair prices and honest negotiations",
-    "Friendly, knowledgeable team"
+    "Friendly & Knowledgeable Team"
   ];
 
   return (
@@ -15,7 +15,7 @@ const About = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Your Trusted Car Dealer Since 1998
+              Your Trusted Car Dealer In Manchester Since 1998
             </h2>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
               At FNT Motor Group, we believe everyone deserves a reliable car that fits their budget. 

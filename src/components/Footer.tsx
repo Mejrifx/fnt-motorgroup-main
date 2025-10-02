@@ -50,7 +50,6 @@ const Footer = () => {
               <li><a href="#services" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Services</a></li>
               <li><a href="#about" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">About Us</a></li>
               <li><a href="#contact" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Contact</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-fnt-red transition-colors duration-300">Careers</a></li>
             </ul>
           </div>
 
@@ -60,8 +59,6 @@ const Footer = () => {
               <li><a href="#" className="text-gray-300 hover:text-fnt-red transition-colors duration-300">Vehicle Sales</a></li>
               <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Financing</a></li>
               <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Trade-In</a></li>
-              <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Service & Maintenance</a></li>
-              <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Parts & Accessories</a></li>
               <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Warranty</a></li>
             </ul>
           </div>
