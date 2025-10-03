@@ -16,15 +16,17 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex flex-col items-center mb-6">
-              <img 
-                src={fntLogo} 
-                alt="FNT Motor Group" 
-                className="h-32 w-auto mb-0"
-                style={{ marginTop: '-30px' }}
-              />
-              <p className="text-gray-300 mb-4 leading-relaxed text-center">
-                Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
-              </p>
+              <div className="relative">
+                <img 
+                  src={fntLogo} 
+                  alt="FNT Motor Group" 
+                  className="h-32 w-auto"
+                  style={{ marginTop: '-30px' }}
+                />
+                <p className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-300 leading-relaxed text-center text-sm max-w-xs">
+                  Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
+                </p>
+              </div>
             </div>
             <div className="flex space-x-4" style={{ marginTop: '-8px', marginLeft: '30px' }}>
               <a 
