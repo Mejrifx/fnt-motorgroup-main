@@ -73,10 +73,18 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const handleSearch = () => {
     console.log('Searching with filters:', filters);
     
-    // Scroll to the inventory section
+    // Scroll to the inventory section with offset to center the results
     const inventorySection = document.getElementById('inventory');
     if (inventorySection) {
-      inventorySection.scrollIntoView({ behavior: 'smooth' });
+      // Calculate offset to center the results in viewport
+      const offset = window.innerHeight * 0.3; // Scroll to show results in center
+      const elementPosition = inventorySection.offsetTop;
+      const offsetPosition = elementPosition - offset;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
     
     // Trigger filter change to pass data to parent
