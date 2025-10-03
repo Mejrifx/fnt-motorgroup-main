@@ -35,4 +35,16 @@ export interface Car {
   updated_at: string
 }
 
+export interface Review {
+  id: string
+  customer_name: string
+  review_text: string
+  rating: number
+  vehicle_purchased: string | null
+  review_date: string
+  is_featured: boolean
+  created_at: string
+  updated_at: string
+}
+
 // Using Supabase's built-in User type from @supabase/supabase-js
