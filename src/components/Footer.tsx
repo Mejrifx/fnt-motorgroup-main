@@ -19,14 +19,14 @@ const Footer = () => {
               <img 
                 src={fntLogo} 
                 alt="FNT Motor Group" 
-                className="h-32 w-auto mb-1"
+                className="h-32 w-auto mb-0"
                 style={{ marginTop: '-30px' }}
               />
-              <p className="text-gray-300 mb-6 leading-relaxed text-center">
+              <p className="text-gray-300 mb-4 leading-relaxed text-center">
                 Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
               </p>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4" style={{ marginTop: '-8px' }}>
               <a 
                 href="https://www.instagram.com/fnt_motorgroup/" 
                 target="_blank" 
