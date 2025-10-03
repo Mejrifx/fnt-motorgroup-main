@@ -35,7 +35,7 @@ const Contact = () => {
                   <Phone className="w-6 h-6 text-fnt-red mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Phone</h4>
-                    <p className="text-gray-600">07735770031</p>
+                    <a href="tel:07735770031" className="text-gray-600 hover:text-fnt-red transition-colors duration-300">07735770031</a>
                   </div>
                 </div>
 
@@ -43,7 +43,7 @@ const Contact = () => {
                   <Mail className="w-6 h-6 text-fnt-red mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Email</h4>
-                    <p className="text-gray-600">fntgroupltd@gmail.com</p>
+                    <a href="mailto:fntgroupltd@gmail.com" className="text-gray-600 hover:text-fnt-red transition-colors duration-300">fntgroupltd@gmail.com</a>
                   </div>
                 </div>
 
@@ -77,7 +77,7 @@ const Contact = () => {
 
           <div>
             <form className="bg-gray-50 rounded-3xl p-8">
-              <h3 className="text-2xl font-bold text-fnt-black mb-6">Send us a Message</h3>
+              <h3 className="text-2xl font-bold text-fnt-black mb-6">Sell Your Car</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
@@ -125,31 +125,49 @@ const Contact = () => {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Interested In
-                </label>
-                <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300">
-                  <option>Select a category</option>
-                  <option>Saloon</option>
-                  <option>Hatchback</option>
-                  <option>Estate</option>
-                  <option>Van</option>
-                  <option>Coupe</option>
-                  <option>Convertible</option>
-                  <option>4x4</option>
-                  <option>Service & Maintenance</option>
-                  <option>Financing</option>
-                </select>
+                <h4 className="text-lg font-semibold text-fnt-black mb-4">Car Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Car Registration
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                      placeholder="AB12 CDE"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mileage
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                      placeholder="50,000"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Make & Model
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                    placeholder="BMW 3 Series"
+                  />
+                </div>
               </div>
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Message
+                  Additional Car Info
                 </label>
                 <textarea
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
-                  placeholder="Tell us about your automotive needs..."
+                  placeholder="Tell us about your car's condition, service history, or any other relevant details..."
                 ></textarea>
               </div>
 
