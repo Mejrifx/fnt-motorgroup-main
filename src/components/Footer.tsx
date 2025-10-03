@@ -50,6 +50,7 @@ const Footer = () => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity duration-300 flex items-center"
+                style={{ marginTop: '-8px' }}
               >
                 <img 
                   src="/autotrader-logo-nobg.png" 
