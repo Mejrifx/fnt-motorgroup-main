@@ -199,61 +199,80 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredCars.map((car) => (
-            <div
-              key={car.id}
-              onClick={() => navigate(`/car/${car.id}`)}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group cursor-pointer"
-            >
-              <div className="relative overflow-hidden">
-                <img
-                  src={
-                    car.cover_image_path 
-                      ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
-                      : car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'
-                  }
-                  alt={`${car.make} ${car.model}`}
-                  className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
-                  }}
-                />
-                <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">
-                  {car.year}
+          {filteredCars.length > 0 ? (
+            filteredCars.map((car) => (
+              <div
+                key={car.id}
+                onClick={() => navigate(`/car/${car.id}`)}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group cursor-pointer"
+              >
+                <div className="relative overflow-hidden">
+                  <img
+                    src={
+                      car.cover_image_path 
+                        ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
+                        : car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'
+                    }
+                    alt={`${car.make} ${car.model}`}
+                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
+                    }}
+                  />
+                  <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    {car.year}
+                  </div>
+                </div>
+                
+                <div className="p-6">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-fnt-black mb-1">
+                      {car.make} {car.model}
+                    </h3>
+                    <p className="text-2xl font-bold text-fnt-red">
+                      £{car.price.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="w-4 h-4 text-fnt-red" />
+                      <span>{car.mileage}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Settings className="w-4 h-4 text-fnt-red" />
+                      <span>{car.transmission}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Fuel className="w-4 h-4 text-fnt-red" />
+                      <span>{car.fuel_type}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      <span>Available</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="p-6">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-fnt-black mb-1">
-                    {car.make} {car.model}
-                  </h3>
-                  <p className="text-2xl font-bold text-fnt-red">
-                    £{car.price.toLocaleString()}
-                  </p>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-16">
+              <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-fnt-red" />
-                    <span>{car.mileage}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Settings className="w-4 h-4 text-fnt-red" />
-                    <span>{car.transmission}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Fuel className="w-4 h-4 text-fnt-red" />
-                    <span>{car.fuel_type}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                    <span>Available</span>
-                  </div>
-                </div>
+                <h3 className="text-xl font-bold text-fnt-black mb-2">No Cars Found</h3>
+                <p className="text-gray-600 mb-4">
+                  Sorry, we don't have any cars matching your search criteria right now.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Try adjusting your filters or check back later for new arrivals.
+                </p>
               </div>
             </div>
-          ))}
+          )}
         </div>
 
         <div className="text-center mt-12">

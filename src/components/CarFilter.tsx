@@ -101,12 +101,12 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 relative z-[99999999]">
       <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative z-[99999999]">
-        <div className="flex flex-col lg:flex-row items-center justify-center px-3 lg:px-6 py-3 lg:py-3 gap-3 lg:gap-0">
+        <div className="flex flex-col lg:flex-row items-center justify-center px-3 lg:px-6 py-3 lg:py-3 gap-3 lg:gap-2 flex-wrap">
           {/* Make Filter */}
           <div className="relative">
             <button
               onClick={() => setIsMakeOpen(!isMakeOpen)}
-              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 whitespace-nowrap rounded-xl lg:rounded-none"
+              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 min-w-0 flex-shrink rounded-xl lg:rounded-none"
             >
               <span>{filters.make || 'Any Make'}</span>
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
@@ -147,7 +147,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="relative">
             <button
               onClick={() => setIsModelOpen(!isModelOpen)}
-              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 whitespace-nowrap rounded-xl lg:rounded-none"
+              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 min-w-0 flex-shrink rounded-xl lg:rounded-none"
             >
               <span>{filters.model || 'Any Model'}</span>
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
@@ -223,7 +223,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="relative">
             <button
               onClick={() => setIsFuelOpen(!isFuelOpen)}
-              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 whitespace-nowrap rounded-xl lg:rounded-none"
+              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 min-w-0 flex-shrink rounded-xl lg:rounded-none"
             >
               <span>{filters.fuelType || 'Any Fuel Type'}</span>
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
@@ -273,7 +273,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}
-              className="text-gray-500 hover:text-fnt-red text-sm font-medium transition-colors duration-300 ml-6 underline"
+              className="text-gray-500 hover:text-fnt-red text-sm font-medium transition-colors duration-300 underline flex-shrink-0"
             >
               Clear
             </button>
