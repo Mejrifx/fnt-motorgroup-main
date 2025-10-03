@@ -15,17 +15,16 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center space-x-3 mb-6">
+            <div className="flex flex-col items-center mb-6">
               <img 
                 src={fntLogo} 
                 alt="FNT Motor Group" 
-                className="h-10 w-auto"
+                className="h-16 w-auto mb-4"
               />
-              <h3 className="text-2xl font-bold">FNT MOTOR GROUP</h3>
+              <p className="text-gray-300 mb-6 leading-relaxed text-center">
+                Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
+              </p>
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">
-              Your premier destination for luxury automotive excellence. We've been crafting exceptional vehicle experiences for over two decades.
-            </p>
             <div className="flex space-x-4">
               <a 
                 href="https://www.instagram.com/fnt_motorgroup/" 
