@@ -1,17 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Shield, CreditCard, Phone, Mail, MapPin, CheckCircle, Star, Clock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const WarrantyFinancing: React.FC = () => {
   const navigate = useNavigate();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Back Button */}
-      <div className="container mx-auto px-4 pt-6">
+      <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center space-x-2 text-fnt-black hover:text-fnt-red transition-colors duration-300"
+          className="flex items-center space-x-2 bg-white/90 backdrop-blur-xl text-fnt-black hover:text-fnt-red transition-colors duration-300 px-4 py-2 rounded-lg shadow-lg border border-gray-200/50"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
