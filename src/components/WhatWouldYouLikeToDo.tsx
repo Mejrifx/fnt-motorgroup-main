@@ -55,7 +55,7 @@ const WhatWouldYouLikeToDo = () => {
   };
 
   return (
-    <section className="py-24 relative z-0" style={{ backgroundColor: '#171819' }}>
+    <section className="py-24 relative z-0 overflow-visible" style={{ backgroundColor: '#171819' }}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-20">
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>

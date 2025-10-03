@@ -35,7 +35,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center overflow-visible"
       style={{
         backgroundImage: 'url("https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop")',
         backgroundSize: 'cover',
