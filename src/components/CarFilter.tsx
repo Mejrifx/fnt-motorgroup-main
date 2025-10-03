@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 
 interface CarFilterProps {
@@ -25,6 +25,20 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const [isMakeOpen, setIsMakeOpen] = useState(false);
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isFuelOpen, setIsFuelOpen] = useState(false);
+  const priceFromRef = useRef<HTMLInputElement>(null);
+
+  // Set placeholder based on screen size
+  useEffect(() => {
+    const updatePlaceholder = () => {
+      if (priceFromRef.current) {
+        priceFromRef.current.placeholder = window.innerWidth >= 1024 ? 'Min' : 'Min Price';
+      }
+    };
+
+    updatePlaceholder();
+    window.addEventListener('resize', updatePlaceholder);
+    return () => window.removeEventListener('resize', updatePlaceholder);
+  }, []);
 
   const carMakes = [
     'Audi', 'BMW', 'Mercedes-Benz', 'Porsche', 'Ferrari', 'Lamborghini', 
@@ -180,6 +194,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-2 py-2 lg:py-0 bg-gray-50 lg:bg-transparent rounded-xl lg:rounded-none">
             <span className="text-sm text-gray-500 mr-2">£</span>
             <input
+              ref={priceFromRef}
               type="number"
               placeholder="Min Price"
               value={filters.priceFrom}
