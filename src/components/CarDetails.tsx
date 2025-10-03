@@ -134,8 +134,9 @@ const CarDetails: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Image Gallery */}
-          <div className="lg:col-span-2">
+          {/* Left Column - Images and Description */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Image Gallery */}
             <div className="relative bg-gray-900 rounded-2xl overflow-hidden">
               {images.length > 0 ? (
                 <>
@@ -180,7 +181,7 @@ const CarDetails: React.FC = () => {
 
             {/* Thumbnail Strip */}
             {images.length > 1 && (
-              <div className="flex space-x-2 mt-4 overflow-x-auto pb-2">
+              <div className="flex space-x-2 overflow-x-auto pb-2">
                 {images.map((image, index) => (
                   <button
                     key={index}
@@ -198,9 +199,17 @@ const CarDetails: React.FC = () => {
                 ))}
               </div>
             )}
+
+            {/* Description Section */}
+            {car.description && (
+              <div className="bg-gray-900 rounded-2xl p-6">
+                <h3 className="text-2xl font-bold text-white mb-4">Description</h3>
+                <p className="text-gray-300 leading-relaxed text-lg">{car.description}</p>
+              </div>
+            )}
           </div>
 
-          {/* Car Details */}
+          {/* Right Column - Car Details */}
           <div className="space-y-6">
             {/* Price & Title */}
             <div className="bg-gray-900 rounded-2xl p-6">
@@ -324,16 +333,6 @@ const CarDetails: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Description Section */}
-        {car.description && (
-          <div className="mt-8">
-            <div className="bg-gray-900 rounded-2xl p-6">
-              <h3 className="text-2xl font-bold text-white mb-4">Description</h3>
-              <p className="text-gray-300 leading-relaxed text-lg">{car.description}</p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Fullscreen Gallery Modal */}
