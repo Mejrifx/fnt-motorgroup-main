@@ -19,6 +19,7 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -65,8 +66,7 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
 
       console.log('🎉 Record created in Airtable:', records[0].id);
       
-      alert('Thank you! We\'ll contact you soon about your car.');
-      onClose();
+      setShowSuccess(true);
       
       // Reset form
       setFormData({
@@ -86,7 +86,36 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleClose = () => {
+    setShowSuccess(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
+
+  if (showSuccess) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-3xl max-w-md w-full p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-fnt-black mb-4">Thank You!</h2>
+          <p className="text-gray-600 mb-6">
+            We've received your car details and will contact you soon to discuss your vehicle.
+          </p>
+          <button
+            onClick={handleClose}
+            className="w-full bg-fnt-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -219,7 +248,8 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={isSubmitting}
               className="px-6 py-3 bg-fnt-red text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
