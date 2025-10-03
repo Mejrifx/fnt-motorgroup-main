@@ -32,11 +32,19 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    console.log('🚀 Form submission started');
+    console.log('📝 Form data:', formData);
+    console.log('🔑 API Key:', import.meta.env.VITE_AIRTABLE_API_KEY ? 'Present' : 'Missing');
+    console.log('🏠 Base ID:', import.meta.env.VITE_AIRTABLE_BASE_ID);
+    console.log('📊 Table Name:', import.meta.env.VITE_AIRTABLE_TABLE_NAME);
+
     try {
       // Initialize Airtable
       const base = new Airtable({ 
         apiKey: import.meta.env.VITE_AIRTABLE_API_KEY 
       }).base(import.meta.env.VITE_AIRTABLE_BASE_ID);
+
+      console.log('✅ Airtable initialized successfully');
 
       // Create record in Airtable
       const records = await base(import.meta.env.VITE_AIRTABLE_TABLE_NAME || 'Car Sales Leads').create([
@@ -55,7 +63,7 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
         }
       ]);
 
-      console.log('Record created in Airtable:', records[0].id);
+      console.log('🎉 Record created in Airtable:', records[0].id);
       
       alert('Thank you! We\'ll contact you soon about your car.');
       onClose();
@@ -71,7 +79,7 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
         additionalInfo: ''
       });
     } catch (error) {
-      console.error('Error submitting to Airtable:', error);
+      console.error('❌ Error submitting to Airtable:', error);
       alert('Sorry, there was an error. Please try again.');
     } finally {
       setIsSubmitting(false);
