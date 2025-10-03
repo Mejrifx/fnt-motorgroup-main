@@ -31,7 +31,11 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   useEffect(() => {
     const updatePlaceholder = () => {
       if (priceFromRef.current) {
-        priceFromRef.current.placeholder = window.innerWidth >= 1024 ? 'Min' : 'Min Price';
+        if (window.innerWidth >= 1024) {
+          priceFromRef.current.placeholder = 'Min';
+        } else {
+          priceFromRef.current.placeholder = 'Min Price';
+        }
       }
     };
 
@@ -40,29 +44,9 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     return () => window.removeEventListener('resize', updatePlaceholder);
   }, []);
 
-  const carMakes = [
-    'Audi', 'BMW', 'Mercedes-Benz', 'Porsche', 'Ferrari', 'Lamborghini', 
-    'Bentley', 'Rolls-Royce', 'Maserati', 'Aston Martin', 'McLaren', 'Jaguar'
-  ];
-
-  const carModels: { [key: string]: string[] } = {
-    'Audi': ['A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7'],
-    'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series', '8 Series', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i3', 'i8'],
-    'Mercedes-Benz': ['A-Class', 'B-Class', 'C-Class', 'CLA', 'CLS', 'E-Class', 'G-Class', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'S-Class', 'SL', 'SLC', 'AMG GT', 'EQC'],
-    'Porsche': ['911', '718 Boxster', '718 Cayman', 'Cayenne', 'Macan', 'Panamera', 'Taycan', '718 Spyder'],
-    'Ferrari': ['488', 'F8 Tributo', 'SF90 Stradale', 'Roma', 'Portofino', '812 Superfast', 'LaFerrari', 'F12 Berlinetta'],
-    'Lamborghini': ['Huracán', 'Aventador', 'Urus', 'Gallardo', 'Murciélago', 'Countach'],
-    'Bentley': ['Continental GT', 'Flying Spur', 'Bentayga', 'Mulsanne', 'Azure'],
-    'Rolls-Royce': ['Phantom', 'Ghost', 'Wraith', 'Dawn', 'Cullinan'],
-    'Maserati': ['Ghibli', 'Quattroporte', 'Levante', 'GranTurismo', 'MC20'],
-    'Aston Martin': ['DB11', 'Vantage', 'DBS', 'DBX', 'Valhalla', 'Valkyrie'],
-    'McLaren': ['720S', '765LT', 'Artura', 'Senna', 'P1', '650S', '570S'],
-    'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE']
-  };
-
-  const fuelTypes = [
-    'Petrol', 'Diesel', 'Hybrid', 'Electric', 'Plug-in Hybrid'
-  ];
+  const carMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Porsche', 'Ferrari', 'Lamborghini', 'Bentley', 'Rolls-Royce', 'Tesla', 'Land Rover', 'Range Rover', 'Jaguar', 'Maserati', 'McLaren', 'Aston Martin'];
+  const carModels = ['3 Series', '5 Series', '7 Series', 'X3', 'X5', 'X7', 'C-Class', 'E-Class', 'S-Class', 'GLE', 'GLS', 'A4', 'A6', 'A8', 'Q5', 'Q7', '911', 'Cayenne', 'Panamera', 'Macan'];
+  const fuelTypes = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 
   const handleFilterChange = (key: keyof CarFilters, value: string) => {
     const newFilters = { ...filters, [key]: value };
@@ -109,72 +93,73 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   return (
     <div className="w-full max-w-4xl mx-auto px-4 relative z-[99999999]">
       <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative z-[99999999]">
-        <div className="flex flex-col lg:flex-row items-center justify-center px-3 lg:px-6 py-3 lg:py-3 gap-3 lg:gap-2 flex-wrap">
-          {/* Make Filter */}
-          <div className="relative">
-            <button
-              onClick={() => setIsMakeOpen(!isMakeOpen)}
-              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 min-w-0 flex-shrink rounded-xl lg:rounded-none"
-            >
-              <span>{filters.make || 'Any Make'}</span>
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isMakeOpen && (
-              <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
-                <div className="py-2">
-                  <button
-                    onClick={() => {
-                      handleFilterChange('make', '');
-                      setIsMakeOpen(false);
-                    }}
-                    className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
-                  >
-                    Any Make
-                  </button>
-                  {carMakes.map((make) => (
+        {/* Desktop Layout */}
+        <div className="hidden lg:block px-6 py-3">
+          <div className="flex items-center justify-center gap-2">
+            {/* Make Filter */}
+            <div className="relative">
+              <button
+                onClick={() => setIsMakeOpen(!isMakeOpen)}
+                className="px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
+              >
+                <span>{filters.make || 'Any Make'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isMakeOpen && (
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                  <div className="py-2">
                     <button
-                      key={make}
                       onClick={() => {
-                        handleFilterChange('make', make);
+                        handleFilterChange('make', '');
                         setIsMakeOpen(false);
                       }}
-                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
                     >
-                      {make}
+                      Any Make
                     </button>
-                  ))}
+                    {carMakes.map((make) => (
+                      <button
+                        key={make}
+                        onClick={() => {
+                          handleFilterChange('make', make);
+                          setIsMakeOpen(false);
+                        }}
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      >
+                        {make}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-fnt-red mx-2"></div>
 
-          {/* Model Filter */}
-          <div className="relative">
-            <button
-              onClick={() => setIsModelOpen(!isModelOpen)}
-              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 min-w-0 flex-shrink rounded-xl lg:rounded-none"
-            >
-              <span>{filters.model || 'Any Model'}</span>
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isModelOpen && (
-              <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
-                <div className="py-2">
-                  <button
-                    onClick={() => {
-                      handleFilterChange('model', '');
-                      setIsModelOpen(false);
-                    }}
-                    className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
-                  >
-                    Any Model
-                  </button>
-                  {filters.make ? (
-                    carModels[filters.make]?.map((model) => (
+            {/* Model Filter */}
+            <div className="relative">
+              <button
+                onClick={() => setIsModelOpen(!isModelOpen)}
+                className="px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
+              >
+                <span>{filters.model || 'Any Model'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isModelOpen && (
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        handleFilterChange('model', '');
+                        setIsModelOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                    >
+                      Any Model
+                    </button>
+                    {carModels.map((model) => (
                       <button
                         key={model}
                         onClick={() => {
@@ -185,107 +170,260 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                       >
                         {model}
                       </button>
-                    ))
-                  ) : (
-                    <div className="px-6 py-3 text-sm text-gray-500">
-                      Select a make first
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-fnt-red mx-2"></div>
 
-          {/* Price From */}
-          <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-2 py-2 lg:py-0 bg-gray-50 lg:bg-transparent rounded-xl lg:rounded-none">
-            <span className="text-sm text-gray-500 mr-2">£</span>
-            <input
-              ref={priceFromRef}
-              type="number"
-              placeholder="Min Price"
-              value={filters.priceFrom}
-              onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-              className="w-28 lg:w-16 px-2 py-2 lg:py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold text-center lg:text-left"
-            />
-          </div>
+            {/* Price Range */}
+            <div className="flex items-center gap-2">
+              <input
+                ref={priceFromRef}
+                type="text"
+                placeholder="Min"
+                value={filters.priceFrom}
+                onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+                className="w-16 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+              />
+              <span className="text-gray-500 text-sm">to</span>
+              <input
+                type="text"
+                placeholder="Max"
+                value={filters.priceTo}
+                onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+                className="w-16 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+              />
+            </div>
 
-          <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-fnt-red mx-2"></div>
 
-          {/* Price To */}
-          <div className="w-full lg:w-auto flex items-center justify-center lg:justify-start px-2 py-2 lg:py-0 bg-gray-50 lg:bg-transparent rounded-xl lg:rounded-none">
-            <span className="text-sm text-gray-500 mr-2">£</span>
-            <input
-              type="number"
-              placeholder="Max Price"
-              value={filters.priceTo}
-              onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-              className="w-24 lg:w-16 px-2 py-2 lg:py-2 text-sm bg-transparent border-none outline-none text-fnt-black placeholder-gray-500 font-bold text-center lg:text-left"
-            />
-          </div>
-
-          <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
-
-          {/* Fuel Type */}
-          <div className="relative">
-            <button
-              onClick={() => setIsFuelOpen(!isFuelOpen)}
-              className="w-full lg:w-auto px-3 py-2 lg:py-2 text-sm lg:text-base font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center lg:justify-start gap-2 min-w-0 flex-shrink rounded-xl lg:rounded-none"
-            >
-              <span>{filters.fuelType || 'Any Fuel Type'}</span>
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isFuelOpen && (
-              <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
-                <div className="py-2">
-                  <button
-                    onClick={() => {
-                      handleFilterChange('fuelType', '');
-                      setIsFuelOpen(false);
-                    }}
-                    className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
-                  >
-                    Any Fuel Type
-                  </button>
-                  {fuelTypes.map((fuel) => (
+            {/* Fuel Type */}
+            <div className="relative">
+              <button
+                onClick={() => setIsFuelOpen(!isFuelOpen)}
+                className="px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
+              >
+                <span>{filters.fuelType || 'Any Fuel Type'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isFuelOpen && (
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                  <div className="py-2">
                     <button
-                      key={fuel}
                       onClick={() => {
-                        handleFilterChange('fuelType', fuel);
+                        handleFilterChange('fuelType', '');
                         setIsFuelOpen(false);
                       }}
-                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
                     >
-                      {fuel}
+                      Any Fuel Type
                     </button>
-                  ))}
+                    {fuelTypes.map((fuel) => (
+                      <button
+                        key={fuel}
+                        onClick={() => {
+                          handleFilterChange('fuelType', fuel);
+                          setIsFuelOpen(false);
+                        }}
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      >
+                        {fuel}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+            </div>
+
+            <div className="h-6 w-px bg-fnt-red mx-2"></div>
+
+            {/* Search Button */}
+            <button
+              onClick={handleSearch}
+              className="bg-fnt-black text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-800 transition-all duration-300 flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              Search
+            </button>
+
+            {/* Clear Button - Only show when filters are active */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="text-gray-500 hover:text-fnt-red text-sm font-medium transition-colors duration-300 underline flex-shrink-0 ml-2"
+              >
+                Clear
+              </button>
             )}
           </div>
+        </div>
 
-          <div className="hidden lg:block h-6 w-px bg-fnt-red mx-2"></div>
-
-          {/* Search Button */}
+        {/* Mobile Layout */}
+        <div className="lg:hidden px-3 py-3 space-y-3">
+          <div className="flex flex-wrap gap-3">
+            {/* Make Filter */}
+            <div className="relative flex-1 min-w-0">
               <button
-                onClick={handleSearch}
-                className="w-full lg:w-auto bg-fnt-black text-white px-4 py-2 lg:py-2 rounded-xl lg:rounded-full text-sm lg:text-base font-bold hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2 mt-2 lg:mt-0"
+                onClick={() => setIsMakeOpen(!isMakeOpen)}
+                className="w-full px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center gap-2 rounded-xl"
               >
-                <Search className="h-4 w-4" />
-                Search
+                <span>{filters.make || 'Any Make'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
               </button>
+              
+              {isMakeOpen && (
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        handleFilterChange('make', '');
+                        setIsMakeOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                    >
+                      Any Make
+                    </button>
+                    {carMakes.map((make) => (
+                      <button
+                        key={make}
+                        onClick={() => {
+                          handleFilterChange('make', make);
+                          setIsMakeOpen(false);
+                        }}
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      >
+                        {make}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
-          {/* Clear Button - Only show when filters are active */}
-          {hasActiveFilters && (
+            {/* Model Filter */}
+            <div className="relative flex-1 min-w-0">
+              <button
+                onClick={() => setIsModelOpen(!isModelOpen)}
+                className="w-full px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center gap-2 rounded-xl"
+              >
+                <span>{filters.model || 'Any Model'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isModelOpen && (
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        handleFilterChange('model', '');
+                        setIsModelOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                    >
+                      Any Model
+                    </button>
+                    {carModels.map((model) => (
+                      <button
+                        key={model}
+                        onClick={() => {
+                          handleFilterChange('model', model);
+                          setIsModelOpen(false);
+                        }}
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      >
+                        {model}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {/* Price Range */}
+            <div className="flex items-center gap-2 flex-1">
+              <input
+                ref={priceFromRef}
+                type="text"
+                placeholder="Min Price"
+                value={filters.priceFrom}
+                onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+                className="w-28 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+              />
+              <span className="text-gray-500 text-sm">to</span>
+              <input
+                type="text"
+                placeholder="Max Price"
+                value={filters.priceTo}
+                onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+                className="w-28 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+              />
+            </div>
+
+            {/* Fuel Type */}
+            <div className="relative flex-1 min-w-0">
+              <button
+                onClick={() => setIsFuelOpen(!isFuelOpen)}
+                className="w-full px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center justify-center gap-2 rounded-xl"
+              >
+                <span>{filters.fuelType || 'Any Fuel Type'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isFuelOpen && (
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        handleFilterChange('fuelType', '');
+                        setIsFuelOpen(false);
+                      }}
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                    >
+                      Any Fuel Type
+                    </button>
+                    {fuelTypes.map((fuel) => (
+                      <button
+                        key={fuel}
+                        onClick={() => {
+                          handleFilterChange('fuelType', fuel);
+                          setIsFuelOpen(false);
+                        }}
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                      >
+                        {fuel}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Search and Clear Buttons */}
+          <div className="flex gap-3">
             <button
-              onClick={handleClearFilters}
-              className="text-gray-500 hover:text-fnt-red text-sm font-medium transition-colors duration-300 underline flex-shrink-0"
+              onClick={handleSearch}
+              className="flex-1 bg-fnt-black text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-800 transition-all duration-300 flex items-center justify-center gap-2"
             >
-              Clear
+              <Search className="h-4 w-4" />
+              Search
             </button>
-          )}
+            
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="px-4 py-2 text-gray-500 hover:text-fnt-red text-sm font-medium transition-colors duration-300 underline"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
