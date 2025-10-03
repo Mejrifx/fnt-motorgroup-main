@@ -19,7 +19,7 @@ const Footer = () => {
               <img 
                 src={fntLogo} 
                 alt="FNT Motor Group" 
-                className="h-16 w-auto mb-4"
+                className="h-32 w-auto mb-4"
               />
               <p className="text-gray-300 mb-6 leading-relaxed text-center">
                 Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
