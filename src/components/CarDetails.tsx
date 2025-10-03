@@ -294,7 +294,7 @@ const CarDetails: React.FC = () => {
                   <div className="flex justify-between items-center py-2">
                     <span className="text-gray-400 flex items-center gap-2">
                       <Banknote className="w-4 h-4" />
-                      Road Tax:
+                      Previous Owners:
                     </span>
                     <span className="text-white font-medium">{car.road_tax}</span>
                   </div>
