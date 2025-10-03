@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Car, Star, DollarSign, MessageCircle, ArrowRight } from 'lucide-react';
+import SellCarModal from './SellCarModal';
 
 const WhatWouldYouLikeToDo = () => {
+  const [isSellCarModalOpen, setIsSellCarModalOpen] = useState(false);
+
   const actions = [
     {
       id: 1,
@@ -19,7 +22,8 @@ const WhatWouldYouLikeToDo = () => {
       icon: DollarSign,
       color: "from-green-600 to-green-800",
       hoverColor: "hover:from-green-800 hover:to-green-600",
-      link: "#services"
+      link: "#services",
+      isModal: true
     },
     {
       id: 3,
@@ -41,9 +45,13 @@ const WhatWouldYouLikeToDo = () => {
     }
   ];
 
-  const handleCardClick = (link: string) => {
-    const element = document.getElementById(link.replace('#', ''));
-    element?.scrollIntoView({ behavior: 'smooth' });
+  const handleCardClick = (action: any) => {
+    if (action.isModal) {
+      setIsSellCarModalOpen(true);
+    } else {
+      const element = document.getElementById(action.link.replace('#', ''));
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -64,7 +72,7 @@ const WhatWouldYouLikeToDo = () => {
             return (
               <div
                 key={action.id}
-                onClick={() => handleCardClick(action.link)}
+                onClick={() => handleCardClick(action)}
                 className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transform transition-all duration-500 hover:bg-white/10 hover:border-fnt-red/30 hover:-translate-y-3 hover:shadow-2xl hover:shadow-fnt-red/10 cursor-pointer overflow-hidden"
               >
                 {/* Subtle background gradient on hover */}
@@ -93,6 +101,11 @@ const WhatWouldYouLikeToDo = () => {
           })}
         </div>
       </div>
+      
+      <SellCarModal 
+        isOpen={isSellCarModalOpen} 
+        onClose={() => setIsSellCarModalOpen(false)} 
+      />
     </section>
   );
 };
