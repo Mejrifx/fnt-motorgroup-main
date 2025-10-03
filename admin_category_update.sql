@@ -2,7 +2,10 @@
 -- This SQL updates existing data to match the new category system
 -- Run this in your Supabase SQL Editor
 
--- 1. Update existing category values to match new system
+-- 1. First, drop the existing constraint to avoid conflicts
+ALTER TABLE cars DROP CONSTRAINT IF EXISTS cars_category_check;
+
+-- 2. Update existing category values to match new system
 -- Change "Sports" to "4x4" and "SUV" to "Van"
 UPDATE cars 
 SET category = '4x4' 
@@ -12,13 +15,18 @@ UPDATE cars
 SET category = 'Van' 
 WHERE category = 'SUV';
 
--- 2. Update the category constraint to match our new filter options
-ALTER TABLE cars DROP CONSTRAINT IF EXISTS cars_category_check;
+-- 3. Handle any other existing categories that might not match our new system
+-- Update any remaining old categories to valid new ones
+UPDATE cars 
+SET category = 'Saloon' 
+WHERE category IN ('Luxury', 'Electric', 'Sedan');
+
+-- 4. Now add the new constraint with our updated categories
 ALTER TABLE cars 
 ADD CONSTRAINT cars_category_check 
 CHECK (category IN ('Saloon', 'Hatchback', 'Estate', 'Van', 'Coupe', 'Convertible', '4x4'));
 
--- 3. Update sample data for road_tax field (now represents Previous Owners)
+-- 5. Update sample data for road_tax field (now represents Previous Owners)
 -- Clear existing road tax data since it now represents previous owners count
 UPDATE cars 
 SET road_tax = CASE 
@@ -32,12 +40,12 @@ SET road_tax = CASE
 END
 WHERE road_tax IS NOT NULL;
 
--- 4. Update style field to match category (since style is now redundant with category)
+-- 6. Update style field to match category (since style is now redundant with category)
 UPDATE cars 
 SET style = category
 WHERE style IS NULL OR style != category;
 
--- 5. Add comment to road_tax column to clarify its new purpose
+-- 7. Add comment to road_tax column to clarify its new purpose
 COMMENT ON COLUMN cars.road_tax IS 'Previous Owners count (changed from Road Tax)';
 
 -- Success message
