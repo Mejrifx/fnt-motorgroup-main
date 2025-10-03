@@ -153,24 +153,24 @@ const Reviews: React.FC = () => {
 
               {/* Navigation Arrows */}
               {reviews.length > 1 && (
-                <div className="flex items-center justify-center space-x-4">
+                <div className="flex items-center justify-center space-x-2 sm:space-x-4">
                   <button
                     onClick={previousReview}
-                    className="p-3 rounded-full bg-gray-100 hover:bg-fnt-red hover:text-white transition-all duration-300 group"
+                    className="p-2 sm:p-3 rounded-full bg-gray-100 hover:bg-fnt-red hover:text-white transition-all duration-300 group"
                     aria-label="Previous review"
                   >
-                    <ChevronLeft className="w-6 h-6" />
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
 
                   {/* Dots Indicator */}
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-1 sm:space-x-2 max-w-full overflow-hidden">
                     {reviews.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentReview(index)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                        className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 flex-shrink-0 ${
                           index === currentReview
-                            ? 'bg-fnt-red w-8'
+                            ? 'bg-fnt-red w-6 sm:w-8'
                             : 'bg-gray-300 hover:bg-gray-400'
                         }`}
                         aria-label={`Go to review ${index + 1}`}
@@ -180,10 +180,10 @@ const Reviews: React.FC = () => {
 
                   <button
                     onClick={nextReview}
-                    className="p-3 rounded-full bg-gray-100 hover:bg-fnt-red hover:text-white transition-all duration-300 group"
+                    className="p-2 sm:p-3 rounded-full bg-gray-100 hover:bg-fnt-red hover:text-white transition-all duration-300 group"
                     aria-label="Next review"
                   >
-                    <ChevronRight className="w-6 h-6" />
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>
               )}
