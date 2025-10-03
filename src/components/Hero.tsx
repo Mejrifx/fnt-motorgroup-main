@@ -80,16 +80,32 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           </button>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Navigation Menu - Full Screen */}
         {isMobileMenuOpen && (
-          <div className="mt-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50">
-            <nav className="px-4 py-4 space-y-2">
+          <div className="fixed inset-0 bg-white z-[99999] flex flex-col">
+            {/* Header with close button */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <img 
+                src={fntLogo} 
+                alt="FNT Motor Group" 
+                className="h-12 w-auto"
+              />
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 text-fnt-black hover:text-fnt-red transition-all duration-300"
+              >
+                <X className="w-8 h-8" />
+              </button>
+            </div>
+            
+            {/* Navigation Links */}
+            <nav className="flex-1 flex flex-col justify-center px-8 space-y-6">
               <button
                 onClick={() => {
                   document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left py-3 px-4 text-base font-bold text-fnt-black hover:text-fnt-red hover:bg-fnt-red/10 rounded-lg transition-all duration-300"
+                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
               >
                 Home
               </button>
@@ -98,7 +114,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                   document.getElementById('inventory')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left py-3 px-4 text-base font-bold text-fnt-black hover:text-fnt-red hover:bg-fnt-red/10 rounded-lg transition-all duration-300"
+                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
               >
                 Showroom
               </button>
@@ -107,7 +123,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                   document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left py-3 px-4 text-base font-bold text-fnt-black hover:text-fnt-red hover:bg-fnt-red/10 rounded-lg transition-all duration-300"
+                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
               >
                 Sell Your Car
               </button>
@@ -116,7 +132,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                   document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left py-3 px-4 text-base font-bold text-fnt-black hover:text-fnt-red hover:bg-fnt-red/10 rounded-lg transition-all duration-300"
+                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
               >
                 Reviews
               </button>
@@ -125,7 +141,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                   document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left py-3 px-4 text-base font-bold text-fnt-black hover:text-fnt-red hover:bg-fnt-red/10 rounded-lg transition-all duration-300"
+                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
               >
                 About Us
               </button>
@@ -134,11 +150,25 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                   document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left py-3 px-4 text-base font-bold text-fnt-black hover:text-fnt-red hover:bg-fnt-red/10 rounded-lg transition-all duration-300"
+                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
               >
                 Contact
               </button>
             </nav>
+            
+            {/* Footer with contact info */}
+            <div className="p-8 border-t border-gray-200 bg-gray-50">
+              <div className="text-center space-y-3">
+                <p className="text-lg font-semibold text-fnt-black">FNT Motor Group</p>
+                <p className="text-gray-600">Manchester M12 4RX</p>
+                <a 
+                  href="tel:07735770031"
+                  className="block text-lg font-bold text-fnt-red hover:text-red-600 transition-colors duration-300"
+                >
+                  07735770031
+                </a>
+              </div>
+            </div>
           </div>
         )}
       </div>
