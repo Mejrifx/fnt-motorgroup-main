@@ -17,7 +17,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     mileage: '',
     fuel_type: 'Petrol',
     transmission: 'Automatic',
-    category: 'Luxury',
+    category: 'Saloon',
     description: '',
     cover_image_path: '',
     gallery_image_paths: [] as string[],
@@ -278,10 +278,13 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
               >
-                <option value="Luxury">Luxury</option>
-                <option value="Sports">Sports</option>
+                <option value="Saloon">Saloon</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Estate">Estate</option>
                 <option value="SUV">SUV</option>
-                <option value="Electric">Electric</option>
+                <option value="Coupe">Coupe</option>
+                <option value="Convertible">Convertible</option>
+                <option value="Sports">Sports</option>
               </select>
             </div>
           </div>

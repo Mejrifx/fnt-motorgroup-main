@@ -52,7 +52,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       transmission: "Automatic",
       fuelType: "Gasoline",
       image: "https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg?auto=compress&cs=tinysrgb&w=800",
-      category: "Luxury"
+      category: "Saloon"
     },
     {
       id: 2,
@@ -64,7 +64,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       transmission: "Automatic",
       fuelType: "Gasoline",
       image: "https://images.pexels.com/photos/3802508/pexels-photo-3802508.jpeg?auto=compress&cs=tinysrgb&w=800",
-      category: "Sports"
+      category: "Coupe"
     },
     {
       id: 3,
@@ -88,7 +88,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       transmission: "Automatic",
       fuelType: "Gasoline",
       image: "https://images.pexels.com/photos/3849168/pexels-photo-3849168.jpeg?auto=compress&cs=tinysrgb&w=800",
-      category: "Luxury"
+      category: "Coupe"
     },
     {
       id: 5,
@@ -100,7 +100,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       transmission: "Single Speed",
       fuelType: "Electric",
       image: "https://images.pexels.com/photos/3729464/pexels-photo-3729464.jpeg?auto=compress&cs=tinysrgb&w=800",
-      category: "Electric"
+      category: "Saloon"
     },
     {
       id: 6,
@@ -116,7 +116,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
     }
   ];
 
-  const filters = ['All', 'Luxury', 'Sports', 'SUV', 'Electric'];
+  const filters = ['All', 'Saloon', 'Hatchback', 'Estate', 'SUV', 'Coupe', 'Convertible', 'Sports'];
 
   // Apply search filters if they exist
   const applySearchFilters = (carList: Car[]) => {
@@ -178,7 +178,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
             Our Car Collection
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            Browse our wide selection of reliable cars, all inspected and ready for their next adventure
+            Browse our wide selection of reliable cars in various styles - Saloon, Hatchback, Estate, SUV, Coupe, Convertible, and Sports cars, all inspected and ready for their next adventure
           </p>
         </div>
 

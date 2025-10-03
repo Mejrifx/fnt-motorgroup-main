@@ -1,9 +1,23 @@
 import React from 'react';
-import { Shield, CreditCard, Phone, Mail, MapPin, CheckCircle, Star, Clock } from 'lucide-react';
+import { Shield, CreditCard, Phone, Mail, MapPin, CheckCircle, Star, Clock, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const WarrantyFinancing: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Back Button */}
+      <div className="container mx-auto px-4 pt-6">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center space-x-2 text-fnt-black hover:text-fnt-red transition-colors duration-300"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-semibold">Back to Home</span>
+        </button>
+      </div>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-fnt-black via-gray-800 to-fnt-black py-20">
         <div className="container mx-auto px-4 text-center">
@@ -266,8 +280,8 @@ const WarrantyFinancing: React.FC = () => {
                   <Mail className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-gray-700 mb-2">Email Us</h3>
-                <a href="mailto:fntgrouplts@gmail.com" className="text-fnt-red hover:text-red-600 font-semibold">
-                  fntgrouplts@gmail.com
+                <a href="mailto:fntgroupltd@gmail.com" className="text-fnt-red hover:text-red-600 font-semibold">
+                  fntgroupltd@gmail.com
                 </a>
               </div>
 

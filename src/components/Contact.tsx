@@ -43,7 +43,7 @@ const Contact = () => {
                   <Mail className="w-6 h-6 text-fnt-red mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Email</h4>
-                    <p className="text-gray-600">fntgrouplts@gmail.com</p>
+                    <p className="text-gray-600">fntgroupltd@gmail.com</p>
                   </div>
                 </div>
 
@@ -127,10 +127,13 @@ const Contact = () => {
                 </label>
                 <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300">
                   <option>Select a category</option>
-                  <option>Luxury Sedans</option>
-                  <option>Sports Cars</option>
-                  <option>SUVs</option>
-                  <option>Electric Vehicles</option>
+                  <option>Saloon</option>
+                  <option>Hatchback</option>
+                  <option>Estate</option>
+                  <option>SUV</option>
+                  <option>Coupe</option>
+                  <option>Convertible</option>
+                  <option>Sports</option>
                   <option>Service & Maintenance</option>
                   <option>Financing</option>
                 </select>
