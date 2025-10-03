@@ -52,9 +52,9 @@ const Footer = () => {
                 className="hover:opacity-80 transition-opacity duration-300"
               >
                 <img 
-                  src="/autotrader-logo.jpg" 
+                  src="/autotrader-logo-nobg.png" 
                   alt="AutoTrader" 
-                  className="w-10 h-10 object-contain"
+                  className="w-16 h-16 object-contain"
                 />
               </a>
             </div>
