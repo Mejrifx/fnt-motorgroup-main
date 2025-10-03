@@ -102,7 +102,12 @@ const Reviews: React.FC = () => {
             <div className="text-center">
               <div className="text-5xl font-bold text-fnt-black mb-2">{averageRating.toFixed(1)}</div>
               <div className="flex justify-center mb-2">{renderStars(5)}</div>
-              <div className="text-sm text-gray-600">Based on {reviews.length}+ reviews</div>
+              <div className="text-sm text-gray-600 mb-3">Based on {reviews.length}+ reviews</div>
+              <img 
+                src="/autotrader-logo.jpg" 
+                alt="AutoTrader" 
+                className="h-8 w-auto mx-auto"
+              />
             </div>
           </div>
         </div>
@@ -123,7 +128,7 @@ const Reviews: React.FC = () => {
             <div className="relative z-10">
               {/* Reviewed on Feefo */}
               <div className="flex flex-col items-center mb-4">
-                <p className="text-xs text-gray-500 mb-2">Reviewed on</p>
+                <p className="text-xs text-gray-500 mb-2 text-left w-full max-w-sm">Reviewed on</p>
                 <img 
                   src="/feefo%20image.png" 
                   alt="Feefo" 
