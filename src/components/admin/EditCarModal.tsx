@@ -161,10 +161,10 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
               onMultipleImagesUploaded={handleGalleryImagesUploaded}
               carId={car.id}
               multiple={true}
-              maxImages={5}
+              maxImages={50}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Upload additional photos to showcase the car (up to 5 images)
+              Upload additional photos to showcase the car (up to 50 images)
             </p>
           </div>
 
