@@ -60,7 +60,7 @@ const About = () => {
                   className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                 />
                 <img
-                  src="https://images.pexels.com/photos/3849170/pexels-photo-3849170.jpeg?auto=compress&cs=tinysrgb&w=400"
+                  src="https://images.pexels.com/photos/3807277/pexels-photo-3807277.jpeg?auto=compress&cs=tinysrgb&w=400"
                   alt="Premium vehicles"
                   className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                 />
