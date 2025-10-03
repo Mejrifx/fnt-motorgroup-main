@@ -130,10 +130,10 @@ const Contact = () => {
                   <option>Saloon</option>
                   <option>Hatchback</option>
                   <option>Estate</option>
-                  <option>SUV</option>
+                  <option>Van</option>
                   <option>Coupe</option>
                   <option>Convertible</option>
-                  <option>Sports</option>
+                  <option>4x4</option>
                   <option>Service & Maintenance</option>
                   <option>Financing</option>
                 </select>

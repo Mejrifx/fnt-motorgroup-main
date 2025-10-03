@@ -76,7 +76,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       transmission: "Automatic",
       fuelType: "Gasoline",
       image: "https://images.pexels.com/photos/1638459/pexels-photo-1638459.jpeg?auto=compress&cs=tinysrgb&w=800",
-      category: "SUV"
+      category: "Van"
     },
     {
       id: 4,
@@ -112,11 +112,11 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
       transmission: "Automatic",
       fuelType: "Gasoline",
       image: "https://images.pexels.com/photos/1805053/pexels-photo-1805053.jpeg?auto=compress&cs=tinysrgb&w=800",
-      category: "Sports"
+      category: "4x4"
     }
   ];
 
-  const filters = ['All', 'Saloon', 'Hatchback', 'Estate', 'SUV', 'Coupe', 'Convertible', 'Sports'];
+  const filters = ['All', 'Saloon', 'Hatchback', 'Estate', 'Van', 'Coupe', 'Convertible', '4x4'];
 
   // Apply search filters if they exist
   const applySearchFilters = (carList: Car[]) => {
@@ -178,7 +178,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
             Our Car Collection
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            Browse our wide selection of reliable cars in various styles - Saloon, Hatchback, Estate, SUV, Coupe, Convertible, and Sports cars, all inspected and ready for their next adventure
+            Browse our wide selection of reliable cars in various styles - Saloon, Hatchback, Estate, Van, Coupe, Convertible, and 4x4 vehicles, all inspected and ready for their next adventure
           </p>
         </div>
 

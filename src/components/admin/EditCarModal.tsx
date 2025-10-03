@@ -274,10 +274,10 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
                 <option value="Saloon">Saloon</option>
                 <option value="Hatchback">Hatchback</option>
                 <option value="Estate">Estate</option>
-                <option value="SUV">SUV</option>
+                <option value="Van">Van</option>
                 <option value="Coupe">Coupe</option>
                 <option value="Convertible">Convertible</option>
-                <option value="Sports">Sports</option>
+                <option value="4x4">4x4</option>
               </select>
             </div>
           </div>

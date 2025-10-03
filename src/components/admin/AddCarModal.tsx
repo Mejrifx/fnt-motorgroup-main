@@ -281,10 +281,10 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
                 <option value="Saloon">Saloon</option>
                 <option value="Hatchback">Hatchback</option>
                 <option value="Estate">Estate</option>
-                <option value="SUV">SUV</option>
+                <option value="Van">Van</option>
                 <option value="Coupe">Coupe</option>
                 <option value="Convertible">Convertible</option>
-                <option value="Sports">Sports</option>
+                <option value="4x4">4x4</option>
               </select>
             </div>
           </div>
@@ -344,26 +344,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Style</label>
-              <select
-                name="style"
-                value={formData.style}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-              >
-                <option value="">Select Style</option>
-                <option value="Saloon">Saloon</option>
-                <option value="Hatchback">Hatchback</option>
-                <option value="Estate">Estate</option>
-                <option value="SUV">SUV</option>
-                <option value="Coupe">Coupe</option>
-                <option value="Convertible">Convertible</option>
-                <option value="Sports">Sports</option>
-                <option value="MPV">MPV</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Doors</label>
               <select
@@ -380,14 +361,14 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Road Tax</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Previous Owners</label>
               <input
                 type="text"
                 name="road_tax"
                 value={formData.road_tax}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-fnt-red"
-                placeholder="e.g., £180, £620"
+                placeholder="e.g., 1, 2, 3"
               />
             </div>
           </div>
