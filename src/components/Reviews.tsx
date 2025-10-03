@@ -125,7 +125,7 @@ const Reviews: React.FC = () => {
               <div className="flex flex-col items-center mb-4">
                 <p className="text-xs text-gray-500 mb-2">Reviewed on</p>
                 <img 
-                  src="/feefo image.png" 
+                  src="/feefo%20image.png" 
                   alt="Feefo" 
                   className="h-6 w-auto"
                 />
