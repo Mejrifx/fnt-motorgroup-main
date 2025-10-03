@@ -128,7 +128,9 @@ const Reviews: React.FC = () => {
             <div className="relative z-10">
               {/* Reviewed on Feefo */}
               <div className="flex flex-col items-center mb-4">
-                <p className="text-xs text-gray-500 mb-2" style={{ marginLeft: '-4px' }}>Reviewed on</p>
+                <div className="flex items-center justify-center w-full">
+                  <p className="text-xs text-gray-500 mb-2" style={{ transform: 'translateX(-4px)' }}>Reviewed on</p>
+                </div>
                 <img 
                   src="/feefo%20image.png" 
                   alt="Feefo" 
