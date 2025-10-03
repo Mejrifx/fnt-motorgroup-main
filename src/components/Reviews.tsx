@@ -86,7 +86,7 @@ const Reviews: React.FC = () => {
   const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
 
   return (
-    <section className="py-20" style={{ backgroundColor: '#171819' }}>
+    <section id="reviews" className="py-20" style={{ backgroundColor: '#171819' }}>
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
