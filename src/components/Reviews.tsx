@@ -121,6 +121,16 @@ const Reviews: React.FC = () => {
 
             {/* Review Content */}
             <div className="relative z-10">
+              {/* Reviewed on Feefo */}
+              <div className="flex flex-col items-center mb-4">
+                <p className="text-xs text-gray-500 mb-2">Reviewed on</p>
+                <img 
+                  src="/feefo image.png" 
+                  alt="Feefo" 
+                  className="h-6 w-auto"
+                />
+              </div>
+
               {/* Stars */}
               <div className="flex justify-center mb-6">
                 {renderStars(reviews[currentReview].rating)}
