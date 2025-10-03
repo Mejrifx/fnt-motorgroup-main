@@ -76,10 +76,10 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     // Scroll to the inventory section with offset to center the results
     const inventorySection = document.getElementById('inventory');
     if (inventorySection) {
-      // Calculate offset to center the results in viewport
-      const offset = window.innerHeight * 0.3; // Scroll to show results in center
+      // Calculate offset to scroll further down and center the results
+      const offset = window.innerHeight * 0.2; // Scroll further down
       const elementPosition = inventorySection.offsetTop;
-      const offsetPosition = elementPosition - offset;
+      const offsetPosition = elementPosition + offset; // ADD offset to go DOWN
       
       window.scrollTo({
         top: offsetPosition,
