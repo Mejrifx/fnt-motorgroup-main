@@ -36,19 +36,19 @@ const WarrantyFinancing: React.FC = () => {
             </div>
 
             {/* Standard Warranty */}
-            <div className="bg-gradient-to-r from-fnt-red to-red-600 rounded-2xl p-8 mb-12 text-white">
+            <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-8 mb-12 text-white">
               <div className="flex items-center mb-4">
-                <CheckCircle className="w-8 h-8 mr-3 text-green-400" />
+                <CheckCircle className="w-8 h-8 mr-3" />
                 <h3 className="text-2xl font-bold">Standard Warranty Included</h3>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="text-xl font-semibold mb-2 text-green-400">6 Months Warranty</h4>
-                  <p className="text-red-100">Comprehensive mechanical and electrical coverage on all vehicles</p>
+                  <h4 className="text-xl font-semibold mb-2">6 Months Warranty</h4>
+                  <p className="text-green-100">Comprehensive mechanical and electrical coverage on all vehicles</p>
                 </div>
                 <div>
-                  <h4 className="text-xl font-semibold mb-2 text-green-400">6 Months Breakdown Cover</h4>
-                  <p className="text-red-100">Nationwide roadside assistance and recovery service</p>
+                  <h4 className="text-xl font-semibold mb-2">6 Months Breakdown Cover</h4>
+                  <p className="text-green-100">Nationwide roadside assistance and recovery service</p>
                 </div>
               </div>
             </div>
