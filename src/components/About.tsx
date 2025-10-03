@@ -3,8 +3,8 @@ import { CheckCircle } from 'lucide-react';
 
 const About = () => {
   const achievements = [
-    "Over 25 years of trusted car sales",
-    "5,000+ happy customers in Manchester",
+    "Years of trusted car sales",
+    "1,000+ happy customers in Manchester",
     "Fair prices and honest negotiations",
     "Friendly & Knowledgeable Team"
   ];
@@ -32,15 +32,11 @@ const About = () => {
               ))}
             </div>
 
-            <p className="text-gray-300 leading-relaxed mb-8">
+            <p className="text-gray-300 leading-relaxed">
               Our team of automotive specialists brings decades of combined experience in luxury vehicle 
               sales and service. We understand that purchasing a premium vehicle is more than a transaction 
               – it's an investment in your lifestyle and a reflection of your success.
             </p>
-
-            <button className="bg-fnt-black text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-300">
-              Learn Our Story
-            </button>
           </div>
 
           <div className="relative">

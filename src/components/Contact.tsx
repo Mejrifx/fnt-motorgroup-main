@@ -66,9 +66,12 @@ const Contact = () => {
               <p className="mb-6 opacity-90">
                 Our expert consultants are standing by to help you discover the luxury vehicle that matches your lifestyle and preferences.
               </p>
-              <button className="bg-fnt-red hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
-                Schedule Appointment
-              </button>
+              <a 
+                href="tel:07735770031"
+                className="inline-block bg-fnt-red hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+              >
+                Contact Us Now
+              </a>
             </div>
           </div>
 

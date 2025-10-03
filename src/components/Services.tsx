@@ -65,18 +65,6 @@ const Services = () => {
             </div>
           ))}
         </div>
-
-        <div className="mt-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 md:p-12 text-center text-white shadow-2xl">
-          <h3 className="text-3xl font-bold mb-4">
-            Experience the FNT Difference
-          </h3>
-          <p className="text-xl mb-8 opacity-90">
-            Schedule your personalized consultation today and discover why discerning customers choose FNT Motor Group
-          </p>
-          <button className="bg-fnt-red hover:bg-red-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
-            Book Consultation
-          </button>
-        </div>
       </div>
     </section>
   );
