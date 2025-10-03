@@ -45,7 +45,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
     >
       {/* Mobile Header - Phone Left, Logo Center, Hamburger Right */}
       <div 
-        className={`lg:hidden w-full px-4 py-1 transition-all duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        className={`lg:hidden w-full px-4 py-1 transition-all duration-300 ${isScrolled && !isMobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
         style={{
           position: 'fixed',
           top: '-10px',
@@ -88,7 +88,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
               <img 
                 src={fntLogo} 
                 alt="FNT Motor Group" 
-                className="h-12 w-auto"
+                className="h-20 w-auto"
               />
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
