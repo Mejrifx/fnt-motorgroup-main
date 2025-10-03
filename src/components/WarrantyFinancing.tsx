@@ -38,16 +38,16 @@ const WarrantyFinancing: React.FC = () => {
             {/* Standard Warranty */}
             <div className="bg-gradient-to-r from-fnt-red to-red-600 rounded-2xl p-8 mb-12 text-white">
               <div className="flex items-center mb-4">
-                <CheckCircle className="w-8 h-8 mr-3" />
+                <CheckCircle className="w-8 h-8 mr-3 text-green-400" />
                 <h3 className="text-2xl font-bold">Standard Warranty Included</h3>
               </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="text-xl font-semibold mb-2">6 Months Warranty</h4>
+                  <h4 className="text-xl font-semibold mb-2 text-green-400">6 Months Warranty</h4>
                   <p className="text-red-100">Comprehensive mechanical and electrical coverage on all vehicles</p>
                 </div>
                 <div>
-                  <h4 className="text-xl font-semibold mb-2">6 Months Breakdown Cover</h4>
+                  <h4 className="text-xl font-semibold mb-2 text-green-400">6 Months Breakdown Cover</h4>
                   <p className="text-red-100">Nationwide roadside assistance and recovery service</p>
                 </div>
               </div>
@@ -66,11 +66,7 @@ const WarrantyFinancing: React.FC = () => {
                   </div>
                   <h4 className="text-xl font-bold text-gray-700 mb-2">Silver Cover</h4>
                   <p className="text-gray-600 mb-4">Enhanced protection with extended coverage</p>
-                  <div className="space-y-2 text-sm text-gray-500">
-                    <p>• Extended warranty period</p>
-                    <p>• Additional breakdown benefits</p>
-                    <p>• Priority service</p>
-                  </div>
+                  <p className="text-sm text-fnt-red font-semibold">Contact us for details</p>
                 </div>
 
                 {/* Gold */}
@@ -83,12 +79,7 @@ const WarrantyFinancing: React.FC = () => {
                   </div>
                   <h4 className="text-xl font-bold text-gray-700 mb-2">Gold Cover</h4>
                   <p className="text-gray-600 mb-4">Premium protection with comprehensive benefits</p>
-                  <div className="space-y-2 text-sm text-gray-500">
-                    <p>• Maximum warranty coverage</p>
-                    <p>• Full breakdown protection</p>
-                    <p>• Courtesy car provision</p>
-                    <p>• Priority repairs</p>
-                  </div>
+                  <p className="text-sm text-fnt-red font-semibold">Contact us for details</p>
                 </div>
 
                 {/* Platinum */}
@@ -98,12 +89,7 @@ const WarrantyFinancing: React.FC = () => {
                   </div>
                   <h4 className="text-xl font-bold text-gray-700 mb-2">Platinum Cover</h4>
                   <p className="text-gray-600 mb-4">Ultimate protection with premium benefits</p>
-                  <div className="space-y-2 text-sm text-gray-500">
-                    <p>• Complete vehicle coverage</p>
-                    <p>• Luxury breakdown service</p>
-                    <p>• Premium courtesy car</p>
-                    <p>• VIP customer service</p>
-                  </div>
+                  <p className="text-sm text-fnt-red font-semibold">Contact us for details</p>
                 </div>
               </div>
             </div>
