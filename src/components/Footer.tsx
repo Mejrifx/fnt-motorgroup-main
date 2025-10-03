@@ -1,5 +1,5 @@
 import React from 'react';
-import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail, MapPin } from 'lucide-react';
+import { Instagram, Phone, Mail, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import fntLogo from '../assets/fnt-logo.png';
 
@@ -27,18 +27,34 @@ const Footer = () => {
               Your premier destination for luxury automotive excellence. We've been crafting exceptional vehicle experiences for over two decades.
             </p>
             <div className="flex space-x-4">
-              <button className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300">
-                <Facebook className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300">
-                <Twitter className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300">
+              <a 
+                href="https://www.instagram.com/fnt_motorgroup/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300"
+              >
                 <Instagram className="w-5 h-5" />
-              </button>
-              <button className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300">
-                <Linkedin className="w-5 h-5" />
-              </button>
+              </a>
+              <a 
+                href="https://www.tiktok.com/@fntmotorgroup?_t=ZN-90FaqSjhSRa&_r=1" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                </svg>
+              </a>
+              <a 
+                href="https://www.autotrader.co.uk/dealers/lancashire/manchester/fnt-motor-group-10042804" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-fnt-red transition-colors duration-300"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </a>
             </div>
           </div>
 
