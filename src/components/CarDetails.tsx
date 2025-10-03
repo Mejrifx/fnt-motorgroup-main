@@ -305,7 +305,7 @@ const CarDetails: React.FC = () => {
                   <span>Call Now</span>
                 </a>
                 <a
-                  href="mailto:info@fntmotorgroup.com?subject=Inquiry about ${car.make} ${car.model}"
+                  href="mailto:fntgrouplts@gmail.com?subject=Inquiry about ${car.make} ${car.model}"
                   className="flex items-center justify-center space-x-2 w-full bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
                 >
                   <Mail className="w-5 h-5" />

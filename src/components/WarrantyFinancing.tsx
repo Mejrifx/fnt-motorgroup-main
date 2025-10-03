@@ -23,8 +23,8 @@ const WarrantyFinancing: React.FC = () => {
             {/* Section Header */}
             <div className="text-center mb-16">
               <div className="flex justify-center mb-6">
-                <div className="bg-fnt-red/10 p-4 rounded-full">
-                  <Shield className="w-12 h-12 text-fnt-red" />
+                <div className="bg-green-100 p-4 rounded-full">
+                  <Shield className="w-12 h-12 text-green-600" />
                 </div>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-fnt-black mb-4">
@@ -266,8 +266,8 @@ const WarrantyFinancing: React.FC = () => {
                   <Mail className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-gray-700 mb-2">Email Us</h3>
-                <a href="mailto:info@fntmotorgroup.com" className="text-fnt-red hover:text-red-600 font-semibold">
-                  info@fntmotorgroup.com
+                <a href="mailto:fntgrouplts@gmail.com" className="text-fnt-red hover:text-red-600 font-semibold">
+                  fntgrouplts@gmail.com
                 </a>
               </div>
 

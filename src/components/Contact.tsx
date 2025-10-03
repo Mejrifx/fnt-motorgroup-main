@@ -43,7 +43,7 @@ const Contact = () => {
                   <Mail className="w-6 h-6 text-fnt-red mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Email</h4>
-                    <p className="text-gray-600">info@fntmotorgroup.com</p>
+                    <p className="text-gray-600">fntgrouplts@gmail.com</p>
                   </div>
                 </div>
 
