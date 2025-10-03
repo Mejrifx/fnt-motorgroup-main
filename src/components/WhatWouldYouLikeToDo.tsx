@@ -47,7 +47,7 @@ const WhatWouldYouLikeToDo = () => {
   };
 
   return (
-    <section className="py-24" style={{ backgroundColor: '#171819' }}>
+    <section className="py-24 relative z-0" style={{ backgroundColor: '#171819' }}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-20">
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -70,7 +70,7 @@ const WhatWouldYouLikeToDo = () => {
                 {/* Subtle background gradient on hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-fnt-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
                 
-                <div className="relative z-10 flex flex-col items-center h-full">
+                <div className="relative z-1 flex flex-col items-center h-full">
                   <div className={`p-6 rounded-2xl bg-gradient-to-br ${action.color} text-white mb-8 transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-lg`}>
                     <IconComponent className="w-8 h-8" />
                   </div>
