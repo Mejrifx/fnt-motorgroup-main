@@ -49,12 +49,12 @@ const Footer = () => {
                 href="https://www.autotrader.co.uk/dealers/lancashire/manchester/fnt-motor-group-10042804" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity duration-300"
+                className="hover:opacity-80 transition-opacity duration-300 flex items-center"
               >
                 <img 
                   src="/autotrader-logo-nobg.png" 
                   alt="AutoTrader" 
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain"
                 />
               </a>
             </div>
