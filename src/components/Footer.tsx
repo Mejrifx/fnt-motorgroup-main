@@ -22,11 +22,11 @@ const Footer = () => {
                 className="h-32 w-auto mb-0"
                 style={{ marginTop: '-30px' }}
               />
-              <p className="text-gray-300 mb-4 leading-relaxed text-center">
+              <p className="text-gray-300 mb-4 leading-relaxed text-center" style={{ transform: 'translateY(-20px)' }}>
                 Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
               </p>
             </div>
-            <div className="flex space-x-4" style={{ marginTop: '-8px', marginLeft: '30px' }}>
+            <div className="flex space-x-4" style={{ marginTop: '-8px', marginLeft: '30px', transform: 'translateY(-20px)' }}>
               <a 
                 href="https://www.instagram.com/fnt_motorgroup/" 
                 target="_blank" 
