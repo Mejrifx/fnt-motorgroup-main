@@ -145,9 +145,11 @@ const Reviews: React.FC = () => {
 
               {/* Review Text */}
               <blockquote className="text-center mb-8">
-                <p className="text-xl md:text-2xl text-gray-700 leading-relaxed italic mb-6">
-                  "{reviews[currentReview].review_text}"
-                </p>
+                <div className="max-h-32 sm:max-h-40 overflow-y-auto px-2">
+                  <p className="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed italic mb-6">
+                    "{reviews[currentReview].review_text}"
+                  </p>
+                </div>
                 
                 {/* Reviewer Info */}
                 <div className="flex flex-col items-center">
