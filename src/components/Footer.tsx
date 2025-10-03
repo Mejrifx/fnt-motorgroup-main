@@ -57,9 +57,9 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-6">Services</h4>
             <ul className="space-y-3">
               <li><a href="#" className="text-gray-300 hover:text-fnt-red transition-colors duration-300">Vehicle Sales</a></li>
-              <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Financing</a></li>
+              <li><button onClick={() => navigate('/warranty-financing')} className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Financing</button></li>
               <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Trade-In</a></li>
-              <li><a href="#" className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Warranty</a></li>
+              <li><button onClick={() => navigate('/warranty-financing')} className="text-blue-100 hover:text-amber-500 transition-colors duration-300">Warranty</button></li>
             </ul>
           </div>
 
