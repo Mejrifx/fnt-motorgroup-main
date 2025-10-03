@@ -26,7 +26,7 @@ const Footer = () => {
                 Your premier destination for luxury automotive excellence. We craft exceptional vehicle experiences in Greater Manchester.
               </p>
             </div>
-            <div className="flex space-x-4" style={{ marginTop: '-8px', marginLeft: '10px' }}>
+            <div className="flex space-x-4" style={{ marginTop: '-8px', marginLeft: '30px' }}>
               <a 
                 href="https://www.instagram.com/fnt_motorgroup/" 
                 target="_blank" 
