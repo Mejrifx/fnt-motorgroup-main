@@ -61,7 +61,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     const inventorySection = document.getElementById('inventory');
     if (inventorySection) {
       // Calculate offset to scroll further down and center the results
-      const offset = window.innerHeight * 0.2; // Scroll further down
+      const offset = window.innerHeight * 0.4; // Scroll further down
       const elementPosition = inventorySection.offsetTop;
       const offsetPosition = elementPosition + offset; // ADD offset to go DOWN
       
@@ -180,22 +180,28 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
 
             {/* Price Range */}
             <div className="flex items-center gap-2">
-              <input
-                ref={priceFromRef}
-                type="text"
-                placeholder="Min"
-                value={filters.priceFrom}
-                onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-                className="w-16 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
-              />
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                <input
+                  ref={priceFromRef}
+                  type="text"
+                  placeholder="Min"
+                  value={filters.priceFrom}
+                  onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+                  className="w-20 pl-6 pr-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                />
+              </div>
               <span className="text-gray-500 text-sm">to</span>
-              <input
-                type="text"
-                placeholder="Max"
-                value={filters.priceTo}
-                onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-                className="w-16 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
-              />
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                <input
+                  type="text"
+                  placeholder="Max"
+                  value={filters.priceTo}
+                  onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+                  className="w-20 pl-6 pr-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                />
+              </div>
             </div>
 
             <div className="h-6 w-px bg-fnt-red mx-2"></div>
@@ -347,22 +353,28 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           <div className="flex flex-wrap gap-3">
             {/* Price Range */}
             <div className="flex items-center gap-2 flex-1">
-              <input
-                ref={priceFromRef}
-                type="text"
-                placeholder="Min Price"
-                value={filters.priceFrom}
-                onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-                className="w-28 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
-              />
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                <input
+                  ref={priceFromRef}
+                  type="text"
+                  placeholder="Min Price"
+                  value={filters.priceFrom}
+                  onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+                  className="w-32 pl-6 pr-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                />
+              </div>
               <span className="text-gray-500 text-sm">to</span>
-              <input
-                type="text"
-                placeholder="Max Price"
-                value={filters.priceTo}
-                onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-                className="w-28 px-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
-              />
+              <div className="relative">
+                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                <input
+                  type="text"
+                  placeholder="Max Price"
+                  value={filters.priceTo}
+                  onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+                  className="w-32 pl-6 pr-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                />
+              </div>
             </div>
 
             {/* Fuel Type */}
