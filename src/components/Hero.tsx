@@ -23,8 +23,18 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
   }, []);
 
   const scrollToInventory = () => {
-    const element = document.getElementById('inventory');
-    element?.scrollIntoView({ behavior: 'smooth' });
+    const inventorySection = document.getElementById('inventory');
+    if (inventorySection) {
+      // Calculate offset to scroll further down and center the results
+      const offset = window.innerHeight * 0.1; // Scroll much further down to center results
+      const elementPosition = inventorySection.offsetTop;
+      const offsetPosition = elementPosition + offset; // ADD offset to go DOWN
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
   };
 
   const handleFilterChange = (filters) => {
