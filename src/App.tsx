@@ -9,6 +9,7 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import CarDetails from './components/CarDetails';
 import WarrantyFinancing from './components/WarrantyFinancing';
+import TermsAndConditions from './components/TermsAndConditions';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 
@@ -40,6 +41,7 @@ function App() {
         <Route path="/" element={<MainSite />} />
         <Route path="/car/:id" element={<CarDetails />} />
         <Route path="/warranty-financing" element={<WarrantyFinancing />} />
+        <Route path="/terms-conditions" element={<TermsAndConditions />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         {/* Catch all route - redirect to home */}
