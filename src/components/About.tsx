@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
+import minicooperImage from '/minicooper.png';
 
 const About = () => {
   const achievements = [
@@ -60,8 +61,8 @@ const About = () => {
                   className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                 />
                 <img
-                  src="/minicooper.png"
-                  alt="Premium vehicles"
+                  src={minicooperImage}
+                  alt="Mini Cooper"
                   className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
                 />
               </div>
