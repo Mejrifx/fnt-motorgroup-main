@@ -261,7 +261,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           </div>
           
           {/* Welcome Text - Bigger and more dominant */}
-          <div className="lg:-mt-48" style={{ marginTop: window.innerWidth < 768 ? '40px' : '-80px' }}>
+          <div className="lg:-mt-48" style={{ marginTop: window.innerWidth < 768 ? '160px' : '-80px' }}>
             <div className="mb-6 md:mb-8">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black mb-4 md:mb-6 leading-tight tracking-tight px-2" style={{ fontFamily: 'Outfit, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
                 <span className="text-white">Welcome to F</span><span className="text-fnt-red">N</span><span className="text-white">T Motor Group</span>
@@ -272,7 +272,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             </div>
             
             {/* Car Filter Section */}
-            <div className="mb-8 relative z-[99999] overflow-visible">
+            <div className="mb-12 relative z-[99999] overflow-visible">
               <CarFilter onFilterChange={handleFilterChange} />
             </div>
             
