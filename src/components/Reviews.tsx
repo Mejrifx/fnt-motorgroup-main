@@ -216,15 +216,6 @@ const Reviews: React.FC = () => {
             </div>
           </div>
 
-          {/* Call to Action */}
-          <div className="text-center mt-12">
-            <a
-              href="tel:07735770031"
-              className="inline-flex items-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              <span>Experience the FNT Difference</span>
-            </a>
-          </div>
         </div>
       </div>
     </section>
