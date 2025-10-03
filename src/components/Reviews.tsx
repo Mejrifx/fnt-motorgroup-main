@@ -86,14 +86,14 @@ const Reviews: React.FC = () => {
   const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-20" style={{ backgroundColor: '#171819' }}>
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-black text-fnt-black mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <h2 className="text-5xl md:text-6xl font-black text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
             What Our <span className="text-fnt-red">Customers</span> Say
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
             Don't just take our word for it - hear from our satisfied customers
           </p>
           
