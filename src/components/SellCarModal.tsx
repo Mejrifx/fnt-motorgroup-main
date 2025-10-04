@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Send } from 'lucide-react';
 import Airtable from 'airtable';
 
@@ -108,10 +109,9 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  if (showSuccess) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999999999] p-4" style={{ zIndex: 999999999 }}>
-        <div className="bg-white rounded-3xl max-w-md w-full p-8 text-center z-[999999999]" style={{ zIndex: 999999999 }}>
+  const modalContent = showSuccess ? (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
+      <div className="bg-white rounded-3xl max-w-md w-full p-8 text-center" style={{ zIndex: 2147483647 }}>
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -129,12 +129,9 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[999999999] p-4" style={{ zIndex: 999999999 }}>
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto z-[999999999]" style={{ zIndex: 999999999 }}>
+  ) : (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 2147483647 }}>
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ zIndex: 2147483647 }}>
         <div className="sticky top-0 bg-white border-b px-8 py-6 flex justify-between items-center rounded-t-3xl">
           <h2 className="text-2xl font-bold text-fnt-black">Sell Your Car</h2>
           <button
@@ -319,6 +316,8 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default SellCarModal;
