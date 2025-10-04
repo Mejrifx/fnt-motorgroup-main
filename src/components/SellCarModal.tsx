@@ -23,9 +23,24 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Input validation for specific fields
+    let processedValue = value;
+    
+    if (name === 'phoneNumber') {
+      // Only allow numbers, spaces, +, -, (, )
+      processedValue = value.replace(/[^0-9\s\+\-\(\)]/g, '');
+    } else if (name === 'carRegistration') {
+      // Only allow letters, numbers, and spaces (UK registration format)
+      processedValue = value.replace(/[^A-Za-z0-9\s]/g, '').toUpperCase();
+    } else if (name === 'mileage') {
+      // Only allow numbers and commas
+      processedValue = value.replace(/[^0-9,]/g, '');
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: processedValue
     }));
   };
 
@@ -131,6 +146,48 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-8">
+          {/* Process Explanation */}
+          <div className="bg-gradient-to-r from-fnt-red/5 to-amber-500/5 border border-fnt-red/20 rounded-xl p-6 mb-8">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-fnt-red rounded-full flex items-center justify-center mr-3">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-fnt-black">How It Works</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-fnt-red text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</div>
+                <div>
+                  <p className="font-semibold text-fnt-black">Submit Details</p>
+                  <p className="text-sm text-gray-600">Fill out the form with your car information</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-fnt-red text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</div>
+                <div>
+                  <p className="font-semibold text-fnt-black">We Review</p>
+                  <p className="text-sm text-gray-600">Our team evaluates your vehicle details</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-fnt-red text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">3</div>
+                <div>
+                  <p className="font-semibold text-fnt-black">Contact You</p>
+                  <p className="text-sm text-gray-600">We'll call to discuss your car and arrange viewing</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-fnt-red text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">4</div>
+                <div>
+                  <p className="font-semibold text-fnt-black">Complete Sale</p>
+                  <p className="text-sm text-gray-600">If everything checks out, we buy your car</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -172,9 +229,11 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
               value={formData.phoneNumber}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300"
+              maxLength={15}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
               placeholder="07735770031"
             />
+            <p className="text-xs text-gray-500 mt-1">Numbers, spaces, +, -, (, ) only</p>
           </div>
 
           <div className="mb-6">
@@ -190,9 +249,11 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
                   value={formData.carRegistration}
                   onChange={handleInputChange}
                   required
+                  maxLength={8}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
                   placeholder="AB12 CDE"
                 />
+                <p className="text-xs text-gray-500 mt-1">Letters and numbers only (UK format)</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -204,9 +265,11 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
                   value={formData.mileage}
                   onChange={handleInputChange}
                   required
+                  maxLength={7}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
                   placeholder="50,000"
                 />
+                <p className="text-xs text-gray-500 mt-1">Numbers and commas only</p>
               </div>
             </div>
             <div className="mt-6">
