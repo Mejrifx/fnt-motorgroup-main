@@ -19,6 +19,24 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Helper function to format mileage
+  const formatMileage = (mileage: string): string => {
+    if (!mileage) return '';
+    
+    // If mileage already contains "miles", return as is
+    if (mileage.toLowerCase().includes('miles')) {
+      return mileage;
+    }
+    
+    // If it's just a number, add "miles"
+    const numericMileage = mileage.replace(/[^\d]/g, '');
+    if (numericMileage) {
+      return `${numericMileage} miles`;
+    }
+    
+    return mileage;
+  };
+
   useEffect(() => {
     fetchCars();
   }, []);
@@ -237,7 +255,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
                   <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-fnt-red" />
-                      <span>{car.mileage}</span>
+                      <span>{formatMileage(car.mileage)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Settings className="w-4 h-4 text-fnt-red" />

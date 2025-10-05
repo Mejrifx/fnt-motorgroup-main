@@ -24,6 +24,24 @@ const AdminDashboard = () => {
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Helper function to format mileage
+  const formatMileage = (mileage: string): string => {
+    if (!mileage) return '';
+    
+    // If mileage already contains "miles", return as is
+    if (mileage.toLowerCase().includes('miles')) {
+      return mileage;
+    }
+    
+    // If it's just a number, add "miles"
+    const numericMileage = mileage.replace(/[^\d]/g, '');
+    if (numericMileage) {
+      return `${numericMileage} miles`;
+    }
+    
+    return mileage;
+  };
+
   useEffect(() => {
     console.log('AdminDashboard - checking auth:', { user, authLoading });
     
@@ -336,7 +354,7 @@ const AdminDashboard = () => {
                       £{car.price.toLocaleString()}
                     </td>
                     <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {car.mileage}
+                      {formatMileage(car.mileage)}
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

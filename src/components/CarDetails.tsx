@@ -12,6 +12,24 @@ const CarDetails: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullscreenGallery, setShowFullscreenGallery] = useState(false);
 
+  // Helper function to format mileage
+  const formatMileage = (mileage: string): string => {
+    if (!mileage) return '';
+    
+    // If mileage already contains "miles", return as is
+    if (mileage.toLowerCase().includes('miles')) {
+      return mileage;
+    }
+    
+    // If it's just a number, add "miles"
+    const numericMileage = mileage.replace(/[^\d]/g, '');
+    if (numericMileage) {
+      return `${numericMileage} miles`;
+    }
+    
+    return mileage;
+  };
+
   useEffect(() => {
     if (id) {
       fetchCar(id);
@@ -288,7 +306,7 @@ const CarDetails: React.FC = () => {
                 )}
                 <div className="flex justify-between items-center py-2 border-b border-gray-700">
                   <span className="text-gray-400">Mileage:</span>
-                  <span className="text-white font-medium">{car.mileage}</span>
+                  <span className="text-white font-medium">{formatMileage(car.mileage)}</span>
                 </div>
                 {car.road_tax && (
                   <div className="flex justify-between items-center py-2">
