@@ -170,7 +170,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             <div className="p-8 border-t border-gray-200 bg-gray-50">
               <div className="text-center space-y-3">
                 <p className="text-lg font-semibold text-fnt-black">FNT Motor Group</p>
-                <p className="text-gray-600">Manchester M12 4RX</p>
+                <p className="text-gray-600">Redgate Lane, Manchester M12 4RX</p>
                 <a 
                   href="tel:07735770031"
                   className="block text-lg font-bold text-fnt-red hover:text-red-600 transition-colors duration-300"
@@ -207,7 +207,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
           >
             <MapPin className="w-4 h-4" />
-            <span>Manchester M12 4RX</span>
+            <span>Redgate Lane, Manchester M12 4RX</span>
           </a>
         </div>
 

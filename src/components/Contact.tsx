@@ -25,7 +25,7 @@ const Contact = () => {
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Location</h4>
                     <p className="text-gray-600">
-                      Manchester M12 4RX<br />
+                      Redgate Lane, Manchester M12 4RX<br />
                       United Kingdom
                     </p>
                   </div>
