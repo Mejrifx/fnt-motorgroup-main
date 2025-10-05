@@ -44,7 +44,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     return () => window.removeEventListener('resize', updatePlaceholder);
   }, []);
 
-  const carMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Land Rover', 'Range Rover', 'Jaguar'];
+  const carMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Land Rover', 'Range Rover', 'Jaguar', 'Alfa Romeo', 'Citroen', 'Cupra', 'Fiat', 'Ford', 'Honda', 'Mitsubishi', 'Hyundai', 'Kia', 'Peugeot', 'Seat', 'Suzuki', 'Toyota', 'Volkswagen', 'Vauxhall', 'Volvo'];
   
   const carModels: { [key: string]: string[] } = {
     'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'e-tron'],
@@ -52,7 +52,23 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     'Mercedes-Benz': ['A-Class', 'B-Class', 'C-Class', 'CLA', 'CLS', 'E-Class', 'G-Class', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'S-Class', 'SL', 'SLC', 'AMG GT', 'EQC', 'EQS'],
     'Land Rover': ['Defender', 'Discovery', 'Discovery Sport', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover'],
     'Tesla': ['Model S', 'Model 3', 'Model X', 'Model Y'],
-    'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE']
+    'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE'],
+    'Alfa Romeo': ['Giulietta', 'Giulia', 'Stelvio', 'Tonale', '4C', '8C'],
+    'Citroen': ['C1', 'C3', 'C4', 'C5', 'Berlingo', 'C4 Picasso', 'Grand C4 Picasso', 'C4 Cactus', 'C3 Aircross', 'C5 Aircross'],
+    'Cupra': ['Leon', 'Formentor', 'Born', 'Tavascan'],
+    'Fiat': ['500', '500L', '500X', 'Panda', 'Punto', 'Tipo', 'Doblo', 'Ducato', 'Talento'],
+    'Ford': ['Fiesta', 'Focus', 'Mondeo', 'Mustang', 'Kuga', 'Edge', 'Explorer', 'Ranger', 'Transit', 'Tourneo'],
+    'Honda': ['Civic', 'Accord', 'CR-V', 'HR-V', 'Jazz', 'Pilot', 'Ridgeline', 'Passport', 'Insight'],
+    'Mitsubishi': ['Outlander', 'Eclipse Cross', 'ASX', 'L200', 'Shogun', 'Mirage', 'Space Star'],
+    'Hyundai': ['i10', 'i20', 'i30', 'i40', 'Tucson', 'Santa Fe', 'Kona', 'IONIQ', 'Nexo'],
+    'Kia': ['Picanto', 'Rio', 'Ceed', 'Optima', 'Sportage', 'Sorento', 'Stonic', 'Niro', 'EV6'],
+    'Peugeot': ['108', '208', '308', '508', '2008', '3008', '5008', 'Partner', 'Expert', 'Boxer'],
+    'Seat': ['Ibiza', 'Leon', 'Toledo', 'Ateca', 'Tarraco', 'Alhambra', 'Arona'],
+    'Suzuki': ['Swift', 'Baleno', 'Celerio', 'Vitara', 'S-Cross', 'Jimny', 'Ignis', 'Across'],
+    'Toyota': ['Aygo', 'Yaris', 'Corolla', 'Camry', 'Prius', 'C-HR', 'RAV4', 'Highlander', 'Land Cruiser', 'Supra', 'Proace'],
+    'Volkswagen': ['Up!', 'Polo', 'Golf', 'Jetta', 'Passat', 'Arteon', 'T-Cross', 'T-Roc', 'Tiguan', 'Touareg', 'ID.3', 'ID.4', 'ID.Buzz'],
+    'Vauxhall': ['Corsa', 'Astra', 'Insignia', 'Mokka', 'Crossland', 'Grandland', 'Combo', 'Movano', 'Vivaro'],
+    'Volvo': ['XC40', 'XC60', 'XC90', 'S60', 'S90', 'V40', 'V60', 'V90', 'C30', 'C70']
   };
   const fuelTypes = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 
