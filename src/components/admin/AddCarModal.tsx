@@ -87,9 +87,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
 
   // Car makes and models data
   const carMakes = [
-    'BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Land Rover', 'Range Rover', 'Jaguar', 
-    'Alfa Romeo', 'Citroen', 'Cupra', 'Fiat', 'Ford', 'Honda', 'Mitsubishi', 
-    'Hyundai', 'Kia', 'Peugeot', 'Seat', 'Suzuki', 'Toyota', 'Volkswagen', 'Vauxhall', 'Volvo'
+    'Alfa Romeo', 'Audi', 'BMW', 'Citroen', 'Cupra', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jaguar', 'Kia', 'Land Rover', 'Mercedes-Benz', 'Mitsubishi', 'Peugeot', 'Range Rover', 'Seat', 'Suzuki', 'Tesla', 'Toyota', 'Vauxhall', 'Volkswagen', 'Volvo'
   ];
 
   const carModels: { [key: string]: string[] } = {

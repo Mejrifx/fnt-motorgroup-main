@@ -44,7 +44,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     return () => window.removeEventListener('resize', updatePlaceholder);
   }, []);
 
-  const carMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Tesla', 'Land Rover', 'Range Rover', 'Jaguar', 'Alfa Romeo', 'Citroen', 'Cupra', 'Fiat', 'Ford', 'Honda', 'Mitsubishi', 'Hyundai', 'Kia', 'Peugeot', 'Seat', 'Suzuki', 'Toyota', 'Volkswagen', 'Vauxhall', 'Volvo'];
+  const carMakes = ['Alfa Romeo', 'Audi', 'BMW', 'Citroen', 'Cupra', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jaguar', 'Kia', 'Land Rover', 'Mercedes-Benz', 'Mitsubishi', 'Peugeot', 'Range Rover', 'Seat', 'Suzuki', 'Tesla', 'Toyota', 'Vauxhall', 'Volkswagen', 'Volvo'];
   
   const carModels: { [key: string]: string[] } = {
     'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'e-tron'],
