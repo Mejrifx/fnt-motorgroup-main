@@ -16,15 +16,15 @@ const CarDetails: React.FC = () => {
   const formatMileage = (mileage: string): string => {
     if (!mileage) return '';
     
-    // If mileage already contains "miles", return as is
+    // If mileage already contains "miles" or "Miles", return as is
     if (mileage.toLowerCase().includes('miles')) {
       return mileage;
     }
     
-    // If it's just a number, add "miles"
+    // If it's just a number, add "Miles"
     const numericMileage = mileage.replace(/[^\d]/g, '');
     if (numericMileage) {
-      return `${numericMileage} miles`;
+      return `${numericMileage} Miles`;
     }
     
     return mileage;
