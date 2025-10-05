@@ -45,11 +45,33 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   }, []);
 
   const carMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Porsche', 'Ferrari', 'Lamborghini', 'Bentley', 'Rolls-Royce', 'Tesla', 'Land Rover', 'Range Rover', 'Jaguar', 'Maserati', 'McLaren', 'Aston Martin'];
-  const carModels = ['3 Series', '5 Series', '7 Series', 'X3', 'X5', 'X7', 'C-Class', 'E-Class', 'S-Class', 'GLE', 'GLS', 'A4', 'A6', 'A8', 'Q5', 'Q7', '911', 'Cayenne', 'Panamera', 'Macan'];
+  
+  const carModels: { [key: string]: string[] } = {
+    'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'e-tron'],
+    'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series', '8 Series', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i3', 'i4', 'iX'],
+    'Mercedes-Benz': ['A-Class', 'B-Class', 'C-Class', 'CLA', 'CLS', 'E-Class', 'G-Class', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'S-Class', 'SL', 'SLC', 'AMG GT', 'EQC', 'EQS'],
+    'Porsche': ['911', '718 Boxster', '718 Cayman', 'Cayenne', 'Macan', 'Panamera', 'Taycan'],
+    'Ferrari': ['488', 'F8 Tributo', 'SF90 Stradale', 'Roma', 'Portofino', '812 Superfast', 'LaFerrari'],
+    'Lamborghini': ['Huracán', 'Aventador', 'Urus', 'Gallardo'],
+    'Bentley': ['Continental GT', 'Flying Spur', 'Bentayga', 'Mulsanne'],
+    'Rolls-Royce': ['Phantom', 'Ghost', 'Wraith', 'Dawn', 'Cullinan'],
+    'Land Rover': ['Defender', 'Discovery', 'Discovery Sport', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover'],
+    'Tesla': ['Model S', 'Model 3', 'Model X', 'Model Y'],
+    'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE'],
+    'Maserati': ['Ghibli', 'Quattroporte', 'Levante', 'GranTurismo', 'GranCabrio'],
+    'McLaren': ['720S', '570S', '600LT', 'GT', 'Artura', 'Senna', 'P1'],
+    'Aston Martin': ['DB11', 'Vantage', 'DBS', 'DBX', 'Valhalla', 'Valkyrie']
+  };
   const fuelTypes = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 
   const handleFilterChange = (key: keyof CarFilters, value: string) => {
     const newFilters = { ...filters, [key]: value };
+    
+    // Reset model when make changes
+    if (key === 'make') {
+      newFilters.model = '';
+    }
+    
     setFilters(newFilters);
     onFilterChange?.(newFilters);
   };
@@ -159,7 +181,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     >
                       Any Model
                     </button>
-                    {carModels.map((model) => (
+                    {filters.make && carModels[filters.make]?.map((model) => (
                       <button
                         key={model}
                         onClick={() => {
@@ -171,6 +193,11 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                         {model}
                       </button>
                     ))}
+                    {!filters.make && (
+                      <div className="px-6 py-3 text-sm text-gray-500 text-center">
+                        Select a make first
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -332,7 +359,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     >
                       Any Model
                     </button>
-                    {carModels.map((model) => (
+                    {filters.make && carModels[filters.make]?.map((model) => (
                       <button
                         key={model}
                         onClick={() => {
