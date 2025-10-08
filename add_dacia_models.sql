@@ -19,11 +19,11 @@ INSERT INTO cars (
    'Raised Sandero with crossover styling and practical features.', 'White', '1.0 TCe', '5', '1', true, NOW(), NOW()),
   
   -- Dacia Duster (Diesel)
-  ('Dacia', 'Duster', 2021, 19500, '30000', 'Diesel', 'Manual', 'SUV', 
+  ('Dacia', 'Duster', 2021, 19500, '30000', 'Diesel', 'Manual', 'Hatchback', 
    'Robust SUV with excellent off-road capability and great value.', 'Grey', '1.5 dCi', '5', '1', true, NOW(), NOW()),
   
   -- Dacia Duster (Petrol)
-  ('Dacia', 'Duster', 2022, 22500, '18000', 'Petrol', 'Manual', 'SUV', 
+  ('Dacia', 'Duster', 2022, 22500, '18000', 'Petrol', 'Manual', 'Hatchback', 
    'Popular SUV with practical design and affordable running costs.', 'Blue', '1.3 TCe', '5', '1', true, NOW(), NOW()),
   
   -- Dacia Logan
