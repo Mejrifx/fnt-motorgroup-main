@@ -87,7 +87,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
 
   // Car makes and models data
   const carMakes = [
-    'Alfa Romeo', 'Audi', 'BMW', 'Citroen', 'Cupra', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jaguar', 'Kia', 'Land Rover', 'Mercedes-Benz', 'Mitsubishi', 'Peugeot', 'Range Rover', 'Seat', 'Suzuki', 'Tesla', 'Toyota', 'Vauxhall', 'Volkswagen', 'Volvo'
+    'Alfa Romeo', 'Audi', 'BMW', 'Citroen', 'Cupra', 'Dacia', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jaguar', 'Kia', 'Land Rover', 'Mercedes-Benz', 'Mitsubishi', 'Peugeot', 'Range Rover', 'Seat', 'Suzuki', 'Tesla', 'Toyota', 'Vauxhall', 'Volkswagen', 'Volvo'
   ];
 
   const carModels: { [key: string]: string[] } = {
@@ -100,6 +100,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
     'Alfa Romeo': ['Giulietta', 'Giulia', 'Stelvio', 'Tonale', '4C', '8C'],
     'Citroen': ['C1', 'C3', 'C4', 'C5', 'Berlingo', 'C4 Picasso', 'Grand C4 Picasso', 'C4 Cactus', 'C3 Aircross', 'C5 Aircross'],
     'Cupra': ['Leon', 'Formentor', 'Born', 'Tavascan'],
+    'Dacia': ['Sandero', 'Sandero Stepway', 'Duster', 'Logan', 'Jogger', 'Spring'],
     'Fiat': ['500', '500L', '500X', 'Panda', 'Punto', 'Tipo', 'Doblo', 'Ducato', 'Talento'],
     'Ford': ['Fiesta', 'Focus', 'Mondeo', 'Mustang', 'Kuga', 'Edge', 'Explorer', 'Ranger', 'Transit', 'Tourneo'],
     'Honda': ['Civic', 'Accord', 'CR-V', 'HR-V', 'Jazz', 'Pilot', 'Ridgeline', 'Passport', 'Insight'],
