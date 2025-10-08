@@ -142,9 +142,26 @@ INSERT INTO cars (
   ('Volvo', 'S60', 2021, 28500, '25000', 'Petrol', 'Automatic', 'Saloon', 
    'Elegant saloon with Volvo safety and Scandinavian luxury.', 'Grey', '2.0 T4', '4', '1', true, NOW(), NOW()),
   ('Volvo', 'V60', 2022, 29500, '15000', 'Petrol', 'Automatic', 'Estate', 
-   'Practical estate with premium features and excellent safety.', 'Blue', '2.0 T4', '5', '1', true, NOW(), NOW())
+   'Practical estate with premium features and excellent safety.', 'Blue', '2.0 T4', '5', '1', true, NOW(), NOW()),
+
+  -- Dacia
+  ('Dacia', 'Sandero', 2021, 12500, '35000', 'Petrol', 'Manual', 'Hatchback', 
+   'Affordable supermini with excellent value for money and reliability.', 'Red', '1.0 TCe', '5', '1', true, NOW(), NOW()),
+  ('Dacia', 'Sandero Stepway', 2022, 15500, '25000', 'Petrol', 'Manual', 'Hatchback', 
+   'Raised Sandero with crossover styling and practical features.', 'White', '1.0 TCe', '5', '1', true, NOW(), NOW()),
+  ('Dacia', 'Duster', 2021, 19500, '30000', 'Diesel', 'Manual', 'SUV', 
+   'Robust SUV with excellent off-road capability and great value.', 'Grey', '1.5 dCi', '5', '1', true, NOW(), NOW()),
+  ('Dacia', 'Duster', 2022, 22500, '18000', 'Petrol', 'Manual', 'SUV', 
+   'Popular SUV with practical design and affordable running costs.', 'Blue', '1.3 TCe', '5', '1', true, NOW(), NOW()),
+  ('Dacia', 'Logan', 2020, 11500, '40000', 'Petrol', 'Manual', 'Saloon', 
+   'Spacious saloon with excellent value and practical features.', 'Silver', '1.0 TCe', '4', '1', true, NOW(), NOW()),
+  ('Dacia', 'Jogger', 2022, 18500, '20000', 'Petrol', 'Manual', 'Estate', 
+   'Versatile 7-seater estate with excellent space and practicality.', 'Green', '1.0 TCe', '5', '1', true, NOW(), NOW()),
+  ('Dacia', 'Spring', 2022, 16500, '15000', 'Electric', 'Automatic', 'Hatchback', 
+   'Affordable electric city car with zero emissions and low running costs.', 'White', 'Electric', '5', '1', true, NOW(), NOW())
 
 ON CONFLICT (make, model, year, mileage) DO NOTHING;
 
 -- Success message
-SELECT 'Mainstream car brands and models added successfully!' as message;
+SELECT 'Mainstream car brands and models (including Dacia) added successfully!' as message;
+
