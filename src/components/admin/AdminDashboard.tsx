@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
@@ -147,6 +147,10 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   // Show loading screen while auth is loading
   if (authLoading) {
     return (
@@ -183,13 +187,22 @@ const AdminDashboard = () => {
                 <img src={fntLogo} alt="FNT Motor Group" className="h-12 w-auto" />
                 <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden xs:inline">Sign Out</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleBackToHome}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                  title="Back to Home"
+                >
+                  <Home className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden xs:inline">Sign Out</span>
+                </button>
+              </div>
             </div>
             <div className="text-center">
               <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
@@ -204,6 +217,14 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+              <button
+                onClick={handleBackToHome}
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                title="Back to Home"
+              >
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </button>
               <button
                 onClick={handleSignOut}
                 className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
