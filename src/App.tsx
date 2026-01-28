@@ -13,6 +13,7 @@ import WarrantyFinancing from './components/WarrantyFinancing';
 import TermsAndConditions from './components/TermsAndConditions';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
+import PasswordGate from './components/PasswordGate';
 
 // Main Site Component
 const MainSite = () => {
@@ -38,18 +39,20 @@ const MainSite = () => {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainSite />} />
-        <Route path="/car/:id" element={<CarDetails />} />
-        <Route path="/warranty-financing" element={<WarrantyFinancing />} />
-        <Route path="/terms-conditions" element={<TermsAndConditions />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        {/* Catch all route - redirect to home */}
-        <Route path="*" element={<MainSite />} />
-      </Routes>
-    </Router>
+    <PasswordGate>
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainSite />} />
+          <Route path="/car/:id" element={<CarDetails />} />
+          <Route path="/warranty-financing" element={<WarrantyFinancing />} />
+          <Route path="/terms-conditions" element={<TermsAndConditions />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* Catch all route - redirect to home */}
+          <Route path="*" element={<MainSite />} />
+        </Routes>
+      </Router>
+    </PasswordGate>
   );
 }
 
