@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
@@ -20,6 +20,12 @@ const AdminDashboard = () => {
   const [showAddReviewModal, setShowAddReviewModal] = useState(false);
   const [showEditReviewModal, setShowEditReviewModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  
+  // AutoTrader sync state
+  const [syncStatus, setSyncStatus] = useState<any>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncLogs, setSyncLogs] = useState<any[]>([]);
+  const [showSyncLogs, setShowSyncLogs] = useState(false);
   
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -63,6 +69,8 @@ const AdminDashboard = () => {
       console.log('AdminDashboard - user authenticated, fetching data');
       fetchCars();
       fetchReviews();
+      fetchSyncStatus();
+      fetchSyncLogs();
     }
   }, [user, authLoading, navigate]);
 
@@ -93,6 +101,83 @@ const AdminDashboard = () => {
       setReviews(data || []);
     } catch (error) {
       console.error('Error fetching reviews:', error);
+    }
+  };
+
+  const fetchSyncStatus = async () => {
+    try {
+      // Fetch latest sync log
+      const { data: latestSync, error: syncError } = await supabase
+        .from('autotrader_sync_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (syncError && syncError.code !== 'PGRST116') { // Ignore "no rows" error
+        console.error('Error fetching sync status:', syncError);
+      }
+      
+      setSyncStatus(latestSync);
+    } catch (error) {
+      console.error('Error fetching sync status:', error);
+    }
+  };
+
+  const fetchSyncLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('autotrader_sync_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setSyncLogs(data || []);
+    } catch (error) {
+      console.error('Error fetching sync logs:', error);
+    }
+  };
+
+  const handleManualSync = async () => {
+    if (isSyncing) return;
+    
+    setIsSyncing(true);
+    try {
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        alert('Not authenticated. Please sign in again.');
+        return;
+      }
+
+      // Call trigger-sync function
+      const response = await fetch('/.netlify/functions/trigger-sync', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        alert(`Sync completed!\nAdded: ${result.result.carsAdded}\nUpdated: ${result.result.carsUpdated}\nMarked Unavailable: ${result.result.carsMarkedUnavailable}`);
+        
+        // Refresh data
+        await fetchCars();
+        await fetchSyncStatus();
+        await fetchSyncLogs();
+      } else {
+        alert(`Sync failed: ${result.message || result.error}`);
+      }
+    } catch (error) {
+      console.error('Manual sync error:', error);
+      alert('Failed to trigger sync. Check console for details.');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -239,6 +324,165 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* AutoTrader Sync Status Panel */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            {/* Left: Sync Info */}
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-3">
+                <RefreshCw className={`w-6 h-6 ${isSyncing ? 'animate-spin text-blue-600' : 'text-blue-600'}`} />
+                <h2 className="text-xl font-bold text-gray-900">AutoTrader Sync Status</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Last Sync Time */}
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Last Sync</p>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <p className="text-sm font-medium text-gray-900">
+                      {syncStatus?.created_at 
+                        ? new Date(syncStatus.created_at).toLocaleString()
+                        : 'Never'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Sync Status */}
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Status</p>
+                  <div className="flex items-center space-x-2">
+                    {syncStatus?.status === 'success' ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-700">Success</span>
+                      </>
+                    ) : syncStatus?.status === 'failed' ? (
+                      <>
+                        <XCircle className="w-4 h-4 text-red-600" />
+                        <span className="text-sm font-medium text-red-700">Failed</span>
+                      </>
+                    ) : syncStatus?.status === 'partial' ? (
+                      <>
+                        <TrendingUp className="w-4 h-4 text-yellow-600" />
+                        <span className="text-sm font-medium text-yellow-700">Partial</span>
+                      </>
+                    ) : (
+                      <span className="text-sm text-gray-500">No sync yet</span>
+                    )}
+                  </div>
+                </div>
+                
+                {/* AutoTrader vs Manual Cars */}
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">From AutoTrader</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {cars.filter(car => car.synced_from_autotrader).length} / {cars.length} cars
+                  </p>
+                </div>
+                
+                {/* Last Sync Stats */}
+                {syncStatus && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Last Sync Results</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      +{syncStatus.cars_added} | ~{syncStatus.cars_updated} | -{syncStatus.cars_marked_unavailable}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Right: Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleManualSync}
+                disabled={isSyncing}
+                className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  isSyncing
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                }`}
+              >
+                <RefreshCw className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>{isSyncing ? 'Syncing...' : 'Sync Now'}</span>
+              </button>
+              
+              <button
+                onClick={() => setShowSyncLogs(!showSyncLogs)}
+                className="px-6 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+              >
+                {showSyncLogs ? 'Hide' : 'View'} Logs
+              </button>
+            </div>
+          </div>
+          
+          {/* Sync Logs */}
+          {showSyncLogs && (
+            <div className="mt-6 pt-6 border-t border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Sync Logs (Last 20)</h3>
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Added</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Removed</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {syncLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                            No sync logs yet
+                          </td>
+                        </tr>
+                      ) : (
+                        syncLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {new Date(log.created_at).toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                log.sync_type === 'full_sync' ? 'bg-blue-100 text-blue-800' :
+                                log.sync_type === 'webhook' ? 'bg-purple-100 text-purple-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {log.sync_type}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                log.status === 'success' ? 'bg-green-100 text-green-800' :
+                                log.status === 'failed' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {log.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{log.cars_added}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{log.cars_updated}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{log.cars_marked_unavailable}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {log.sync_duration_ms ? `${(log.sync_duration_ms / 1000).toFixed(2)}s` : '-'}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">

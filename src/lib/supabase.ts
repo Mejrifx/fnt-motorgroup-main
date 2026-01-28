@@ -33,6 +33,13 @@ export interface Car {
   is_available: boolean
   created_at: string
   updated_at: string
+  // AutoTrader sync fields
+  autotrader_id?: string | null
+  autotrader_advertiser_id?: string | null
+  synced_from_autotrader?: boolean
+  sync_override?: boolean
+  last_synced_at?: string | null
+  autotrader_data?: any
 }
 
 export interface Review {
