@@ -10,3 +10,5 @@ INSERT INTO cars (
 
 -- Success message
 SELECT 'Test Dacia entry added successfully!' as message;
+
+

@@ -27,3 +27,5 @@ INSERT INTO cars (
 
 -- Success message
 SELECT 'Category tests completed!' as message;
+
+
