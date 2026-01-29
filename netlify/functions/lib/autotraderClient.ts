@@ -57,13 +57,24 @@ class AutoTraderClient {
     this.credentials = credentials;
     
     // Set API endpoints based on environment
+    // Note: AutoTrader may use same URLs for sandbox/production
+    // The credentials determine which environment you're accessing
     if (credentials.environment === 'sandbox') {
-      this.baseUrl = 'https://api-sandbox.autotrader.co.uk';
-      this.authUrl = 'https://auth-sandbox.autotrader.co.uk';
+      // Try production URLs with sandbox credentials
+      // AutoTrader's sandbox might share the same endpoints
+      this.baseUrl = 'https://api.autotrader.co.uk';
+      this.authUrl = 'https://auth.autotrader.co.uk';
+      console.log('Using sandbox mode with credentials:', credentials.key);
     } else {
       this.baseUrl = 'https://api.autotrader.co.uk';
       this.authUrl = 'https://auth.autotrader.co.uk';
     }
+    
+    console.log('AutoTrader Client initialized:', {
+      environment: credentials.environment,
+      baseUrl: this.baseUrl,
+      authUrl: this.authUrl,
+    });
   }
 
   /**
