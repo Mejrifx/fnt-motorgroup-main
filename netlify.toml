@@ -1,0 +1,59 @@
+# Netlify Configuration for FNT Motor Group
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Build environment variables
+[build.environment]
+  NODE_VERSION = "18"
+
+# Redirects for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = []}
+
+# Scheduled Function: AutoTrader Stock Sync
+# Runs every 30 minutes to sync inventory from AutoTrader
+# Requires Netlify Pro plan or higher
+[functions."sync-stock"]
+  schedule = "*/30 * * * *"  # Every 30 minutes
+
+# Function settings
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@supabase/supabase-js"]
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Headers for Netlify Functions
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization, X-Autotrader-Signature"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+# Environment-specific settings
+[context.production]
+  [context.production.environment]
+    AUTOTRADER_ENVIRONMENT = "production"
+
+[context.deploy-preview]
+  [context.deploy-preview.environment]
+    AUTOTRADER_ENVIRONMENT = "sandbox"
+
+[context.branch-deploy]
+  [context.branch-deploy.environment]
+    AUTOTRADER_ENVIRONMENT = "sandbox"
