@@ -89,16 +89,18 @@ class AutoTraderClient {
       console.log('Authenticating with AutoTrader...');
       console.log('Auth URL:', this.authUrl);
       
-      // Prepare OAuth 2.0 client credentials request
-      const authString = Buffer.from(`${this.credentials.key}:${this.credentials.secret}`).toString('base64');
+      // AutoTrader expects key and secret as form parameters, not Basic Auth
+      // Reference: Error message from API - "Expected x-www-form-urlencoded POST to /authenticate with key and secret"
+      const formBody = `key=${encodeURIComponent(this.credentials.key)}&secret=${encodeURIComponent(this.credentials.secret)}`;
+      
+      console.log('Sending authentication request with key:', this.credentials.key);
       
       const response = await fetch(this.authUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${authString}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'grant_type=client_credentials',
+        body: formBody,
       });
 
       console.log('Authentication response status:', response.status);
@@ -110,6 +112,7 @@ class AutoTraderClient {
       }
 
       const data = await response.json();
+      console.log('Authentication response received:', { hasAccessToken: !!data.access_token, expiresIn: data.expires_in });
       
       // Cache token with expiration time
       this.token = {
