@@ -165,7 +165,11 @@ class AutoTraderClient {
         options.body = JSON.stringify(body);
       }
 
-      const response = await fetch(`${this.baseUrl}${endpoint}`, options);
+      const fullUrl = `${this.baseUrl}${endpoint}`;
+      console.log(`Making ${method} request to: ${fullUrl}`);
+      
+      const response = await fetch(fullUrl, options);
+      console.log(`Response status: ${response.status} ${response.statusText}`);
 
       // Handle rate limiting (429 Too Many Requests)
       if (response.status === 429) {
@@ -190,9 +194,14 @@ class AutoTraderClient {
         throw new Error('Unauthorized. Authentication failed after retries.');
       }
 
-      // Handle other errors
+      // Handle other errors with detailed logging
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(`API request failed for ${fullUrl}:`, {
+          status: response.status,
+          statusText: response.statusText,
+          errorBody: errorText
+        });
         throw new Error(`API request failed: ${response.status} - ${errorText}`);
       }
 
@@ -213,16 +222,42 @@ class AutoTraderClient {
 
   /**
    * Get all vehicles for the advertiser
+   * Reference: https://developers.autotrader.co.uk/api
    */
   async getAdvertiserStock(advertiserId?: string): Promise<StockResponse> {
     const id = advertiserId || this.credentials.advertiserId;
     
     try {
       console.log(`Fetching stock for advertiser ${id}...`);
-      const response = await this.makeRequest(`/stock/advertiser/${id}/vehicles`);
       
-      console.log(`Successfully fetched ${response.vehicles?.length || 0} vehicles`);
-      return response;
+      // Try the /stock endpoint - AutoTrader's sandbox might use this
+      // The advertiser ID might be determined by authentication credentials
+      const endpoint = `/stock`;
+      console.log(`Calling stock endpoint: ${this.baseUrl}${endpoint}`);
+      
+      const response = await this.makeRequest(endpoint);
+      
+      console.log(`Stock API response:`, {
+        hasVehicles: !!response.vehicles,
+        vehicleCount: response.vehicles?.length || 0,
+        totalCount: response.totalCount,
+        responseKeys: Object.keys(response || {})
+      });
+      
+      // Handle different response structures
+      if (response.vehicles && Array.isArray(response.vehicles)) {
+        console.log(`Successfully fetched ${response.vehicles.length} vehicles`);
+        return response;
+      }
+      
+      // If response structure is different, try to adapt it
+      if (Array.isArray(response)) {
+        console.log(`Response is array of ${response.length} vehicles`);
+        return { vehicles: response, totalCount: response.length };
+      }
+      
+      console.warn('Unexpected response structure from stock API:', response);
+      return { vehicles: [], totalCount: 0 };
     } catch (error) {
       console.error(`Failed to fetch advertiser stock:`, error);
       throw new Error(`Failed to get advertiser stock: ${error.message}`);
