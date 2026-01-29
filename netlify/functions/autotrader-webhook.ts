@@ -7,6 +7,7 @@
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { createAutoTraderClient } from './lib/autotraderClient';
 import { mapAutoTraderToDatabase, validateMappedCar } from './lib/dataMapper';
 
@@ -31,13 +32,58 @@ interface WebhookEvent {
 }
 
 /**
- * Verify webhook signature (for security)
- * AutoTrader signs webhooks with HMAC-SHA256
+ * Verify webhook signature using HMAC-SHA256 (for security)
+ * AutoTrader signs webhooks with a shared secret key
+ * Reference: https://developers.autotrader.co.uk/webhooks
  */
-function verifyWebhookSignature(payload: string, signature: string): boolean {
-  // TODO: Implement signature verification when AutoTrader provides webhook secret
-  // For now, basic validation
-  return !!signature && signature.length > 0;
+function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  try {
+    // If no signature or secret provided, reject
+    if (!signature || !secret) {
+      console.error('❌ Webhook signature or secret is missing');
+      return false;
+    }
+    
+    // Remove "sha256=" prefix if present (some APIs include this)
+    const cleanSignature = signature.replace(/^sha256=/, '');
+    
+    // Compute expected signature using HMAC-SHA256
+    const hmac = createHmac('sha256', secret);
+    hmac.update(payload, 'utf8');
+    const expectedSignature = hmac.digest('hex');
+    
+    // Verify signature lengths match
+    if (cleanSignature.length !== expectedSignature.length) {
+      console.error('❌ Webhook signature length mismatch');
+      console.error('Expected length:', expectedSignature.length);
+      console.error('Received length:', cleanSignature.length);
+      return false;
+    }
+    
+    // Constant-time comparison to prevent timing attacks
+    const signatureBuffer = Buffer.from(cleanSignature, 'hex');
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    
+    if (signatureBuffer.length !== expectedBuffer.length) {
+      console.error('❌ Webhook signature buffer length mismatch');
+      return false;
+    }
+    
+    const isValid = timingSafeEqual(signatureBuffer, expectedBuffer);
+    
+    if (!isValid) {
+      console.error('❌ Webhook signature verification FAILED');
+      console.error('Expected signature:', expectedSignature.substring(0, 20) + '...');
+      console.error('Received signature:', cleanSignature.substring(0, 20) + '...');
+    } else {
+      console.log('✅ Webhook signature verified successfully');
+    }
+    
+    return isValid;
+  } catch (error) {
+    console.error('❌ Error verifying webhook signature:', error);
+    return false;
+  }
 }
 
 /**
@@ -251,15 +297,37 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     
     const webhookEvent: WebhookEvent = JSON.parse(event.body);
     
-    // Verify webhook signature (if provided)
+    // Get webhook signature and secret
     const signature = event.headers['x-autotrader-signature'] || event.headers['X-Autotrader-Signature'];
-    if (signature && !verifyWebhookSignature(event.body, signature)) {
-      console.warn('Invalid webhook signature');
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Invalid signature' }),
-      };
+    const webhookSecret = process.env.AUTOTRADER_WEBHOOK_SECRET;
+    
+    // If webhook secret is configured, enforce signature verification
+    if (webhookSecret) {
+      // Reject if signature is missing
+      if (!signature) {
+        console.error('❌ Webhook signature header missing (AUTOTRADER_WEBHOOK_SECRET is set)');
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Missing webhook signature' }),
+        };
+      }
+      
+      // Verify signature
+      if (!verifyWebhookSignature(event.body, signature, webhookSecret)) {
+        console.error('❌ Webhook signature verification FAILED - potential security threat!');
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Invalid webhook signature' }),
+        };
+      }
+      
+      console.log('✅ Webhook signature verified - request is authentic');
+    } else {
+      // Webhook secret not configured - log warning but allow (sandbox mode)
+      console.warn('⚠️ WARNING: AUTOTRADER_WEBHOOK_SECRET not set - webhooks are NOT verified!');
+      console.warn('⚠️ This is acceptable for sandbox testing but MUST be configured for production!');
     }
     
     // Log webhook receipt

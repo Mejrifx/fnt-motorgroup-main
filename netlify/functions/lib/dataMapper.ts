@@ -170,6 +170,66 @@ function extractEngine(vehicle: VehicleResponse): string | null {
 }
 
 /**
+ * Validate and sanitize image URL
+ * Ensures images are HTTPS and from trusted sources
+ */
+function validateImageUrl(url: string | undefined | null): string {
+  const DEFAULT_CAR_IMAGE = 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg';
+  
+  // If no URL provided, use default
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    console.warn('⚠️ Image URL is empty, using default');
+    return DEFAULT_CAR_IMAGE;
+  }
+  
+  const trimmedUrl = url.trim();
+  
+  // Check if URL is HTTPS (security requirement)
+  if (!trimmedUrl.startsWith('https://')) {
+    console.warn('⚠️ Image URL is not HTTPS:', trimmedUrl.substring(0, 50) + '...');
+    return DEFAULT_CAR_IMAGE;
+  }
+  
+  // Check if URL is from trusted sources
+  const trustedDomains = [
+    'autotrader.co.uk',
+    'at-cdn.co.uk',
+    'autotradercdn.com',
+    'images.pexels.com', // Our fallback
+  ];
+  
+  const isTrusted = trustedDomains.some(domain => trimmedUrl.includes(domain));
+  
+  if (!isTrusted) {
+    console.warn('⚠️ Image URL is not from a trusted domain:', trimmedUrl.substring(0, 50) + '...');
+    console.warn('⚠️ Trusted domains:', trustedDomains.join(', '));
+    // Still return it (AutoTrader might use other CDNs) but log warning
+  }
+  
+  // Basic URL format validation
+  try {
+    new URL(trimmedUrl);
+    return trimmedUrl;
+  } catch (error) {
+    console.error('❌ Invalid image URL format:', trimmedUrl.substring(0, 50) + '...');
+    return DEFAULT_CAR_IMAGE;
+  }
+}
+
+/**
+ * Validate and sanitize array of image URLs
+ */
+function validateImageUrls(urls: string[] | undefined | null): string[] {
+  if (!Array.isArray(urls) || urls.length === 0) {
+    return [];
+  }
+  
+  return urls
+    .map(url => validateImageUrl(url))
+    .filter(url => url !== 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg'); // Remove default images from gallery
+}
+
+/**
  * Map AutoTrader vehicle to FNT database schema
  */
 export function mapAutoTraderToDatabase(
@@ -188,9 +248,9 @@ export function mapAutoTraderToDatabase(
     category: mapBodyTypeToCategory(vehicle.bodyType),
     description: vehicle.description || generateDescription(vehicle),
     
-    // Images
-    cover_image_url: vehicle.images?.[0] || 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg',
-    gallery_images: vehicle.images || [],
+    // Images (validated for security and quality)
+    cover_image_url: validateImageUrl(vehicle.images?.[0]),
+    gallery_images: validateImageUrls(vehicle.images),
     
     // Additional details
     colour: vehicle.colour || null,

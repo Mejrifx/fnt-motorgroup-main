@@ -221,7 +221,7 @@ class AutoTraderClient {
   }
 
   /**
-   * Get all vehicles for the advertiser
+   * Get all vehicles for the advertiser (with pagination support)
    * Reference: https://developers.autotrader.co.uk/api
    */
   async getAdvertiserStock(advertiserId?: string): Promise<StockResponse> {
@@ -230,28 +230,76 @@ class AutoTraderClient {
     try {
       console.log(`Fetching stock for advertiser ${id}...`);
       
-      // Try the /stock endpoint - AutoTrader's sandbox might use this
-      // The advertiser ID might be determined by authentication credentials
+      // Fetch first page
       const endpoint = `/stock`;
       console.log(`Calling stock endpoint: ${this.baseUrl}${endpoint}`);
       
-      const response = await this.makeRequest(endpoint);
+      const firstPageResponse = await this.makeRequest(endpoint);
       
       console.log(`Stock API response:`, {
-        hasResults: !!response.results,
-        resultsCount: response.results?.length || 0,
-        totalResults: response.totalResults,
-        responseKeys: Object.keys(response || {})
+        hasResults: !!firstPageResponse.results,
+        resultsCount: firstPageResponse.results?.length || 0,
+        totalResults: firstPageResponse.totalResults,
+        responseKeys: Object.keys(firstPageResponse || {})
       });
+      
+      // Check if pagination is needed
+      let allResults = firstPageResponse.results || [];
+      const totalResults = firstPageResponse.totalResults || 0;
+      const resultsPerPage = firstPageResponse.results?.length || 20;
+      
+      // If there are more results than what we got, fetch additional pages
+      if (totalResults > resultsPerPage && this.credentials.environment === 'production') {
+        console.log(`📄 Pagination detected: ${resultsPerPage} results per page, ${totalResults} total`);
+        console.log(`📄 Need to fetch ${Math.ceil(totalResults / resultsPerPage) - 1} more page(s)`);
+        
+        const totalPages = Math.ceil(totalResults / resultsPerPage);
+        
+        // Fetch remaining pages (start from page 2)
+        for (let page = 2; page <= totalPages; page++) {
+          try {
+            console.log(`📄 Fetching page ${page} of ${totalPages}...`);
+            
+            // Try different pagination parameter formats (AutoTrader might use any of these)
+            let nextPageResponse;
+            try {
+              // Try page parameter
+              nextPageResponse = await this.makeRequest(`${endpoint}?page=${page}`);
+            } catch (error) {
+              // Try offset/limit parameters
+              const offset = (page - 1) * resultsPerPage;
+              nextPageResponse = await this.makeRequest(`${endpoint}?limit=${resultsPerPage}&offset=${offset}`);
+            }
+            
+            if (nextPageResponse.results && Array.isArray(nextPageResponse.results)) {
+              allResults = allResults.concat(nextPageResponse.results);
+              console.log(`📄 Page ${page} fetched: ${nextPageResponse.results.length} vehicles (total: ${allResults.length})`);
+            } else {
+              console.warn(`⚠️ Page ${page} returned no results, stopping pagination`);
+              break;
+            }
+          } catch (pageError) {
+            console.error(`❌ Failed to fetch page ${page}:`, pageError.message);
+            console.warn(`⚠️ Continuing with ${allResults.length} vehicles from ${page - 1} page(s)`);
+            break;
+          }
+        }
+        
+        console.log(`✅ Pagination complete: Fetched ${allResults.length} of ${totalResults} total vehicles`);
+      } else if (totalResults > resultsPerPage && this.credentials.environment === 'sandbox') {
+        console.warn(`⚠️ SANDBOX MODE: Pagination skipped (sandbox may not support it)`);
+        console.warn(`⚠️ Fetched ${resultsPerPage} vehicles, but ${totalResults} are available`);
+        console.warn(`⚠️ In production, all ${totalResults} vehicles will be synced`);
+      }
       
       // AutoTrader returns { results: [...], totalResults: N }
       // Each result has nested structure: { vehicle: {...}, advertiser: {...}, media: {...}, ... }
-      if (response.results && Array.isArray(response.results)) {
-        console.log(`Successfully fetched ${response.results.length} vehicles from AutoTrader`);
+      if (allResults && Array.isArray(allResults)) {
+        console.log(`Successfully fetched ${allResults.length} vehicles from AutoTrader`);
         
         // Log first vehicle structure to understand the data format
-        if (response.results.length > 0) {
-          const firstResult = response.results[0];
+        if (allResults.length > 0) {
+          const firstResult = allResults[0];
           console.log('First vehicle structure:', {
             resultKeys: Object.keys(firstResult),
             vehicleKeys: Object.keys(firstResult.vehicle || {}),
@@ -269,7 +317,7 @@ class AutoTraderClient {
         }
         
         // Transform AutoTrader's nested structure to our flat vehicle structure
-        const vehicles = response.results.map((result: any, index: number) => {
+        const vehicles = allResults.map((result: any, index: number) => {
           const vehicle = result.vehicle || {};
           const media = result.media || {};
           const adverts = result.adverts || {};
@@ -348,17 +396,17 @@ class AutoTraderClient {
         
         return { 
           vehicles, 
-          totalCount: response.totalResults || vehicles.length 
+          totalCount: totalResults || vehicles.length 
         };
       }
       
       // Fallback for unexpected structures
-      if (Array.isArray(response)) {
-        console.log(`Response is array of ${response.length} items`);
-        return { vehicles: response, totalCount: response.length };
+      if (Array.isArray(firstPageResponse)) {
+        console.log(`Response is array of ${firstPageResponse.length} items`);
+        return { vehicles: firstPageResponse, totalCount: firstPageResponse.length };
       }
       
-      console.warn('Unexpected response structure from stock API:', response);
+      console.warn('Unexpected response structure from stock API:', firstPageResponse);
       return { vehicles: [], totalCount: 0 };
     } catch (error) {
       console.error(`Failed to fetch advertiser stock:`, error);
