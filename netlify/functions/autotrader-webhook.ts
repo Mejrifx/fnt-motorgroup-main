@@ -7,7 +7,7 @@
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
-import { createHmac, timingSafeEqual } from 'crypto';
+import crypto from 'crypto';
 import { createAutoTraderClient } from './lib/autotraderClient';
 import { mapAutoTraderToDatabase, validateMappedCar } from './lib/dataMapper';
 
@@ -48,7 +48,7 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
     const cleanSignature = signature.replace(/^sha256=/, '');
     
     // Compute expected signature using HMAC-SHA256
-    const hmac = createHmac('sha256', secret);
+    const hmac = crypto.createHmac('sha256', secret);
     hmac.update(payload, 'utf8');
     const expectedSignature = hmac.digest('hex');
     
@@ -69,7 +69,7 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
       return false;
     }
     
-    const isValid = timingSafeEqual(signatureBuffer, expectedBuffer);
+    const isValid = crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
     
     if (!isValid) {
       console.error('❌ Webhook signature verification FAILED');
