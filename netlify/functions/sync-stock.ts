@@ -44,7 +44,29 @@ async function syncStock(): Promise<SyncResult> {
   try {
     console.log('===== AutoTrader Stock Sync Started =====');
     
+    // Step 0: Verify environment variables
+    console.log('Checking environment variables...');
+    const requiredEnvVars = {
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL,
+      VITE_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY ? '[SET]' : '[MISSING]',
+      AUTOTRADER_API_KEY: process.env.AUTOTRADER_API_KEY ? '[SET]' : '[MISSING]',
+      AUTOTRADER_API_SECRET: process.env.AUTOTRADER_API_SECRET ? '[SET]' : '[MISSING]',
+      AUTOTRADER_ADVERTISER_ID: process.env.AUTOTRADER_ADVERTISER_ID,
+      AUTOTRADER_ENVIRONMENT: process.env.AUTOTRADER_ENVIRONMENT,
+    };
+    console.log('Environment variables status:', requiredEnvVars);
+    
+    // Check for missing variables
+    const missing = Object.entries(requiredEnvVars)
+      .filter(([key, value]) => !value || value === '[MISSING]')
+      .map(([key]) => key);
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+    
     // Step 1: Initialize AutoTrader client
+    console.log('Initializing AutoTrader client...');
     const autotraderClient = createAutoTraderClient();
     const advertiserId = process.env.AUTOTRADER_ADVERTISER_ID || '';
     
@@ -202,14 +224,22 @@ async function syncStock(): Promise<SyncResult> {
     
     return result;
   } catch (error) {
-    console.error('Fatal sync error:', error);
+    console.error('===== Fatal Sync Error =====');
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
     result.duration = Date.now() - startTime;
     result.success = false;
-    result.errors.push(error.message);
-    result.message = `Sync failed: ${error.message}`;
+    result.errors.push(error.message || 'Unknown error');
+    result.message = `Sync failed: ${error.message || 'Unknown error'}`;
     
-    // Log failed sync
-    await logSyncResult(result);
+    // Log failed sync (try-catch to prevent double errors)
+    try {
+      await logSyncResult(result);
+    } catch (logError) {
+      console.error('Failed to log sync result:', logError);
+    }
     
     return result;
   }
@@ -266,8 +296,18 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   }
   
   try {
+    console.log('Sync handler started');
+    console.log('Request method:', event.httpMethod);
+    
     // Run sync
     const result = await syncStock();
+    
+    console.log('Sync completed with result:', {
+      success: result.success,
+      carsAdded: result.carsAdded,
+      carsUpdated: result.carsUpdated,
+      errors: result.errors.length,
+    });
     
     return {
       statusCode: result.success ? 200 : 207, // 207 = Multi-Status (partial success)
@@ -275,15 +315,19 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       body: JSON.stringify(result),
     };
   } catch (error) {
-    console.error('Handler error:', error);
+    console.error('===== Handler Error =====');
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: error.message,
+        error: error.message || 'Unknown error',
         message: 'Internal server error during sync',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       }),
     };
   }
