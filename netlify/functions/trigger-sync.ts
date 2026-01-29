@@ -118,12 +118,23 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       };
     }
     
-    // Get site URL from headers or environment
-    const siteUrl = event.headers['x-forwarded-host'] 
-      ? `https://${event.headers['x-forwarded-host']}`
-      : event.headers['referer']?.replace(/\/$/, '') || process.env.URL || 'http://localhost:8888';
+    // Get site URL from headers or environment (extract base URL only)
+    let siteUrl = process.env.URL || 'http://localhost:8888';
+    
+    if (event.headers['x-forwarded-host']) {
+      siteUrl = `https://${event.headers['x-forwarded-host']}`;
+    } else if (event.headers['referer']) {
+      try {
+        // Extract base URL from referer (remove path like /admin/dashboard)
+        const refererUrl = new URL(event.headers['referer']);
+        siteUrl = `${refererUrl.protocol}//${refererUrl.host}`;
+      } catch (e) {
+        console.warn('Failed to parse referer URL, using fallback');
+      }
+    }
     
     console.log('Manual sync triggered by admin');
+    console.log('Using site URL:', siteUrl);
     
     // Trigger the sync function
     const syncResult = await triggerSyncFunction(siteUrl);
