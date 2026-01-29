@@ -238,21 +238,65 @@ class AutoTraderClient {
       const response = await this.makeRequest(endpoint);
       
       console.log(`Stock API response:`, {
-        hasVehicles: !!response.vehicles,
-        vehicleCount: response.vehicles?.length || 0,
-        totalCount: response.totalCount,
+        hasResults: !!response.results,
+        resultsCount: response.results?.length || 0,
+        totalResults: response.totalResults,
         responseKeys: Object.keys(response || {})
       });
       
-      // Handle different response structures
-      if (response.vehicles && Array.isArray(response.vehicles)) {
-        console.log(`Successfully fetched ${response.vehicles.length} vehicles`);
-        return response;
+      // AutoTrader returns { results: [...], totalResults: N }
+      // Each result has nested structure: { vehicle: {...}, advertiser: {...}, media: {...}, ... }
+      if (response.results && Array.isArray(response.results)) {
+        console.log(`Successfully fetched ${response.results.length} vehicles from AutoTrader`);
+        
+        // Transform AutoTrader's nested structure to our flat vehicle structure
+        const vehicles = response.results.map((result: any) => {
+          const vehicle = result.vehicle || {};
+          const media = result.media || {};
+          const adverts = result.adverts || {};
+          const pricing = adverts.forecourtPrice || {};
+          
+          return {
+            // Core vehicle data
+            vehicleId: vehicle.vrm || vehicle.vehicleId || '',
+            advertiserId: id,
+            make: vehicle.make || 'Unknown',
+            model: vehicle.model || 'Unknown',
+            variant: vehicle.derivative || '',
+            year: vehicle.year || new Date().getFullYear(),
+            
+            // Pricing
+            price: pricing.amountGBP || 0,
+            
+            // Technical specs
+            mileage: vehicle.mileage?.mileage || 0,
+            fuelType: vehicle.fuelType || 'Unknown',
+            transmission: vehicle.transmission || 'Unknown',
+            bodyType: vehicle.bodyType || '',
+            colour: vehicle.colour || 'Unknown',
+            doors: vehicle.numberOfDoors || null,
+            engine: vehicle.engine ? `${vehicle.engine.sizeLitres}L` : 'Unknown',
+            
+            // Description
+            description: adverts.description || `${vehicle.make} ${vehicle.model} available`,
+            
+            // Images - AutoTrader provides images in media object
+            images: media.images?.map((img: any) => img.href || img.url) || [],
+            
+            // Keep full AutoTrader data for reference
+            autotraderData: result,
+          };
+        });
+        
+        return { 
+          vehicles, 
+          totalCount: response.totalResults || vehicles.length 
+        };
       }
       
-      // If response structure is different, try to adapt it
+      // Fallback for unexpected structures
       if (Array.isArray(response)) {
-        console.log(`Response is array of ${response.length} vehicles`);
+        console.log(`Response is array of ${response.length} items`);
         return { vehicles: response, totalCount: response.length };
       }
       
