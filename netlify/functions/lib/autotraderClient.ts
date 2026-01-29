@@ -249,16 +249,50 @@ class AutoTraderClient {
       if (response.results && Array.isArray(response.results)) {
         console.log(`Successfully fetched ${response.results.length} vehicles from AutoTrader`);
         
+        // Log first vehicle structure to understand the data format
+        if (response.results.length > 0) {
+          const firstResult = response.results[0];
+          console.log('First vehicle structure:', {
+            resultKeys: Object.keys(firstResult),
+            vehicleKeys: Object.keys(firstResult.vehicle || {}),
+            metadataKeys: Object.keys(firstResult.metadata || {}),
+            advertsKeys: Object.keys(firstResult.adverts || {}),
+            hasStockItemId: !!firstResult.metadata?.stockItemId,
+            hasAdvertId: !!firstResult.adverts?.advertId,
+            hasVRM: !!firstResult.vehicle?.vrm,
+            sampleVRM: firstResult.vehicle?.vrm,
+            sampleStockItemId: firstResult.metadata?.stockItemId,
+            sampleAdvertId: firstResult.adverts?.advertId,
+          });
+        }
+        
         // Transform AutoTrader's nested structure to our flat vehicle structure
-        const vehicles = response.results.map((result: any) => {
+        const vehicles = response.results.map((result: any, index: number) => {
           const vehicle = result.vehicle || {};
           const media = result.media || {};
           const adverts = result.adverts || {};
+          const metadata = result.metadata || {};
           const pricing = adverts.forecourtPrice || {};
+          
+          // Try multiple possible ID fields (AutoTrader might use different fields)
+          const vehicleId = metadata.stockItemId || 
+                           adverts.advertId || 
+                           vehicle.vrm || 
+                           vehicle.vehicleId || 
+                           `AT-${id}-${index}`;
+          
+          if (index === 0) {
+            console.log('First vehicle ID extraction:', {
+              vehicleId,
+              stockItemId: metadata.stockItemId,
+              advertId: adverts.advertId,
+              vrm: vehicle.vrm,
+            });
+          }
           
           return {
             // Core vehicle data
-            vehicleId: vehicle.vrm || vehicle.vehicleId || '',
+            vehicleId,
             advertiserId: id,
             make: vehicle.make || 'Unknown',
             model: vehicle.model || 'Unknown',
