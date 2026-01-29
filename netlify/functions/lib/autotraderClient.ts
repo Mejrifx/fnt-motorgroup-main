@@ -57,18 +57,16 @@ class AutoTraderClient {
     this.credentials = credentials;
     
     // Set API endpoints based on environment
-    // Note: AutoTrader may use same URLs for sandbox/production
-    // The credentials determine which environment you're accessing
+    // Reference: https://developers.autotrader.co.uk/documentation#authentication
     if (credentials.environment === 'sandbox') {
-      // Try production URLs with sandbox credentials
-      // AutoTrader's sandbox might share the same endpoints
-      this.baseUrl = 'https://api.autotrader.co.uk';
-      this.authUrl = 'https://auth.autotrader.co.uk';
+      this.baseUrl = 'https://api-sandbox.autotrader.co.uk';
       console.log('Using sandbox mode with credentials:', credentials.key);
     } else {
       this.baseUrl = 'https://api.autotrader.co.uk';
-      this.authUrl = 'https://auth.autotrader.co.uk';
     }
+    
+    // Authentication endpoint is part of the API base URL
+    this.authUrl = `${this.baseUrl}/authenticate`;
     
     console.log('AutoTrader Client initialized:', {
       environment: credentials.environment,
@@ -79,6 +77,7 @@ class AutoTraderClient {
 
   /**
    * Authenticate with AutoTrader API using OAuth 2.0 Client Credentials flow
+   * Reference: https://developers.autotrader.co.uk/documentation#authentication
    */
   async authenticate(): Promise<string> {
     // Check if we have a valid cached token
@@ -87,10 +86,13 @@ class AutoTraderClient {
     }
 
     try {
+      console.log('Authenticating with AutoTrader...');
+      console.log('Auth URL:', this.authUrl);
+      
       // Prepare OAuth 2.0 client credentials request
       const authString = Buffer.from(`${this.credentials.key}:${this.credentials.secret}`).toString('base64');
       
-      const response = await fetch(`${this.authUrl}/oauth2/token`, {
+      const response = await fetch(this.authUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${authString}`,
@@ -99,8 +101,11 @@ class AutoTraderClient {
         body: 'grant_type=client_credentials',
       });
 
+      console.log('Authentication response status:', response.status);
+
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Authentication failed:', response.status, errorText);
         throw new Error(`Authentication failed: ${response.status} - ${errorText}`);
       }
 
@@ -114,7 +119,7 @@ class AutoTraderClient {
         expires_at: Date.now() + ((data.expires_in || 3600) * 1000),
       };
 
-      console.log('AutoTrader authentication successful');
+      console.log('AutoTrader authentication successful. Token expires in', this.token.expires_in, 'seconds');
       return this.token.access_token;
     } catch (error) {
       console.error('AutoTrader authentication error:', error);
