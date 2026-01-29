@@ -293,6 +293,25 @@ class AutoTraderClient {
             });
           }
           
+          // Extract fields using AutoTrader's actual field names
+          const mileage = vehicle.odometerReadingMiles || 0;
+          const transmission = vehicle.transmissionType || vehicle.transmission || 'Manual'; // Fallback to Manual
+          const engineSize = vehicle.badgeEngineSizeLitres || 
+                           (vehicle.engineCapacityCC ? (vehicle.engineCapacityCC / 1000).toFixed(1) : null);
+          const year = vehicle.yearOfManufacture || vehicle.year || new Date().getFullYear();
+          
+          if (index === 0) {
+            console.log('First vehicle field extraction:', {
+              mileage,
+              transmission,
+              engineSize,
+              year,
+              doors: vehicle.doors,
+              rawTransmission: vehicle.transmissionType,
+              rawMileage: vehicle.odometerReadingMiles,
+            });
+          }
+          
           return {
             // Core vehicle data
             vehicleId,
@@ -300,19 +319,19 @@ class AutoTraderClient {
             make: vehicle.make || 'Unknown',
             model: vehicle.model || 'Unknown',
             variant: vehicle.derivative || '',
-            year: vehicle.year || new Date().getFullYear(),
+            year,
             
             // Pricing
             price: pricing.amountGBP || 0,
             
             // Technical specs
-            mileage: vehicle.mileage?.mileage || 0,
-            fuelType: vehicle.fuelType || 'Unknown',
-            transmission: vehicle.transmission || 'Unknown',
+            mileage,
+            fuelType: vehicle.fuelType || 'Petrol', // Fallback to Petrol instead of Unknown
+            transmission,
             bodyType: vehicle.bodyType || '',
-            colour: vehicle.colour || 'Unknown',
-            doors: vehicle.numberOfDoors || null,
-            engine: vehicle.engine ? `${vehicle.engine.sizeLitres}L` : 'Unknown',
+            colour: vehicle.colour || 'Black', // Fallback to Black instead of Unknown
+            doors: vehicle.doors || null,
+            engine: engineSize ? `${engineSize}L` : null,
             
             // Description
             description: adverts.description || `${vehicle.make} ${vehicle.model} available`,
