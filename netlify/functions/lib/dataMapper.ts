@@ -50,20 +50,21 @@ function mapBodyTypeToCategory(bodyType?: string): string {
   const type = bodyType.toLowerCase();
   
   // Map common body types to our categories
+  // Database constraint: Saloon, Hatchback, Estate, Van, Coupe, Convertible, 4x4
   const categoryMap: Record<string, string> = {
-    'suv': 'SUV',
-    '4x4': 'SUV',
+    'suv': '4x4',           // SUV -> 4x4 (per database constraint)
+    '4x4': '4x4',
     'estate': 'Estate',
     'hatchback': 'Hatchback',
     'saloon': 'Saloon',
     'sedan': 'Saloon',
     'coupe': 'Coupe',
     'convertible': 'Convertible',
-    'mpv': 'MPV',
+    'mpv': 'Van',           // MPV -> Van (closest match)
     'van': 'Van',
-    'pickup': 'Pickup',
-    'sports': 'Sports',
-    'luxury': 'Luxury',
+    'pickup': 'Van',        // Pickup -> Van (closest match)
+    'sports': 'Coupe',      // Sports -> Coupe (closest match)
+    'luxury': 'Saloon',     // Luxury -> Saloon (default for luxury cars)
   };
   
   // Try to find match

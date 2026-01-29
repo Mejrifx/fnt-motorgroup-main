@@ -298,7 +298,9 @@ class AutoTraderClient {
           const transmission = vehicle.transmissionType || vehicle.transmission || 'Manual'; // Fallback to Manual
           const engineSize = vehicle.badgeEngineSizeLitres || 
                            (vehicle.engineCapacityCC ? (vehicle.engineCapacityCC / 1000).toFixed(1) : null);
-          const year = vehicle.yearOfManufacture || vehicle.year || new Date().getFullYear();
+          // Ensure year is an INTEGER (database constraint requires it)
+          const yearRaw = vehicle.yearOfManufacture || vehicle.year || new Date().getFullYear();
+          const year = typeof yearRaw === 'string' ? parseInt(yearRaw, 10) : yearRaw;
           
           if (index === 0) {
             console.log('First vehicle field extraction:', {
