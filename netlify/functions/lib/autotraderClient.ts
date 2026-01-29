@@ -257,12 +257,14 @@ class AutoTraderClient {
             vehicleKeys: Object.keys(firstResult.vehicle || {}),
             metadataKeys: Object.keys(firstResult.metadata || {}),
             advertsKeys: Object.keys(firstResult.adverts || {}),
-            hasStockItemId: !!firstResult.metadata?.stockItemId,
-            hasAdvertId: !!firstResult.adverts?.advertId,
-            hasVRM: !!firstResult.vehicle?.vrm,
-            sampleVRM: firstResult.vehicle?.vrm,
-            sampleStockItemId: firstResult.metadata?.stockItemId,
-            sampleAdvertId: firstResult.adverts?.advertId,
+            hasStockId: !!firstResult.metadata?.stockId,
+            hasExternalStockId: !!firstResult.metadata?.externalStockId,
+            hasRegistration: !!firstResult.vehicle?.registration,
+            hasVIN: !!firstResult.vehicle?.vin,
+            sampleStockId: firstResult.metadata?.stockId,
+            sampleExternalStockId: firstResult.metadata?.externalStockId,
+            sampleRegistration: firstResult.vehicle?.registration,
+            sampleVIN: firstResult.vehicle?.vin,
           });
         }
         
@@ -274,19 +276,20 @@ class AutoTraderClient {
           const metadata = result.metadata || {};
           const pricing = adverts.forecourtPrice || {};
           
-          // Try multiple possible ID fields (AutoTrader might use different fields)
-          const vehicleId = metadata.stockItemId || 
-                           adverts.advertId || 
-                           vehicle.vrm || 
-                           vehicle.vehicleId || 
-                           `AT-${id}-${index}`;
+          // Try multiple possible ID fields (AutoTrader uses stockId)
+          const vehicleId = metadata.stockId ||           // ← Primary ID from logs!
+                           metadata.externalStockId ||    // ← Alternative
+                           vehicle.registration ||        // ← Registration number
+                           vehicle.vin ||                 // ← VIN number
+                           `AT-${id}-${index}`;           // ← Fallback
           
           if (index === 0) {
             console.log('First vehicle ID extraction:', {
               vehicleId,
-              stockItemId: metadata.stockItemId,
-              advertId: adverts.advertId,
-              vrm: vehicle.vrm,
+              stockId: metadata.stockId,
+              externalStockId: metadata.externalStockId,
+              registration: vehicle.registration,
+              vin: vehicle.vin,
             });
           }
           

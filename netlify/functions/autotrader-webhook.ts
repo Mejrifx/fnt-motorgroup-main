@@ -10,10 +10,16 @@ import { createClient } from '@supabase/supabase-js';
 import { createAutoTraderClient } from './lib/autotraderClient';
 import { mapAutoTraderToDatabase, validateMappedCar } from './lib/dataMapper';
 
-// Initialize Supabase client
+// Initialize Supabase client with SERVICE ROLE key (bypasses RLS for backend operations)
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL || '',
-  process.env.VITE_SUPABASE_ANON_KEY || ''
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 interface WebhookEvent {
