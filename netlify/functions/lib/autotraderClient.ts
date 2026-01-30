@@ -457,7 +457,8 @@ class AutoTraderClient {
               // Transform based on EXACT patterns seen in raw data
               if (mainDesc && !mainDesc.includes('\n')) {
                 // Protect compound words that should stay together
-                const protectedTerms = ['CarPlay', 'AppleCarPlay', 'AndroidAuto', 'Android Auto', 'iPhone', 'iPad', 'xDrive'];
+                // NOTE: Removed "Android Auto" to avoid blocking "AutoPlease" splits
+                const protectedTerms = ['CarPlay', 'AppleCarPlay', 'iPhone', 'iPad', 'xDrive'];
                 const placeholders: { [key: string]: string } = {};
                 protectedTerms.forEach((term, index) => {
                   const placeholder = `__PROTECTED_${index}__`;
@@ -473,16 +474,16 @@ class AutoTraderClient {
                 // "MilesFull" → "Miles\n\nFull", "MilesOptions" → "Miles\n\nOptions"
                 mainDesc = mainDesc.replace(/Miles([A-Z])/g, 'Miles\n\n$1');
                 
-                // STEP 3: Fix "Options: " - ensure space after colon if not present
-                mainDesc = mainDesc.replace(/Options:([^ \n])/gi, 'Options: $1');
+                // STEP 3: Split BEFORE section headers when concatenated with previous word
+                // "OutOptions:" → "Out\n\nOptions:", "AutoPlease" → "Auto\n\nPlease"
+                mainDesc = mainDesc.replace(/([a-z])(Options:|Features:|Extras:|Please|Note|Contact)/gi, '$1\n\n$2');
                 
-                // STEP 4: Split bullet points - dash followed by uppercase/digit is NEW bullet
+                // STEP 4: Fix "Options: " - ensure space after colon if not present
+                mainDesc = mainDesc.replace(/Options:([^ \n-])/gi, 'Options: $1');
+                
+                // STEP 5: Split bullet points - dash followed by uppercase/digit is NEW bullet
                 // "Cameras-Bang" → "Cameras\n-Bang"
                 mainDesc = mainDesc.replace(/([a-zA-Z0-9 ])(-[A-Z0-9])/g, '$1\n$2');
-                
-                // STEP 5: Fix concatenated word before "Please" (start of disclaimer section)
-                // "AutoPlease" → "Auto\n\nPlease"
-                mainDesc = mainDesc.replace(/([a-z])(Please)/g, '$1\n\n$2');
                 
                 // STEP 6: Clean up multiple consecutive line breaks (max 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
