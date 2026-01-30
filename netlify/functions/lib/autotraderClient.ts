@@ -360,6 +360,15 @@ class AutoTraderClient {
             sampleRegistration: firstResult.vehicle?.registration,
             sampleVIN: firstResult.vehicle?.vin,
           });
+          
+          // Log description-related fields to debug
+          console.log('📝 Description debugging:', {
+            'adverts.description': firstResult.adverts?.description,
+            'adverts.advert?.description': firstResult.adverts?.advert?.description,
+            'adverts.advertDescription': firstResult.adverts?.advertDescription,
+            'vehicle.description': firstResult.vehicle?.description,
+            'advertsObject': firstResult.adverts,
+          });
         }
         
         // Transform AutoTrader's nested structure to our flat vehicle structure
@@ -429,8 +438,13 @@ class AutoTraderClient {
             doors: vehicle.doors || null,
             engine: engineSize ? `${engineSize}L` : null,
             
-            // Description
-            description: adverts.description || `${vehicle.make} ${vehicle.model} available`,
+            // Description - check multiple possible locations in AutoTrader response
+            description: adverts.description || 
+                        adverts.advert?.description || 
+                        adverts.advertDescription ||
+                        adverts.forecourtAdvert?.description ||
+                        vehicle.description ||
+                        `${vehicle.make} ${vehicle.model} available`,
             
             // Images - AutoTrader provides images in media object
             images: media.images?.map((img: any) => img.href || img.url) || [],
