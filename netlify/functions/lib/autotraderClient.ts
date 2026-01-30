@@ -443,14 +443,38 @@ class AutoTraderClient {
             // Description - AutoTrader stores it in retailAdverts.description2!
             description: (() => {
               // Get the main description
-              const mainDesc = adverts.retailAdverts?.description2 ||
-                              adverts.retailAdverts?.description || 
-                              adverts.description || 
-                              adverts.advert?.description || 
-                              adverts.advertDescription ||
-                              adverts.forecourtAdvert?.description ||
-                              vehicle.description ||
-                              `${vehicle.make} ${vehicle.model} available`;
+              let mainDesc = adverts.retailAdverts?.description2 ||
+                            adverts.retailAdverts?.description || 
+                            adverts.description || 
+                            adverts.advert?.description || 
+                            adverts.advertDescription ||
+                            adverts.forecourtAdvert?.description ||
+                            vehicle.description ||
+                            `${vehicle.make} ${vehicle.model} available`;
+              
+              // AutoTrader sends descriptions without line breaks - add intelligent formatting
+              if (mainDesc && !mainDesc.includes('\n')) {
+                // Add line break after "Options:" followed by a dash
+                mainDesc = mainDesc.replace(/Options:\s*-/gi, 'Options:\n-');
+                
+                // Add line break before each dash (bullet point) that's not already on a new line
+                mainDesc = mainDesc.replace(/([^\n])-\s+/g, '$1\n- ');
+                
+                // Add line break after phrases that end sentences followed by uppercase letter
+                mainDesc = mainDesc.replace(/([.!])\s+([A-Z])/g, '$1\n\n$2');
+                
+                // Add line break after "Miles" if followed by uppercase letter (start of next section)
+                mainDesc = mainDesc.replace(/Miles([A-Z])/g, 'Miles\n\n$1');
+                
+                // Add line break after asterisk sections
+                mainDesc = mainDesc.replace(/\*([^*]+)\*/g, '\n\n*$1*\n\n');
+                
+                // Clean up any multiple consecutive line breaks (more than 2)
+                mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
+                
+                // Trim any leading/trailing whitespace
+                mainDesc = mainDesc.trim();
+              }
               
               // Get the attention grabber (headline/key features)
               const attentionGrabber = adverts.retailAdverts?.attentionGrabber;
