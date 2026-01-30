@@ -454,68 +454,54 @@ class AutoTraderClient {
               
               // AutoTrader sends descriptions without line breaks - add intelligent formatting
               if (mainDesc && !mainDesc.includes('\n')) {
-                // Step 1: Protect compound words and special terms that should NOT be split
-                const protectedTerms = ['xDrive', 'CarPlay', 'AppleCarPlay', 'AndroidAuto', 'iPhone', 'iPad'];
+                // Protect compound words that should NEVER be split
+                const protectedTerms = ['xDrive', 'CarPlay', 'AppleCarPlay', 'AndroidAuto', 'iPhone', 'iPad', 'Android Auto'];
                 const placeholders: { [key: string]: string } = {};
                 protectedTerms.forEach((term, index) => {
                   const placeholder = `__PROTECTED_${index}__`;
-                  const regex = new RegExp(term, 'gi');
-                  mainDesc = mainDesc.replace(regex, (match) => {
-                    placeholders[placeholder] = match;
-                    return placeholder;
-                  });
+                  mainDesc = mainDesc.replace(new RegExp(term, 'gi'), placeholder);
+                  placeholders[placeholder] = term;
                 });
                 
-                // Step 2: Add line breaks after sentences (. or !) followed by space and uppercase
-                mainDesc = mainDesc.replace(/([.!])\s+([A-Z])/g, '$1\n\n$2');
+                // CONSERVATIVE APPROACH: Only fix OBVIOUS missing spaces/line breaks
                 
-                // Step 3: Add line break after "Miles" at the start (after main title)
-                mainDesc = mainDesc.replace(/Miles\s+([A-Z])/g, 'Miles\n\n$1');
+                // 1. Fix period with NO space before next sentence: "Miles.Options" → "Miles.\n\nOptions"
+                mainDesc = mainDesc.replace(/([.!])([A-Z])/g, '$1\n\n$2');
                 
-                // Step 4: UNIVERSAL RULE - Add line break when lowercase letter is directly followed by uppercase
-                // This catches: "OutFull", "HistoryNew", "TyresAll", "ImmobiliserFull", etc.
-                mainDesc = mainDesc.replace(/([a-z])([A-Z])/g, '$1\n$2');
+                // 2. Fix section headers that are concatenated: "AutoPlease" → "Auto\n\nPlease"  
+                //    Only when it's clearly two complete words (4+ letters each, ending/starting with specific patterns)
+                mainDesc = mainDesc.replace(/([a-z]{4,})(Please|Note|Options|Features|Extras|Specification|Contact)/g, '$1\n\n$2');
                 
-                // Step 5: Add line break when lowercase/punctuation is followed by a digit starting a phrase
-                // This catches: "Pads12", "Tyres2", etc.
-                mainDesc = mainDesc.replace(/([a-z])(\d)/g, '$1\n$2');
+                // 3. Fix "Options:" or similar with NO space before it
+                mainDesc = mainDesc.replace(/([a-z])(Options:|Features:|Extras:|Specification:)/gi, '$1\n\n$2');
                 
-                // Step 6: Add line break after numbers/symbols followed by uppercase letters
-                // This catches: "2+700", "+ BHP", "NM Down", etc.
-                mainDesc = mainDesc.replace(/([0-9+])\s*([A-Z][a-z])/g, '$1\n$2');
+                // 4. Add line break AFTER "Options:" when followed immediately by a dash
+                mainDesc = mainDesc.replace(/(Options|Features|Extras|Specification):\s*-/gi, '$1: \n-');
                 
-                // Step 7: Special handling for section headers like "Options:", "Features:", "Extras:"
-                // Add double line break before these section headers if preceded by text
-                mainDesc = mainDesc.replace(/([a-zA-Z])(Options:|Features:|Extras:|Specification:)/gi, '$1\n\n$2');
+                // 5. Fix bullet points: dash with no line break before it
+                //    "-360 Cameras-Bang" → "-360 Cameras\n-Bang"
+                //    Look for: letter/digit followed by dash followed by letter/digit
+                mainDesc = mainDesc.replace(/([a-zA-Z0-9])(-[A-Z0-9])/g, '$1\n$2');
                 
-                // Step 8: Add line break after section headers followed by a dash
-                mainDesc = mainDesc.replace(/(Options|Features|Extras|Specification):\s*-/gi, '$1:\n-');
+                // 6. Clean up: ensure spaces after dashes for bullet points
+                mainDesc = mainDesc.replace(/\n-([A-Z0-9])/g, '\n- $1');
                 
-                // Step 9: Add line break before each dash (bullet point) that's not already on a new line
-                mainDesc = mainDesc.replace(/([^\n])\s*-\s+/g, '$1\n- ');
+                // 7. Fix concatenated complete words ONLY when both are 4+ letters
+                //    "HistoryNew", "ServiceFull", etc. BUT NOT "A4", "35", "2.0"
+                //    Very conservative: both words must be real words (4+ consecutive letters)
+                mainDesc = mainDesc.replace(/([a-z]{4,})([A-Z][a-z]{3,})/g, '$1\n$2');
                 
-                // Step 10: Handle uppercase-to-uppercase transitions (like "MOTOptions", "AMGGHOST")
-                // Insert double line break before major section keywords when preceded by uppercase
-                mainDesc = mainDesc.replace(/([A-Z]{2,})(Options|Features|Full|Service|History|Specification)/g, '$1\n\n$2');
-                
-                // Step 11: Add line breaks around asterisk sections (notes/disclaimers)
-                mainDesc = mainDesc.replace(/([^\n])\*([^*]+)\*/g, '$1\n\n*$2*');
-                mainDesc = mainDesc.replace(/\*([^*]+)\*([^\n])/g, '*$1*\n\n$2');
-                
-                // Step 12: Clean up formatting
-                // Remove spaces before line breaks
-                mainDesc = mainDesc.replace(/ +\n/g, '\n');
-                // Clean up multiple consecutive line breaks (max 2)
+                // 8. Clean up multiple line breaks (max 2 consecutive)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
-                // Clean up spaces around dashes
-                mainDesc = mainDesc.replace(/\n- +/g, '\n- ');
                 
-                // Step 13: Restore protected compound words
+                // 9. Remove trailing spaces from lines
+                mainDesc = mainDesc.replace(/ +\n/g, '\n');
+                
+                // 10. Restore protected terms
                 Object.keys(placeholders).forEach(placeholder => {
                   mainDesc = mainDesc.replace(new RegExp(placeholder, 'g'), placeholders[placeholder]);
                 });
                 
-                // Step 14: Final trim
                 mainDesc = mainDesc.trim();
               }
               
