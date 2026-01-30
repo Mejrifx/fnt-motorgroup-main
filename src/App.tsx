@@ -11,6 +11,8 @@ import Footer from './components/Footer';
 import CarDetails from './components/CarDetails';
 import WarrantyFinancing from './components/WarrantyFinancing';
 import TermsAndConditions from './components/TermsAndConditions';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import CookiePolicy from './components/CookiePolicy';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import PasswordGate from './components/PasswordGate';
@@ -46,6 +48,8 @@ function App() {
           <Route path="/car/:id" element={<CarDetails />} />
           <Route path="/warranty-financing" element={<WarrantyFinancing />} />
           <Route path="/terms-conditions" element={<TermsAndConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           {/* Catch all route - redirect to home */}

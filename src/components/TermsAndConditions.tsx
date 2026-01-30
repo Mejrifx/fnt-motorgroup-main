@@ -63,10 +63,7 @@ const TermsAndConditions: React.FC = () => {
               
               {/* 1. Deposits */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <CreditCard className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">1. Deposits</h3>
                 </div>
                 
@@ -81,8 +78,7 @@ const TermsAndConditions: React.FC = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                      <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3">
                       Deposits are NON-REFUNDABLE in the following conditions:
                     </h4>
                     <ul className="space-y-3 ml-6">
@@ -102,8 +98,7 @@ const TermsAndConditions: React.FC = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3">
                       Deposits are REFUNDABLE in the following conditions:
                     </h4>
                     <ul className="space-y-3 ml-6">
@@ -126,10 +121,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 2. Vehicle Description */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <Car className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">2. Vehicle Description</h3>
                 </div>
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
@@ -142,10 +134,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 3. Price and Payment */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <CreditCard className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">3. Price and Payment</h3>
                 </div>
                 <ul className="space-y-3">
@@ -166,10 +155,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 4. Deposit and Cancellation */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <Clock className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">4. Deposit and Cancellation</h3>
                 </div>
                 <ul className="space-y-3">
@@ -190,10 +176,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 5. Part Exchange */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <Car className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">5. Part Exchange</h3>
                 </div>
                 <ul className="space-y-3">
@@ -210,10 +193,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 6. Vehicle Collection */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <Clock className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">6. Vehicle Collection</h3>
                 </div>
                 <ul className="space-y-3">
@@ -230,10 +210,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 7. Warranty */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <Shield className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">7. Warranty</h3>
                 </div>
                 <ul className="space-y-3">
@@ -250,10 +227,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 8. Consumer Rights */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <CheckCircle className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">8. Consumer Rights</h3>
                 </div>
                 <ul className="space-y-3">
@@ -270,10 +244,7 @@ const TermsAndConditions: React.FC = () => {
 
               {/* 9. Distance Selling */}
               <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg">
-                <div className="flex items-center mb-6">
-                  <div className="bg-fnt-red/10 p-3 rounded-full mr-4">
-                    <FileText className="w-6 h-6 text-fnt-red" />
-                  </div>
+                <div className="mb-6">
                   <h3 className="text-2xl font-bold text-fnt-black">9. Distance Selling (if applicable)</h3>
                 </div>
                 <div className="bg-green-50 border-l-4 border-green-400 p-4">
