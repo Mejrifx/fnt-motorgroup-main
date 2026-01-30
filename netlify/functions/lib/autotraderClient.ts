@@ -454,25 +454,39 @@ class AutoTraderClient {
               
               // AutoTrader sends descriptions without line breaks - add intelligent formatting
               if (mainDesc && !mainDesc.includes('\n')) {
-                // Add line break after "Options:" followed by a dash
-                mainDesc = mainDesc.replace(/Options:\s*-/gi, 'Options:\n-');
-                
-                // Add line break before each dash (bullet point) that's not already on a new line
-                mainDesc = mainDesc.replace(/([^\n])-\s+/g, '$1\n- ');
-                
-                // Add line break after phrases that end sentences followed by uppercase letter
-                mainDesc = mainDesc.replace(/([.!])\s+([A-Z])/g, '$1\n\n$2');
-                
-                // Add line break after "Miles" if followed by uppercase letter (start of next section)
+                // 1. Add line break after "Miles" if followed by uppercase letter
                 mainDesc = mainDesc.replace(/Miles([A-Z])/g, 'Miles\n\n$1');
                 
-                // Add line break after asterisk sections
+                // 2. Add line break when lowercase letter is followed directly by uppercase (word boundary)
+                //    e.g., "PipesGhost" → "Pipes\nGhost"
+                mainDesc = mainDesc.replace(/([a-z])([A-Z])/g, '$1\n$2');
+                
+                // 3. Add line break after numbers/symbols followed by uppercase letters
+                //    e.g., "2+700" → "2+\n700", "NM Down" → "NM\nDown"
+                mainDesc = mainDesc.replace(/([0-9+])([A-Z][a-z])/g, '$1\n$2');
+                
+                // 4. Add line break after common phrase endings before "Options:" or similar section headers
+                mainDesc = mainDesc.replace(/(Out|Fitted|Included|Added)(Options:|Features:|Extras:)/gi, '$1\n\n$2');
+                
+                // 5. Add line break after "Options:" followed by a dash
+                mainDesc = mainDesc.replace(/Options:\s*-/gi, 'Options:\n-');
+                
+                // 6. Add line break before each dash (bullet point) that's not already on a new line
+                mainDesc = mainDesc.replace(/([^\n])-\s+/g, '$1\n- ');
+                
+                // 7. Add line break after phrases that end sentences followed by uppercase letter
+                mainDesc = mainDesc.replace(/([.!])\s+([A-Z])/g, '$1\n\n$2');
+                
+                // 8. Add line break after asterisk sections
                 mainDesc = mainDesc.replace(/\*([^*]+)\*/g, '\n\n*$1*\n\n');
                 
-                // Clean up any multiple consecutive line breaks (more than 2)
+                // 9. Add line break after "BHP" or "NM" or "PS" (power/torque specs)
+                mainDesc = mainDesc.replace(/(BHP|NM|PS)([A-Z])/g, '$1\n$2');
+                
+                // 10. Clean up any multiple consecutive line breaks (more than 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
                 
-                // Trim any leading/trailing whitespace
+                // 11. Trim any leading/trailing whitespace and line breaks
                 mainDesc = mainDesc.trim();
               }
               
