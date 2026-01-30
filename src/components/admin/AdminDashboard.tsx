@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
@@ -24,6 +24,7 @@ const AdminDashboard = () => {
   // AutoTrader sync state
   const [syncStatus, setSyncStatus] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncSuccess, setSyncSuccess] = useState(false);
   const [syncLogs, setSyncLogs] = useState<any[]>([]);
   const [showSyncLogs, setShowSyncLogs] = useState(false);
   
@@ -143,6 +144,8 @@ const AdminDashboard = () => {
     if (isSyncing) return;
     
     setIsSyncing(true);
+    setSyncSuccess(false);
+    
     try {
       // Get current session token
       const { data: { session } } = await supabase.auth.getSession();
@@ -164,19 +167,26 @@ const AdminDashboard = () => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        alert(`Sync completed!\nAdded: ${result.result.carsAdded}\nUpdated: ${result.result.carsUpdated}\nMarked Unavailable: ${result.result.carsMarkedUnavailable}`);
-        
         // Refresh data
         await fetchCars();
         await fetchSyncStatus();
         await fetchSyncLogs();
+        
+        // Show success checkmark
+        setIsSyncing(false);
+        setSyncSuccess(true);
+        
+        // Reset success state after 3 seconds
+        setTimeout(() => {
+          setSyncSuccess(false);
+        }, 3000);
       } else {
         alert(`Sync failed: ${result.message || result.error}`);
+        setIsSyncing(false);
       }
     } catch (error) {
       console.error('Manual sync error:', error);
       alert('Failed to trigger sync. Check console for details.');
-    } finally {
       setIsSyncing(false);
     }
   };
@@ -330,7 +340,13 @@ const AdminDashboard = () => {
             {/* Left: Sync Info */}
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-3">
-                <RefreshCw className={`w-6 h-6 ${isSyncing ? 'animate-spin text-blue-600' : 'text-blue-600'}`} />
+                <div className="relative w-6 h-6">
+                  {syncSuccess ? (
+                    <Check className="w-6 h-6 text-green-600 absolute inset-0 transition-all duration-500 ease-in-out animate-in fade-in zoom-in" />
+                  ) : (
+                    <RefreshCw className={`w-6 h-6 text-blue-600 absolute inset-0 transition-all duration-300 ease-in-out ${isSyncing ? 'animate-spin' : ''}`} />
+                  )}
+                </div>
                 <h2 className="text-xl font-bold text-gray-900">AutoTrader Sync Status</h2>
               </div>
               
@@ -397,15 +413,23 @@ const AdminDashboard = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleManualSync}
-                disabled={isSyncing}
+                disabled={isSyncing || syncSuccess}
                 className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                  isSyncing
+                  isSyncing || syncSuccess
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                }`}
+                } ${syncSuccess ? '!bg-green-600' : ''}`}
               >
-                <RefreshCw className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
-                <span>{isSyncing ? 'Syncing...' : 'Sync Now'}</span>
+                <div className="relative w-5 h-5">
+                  {syncSuccess ? (
+                    <Check className="w-5 h-5 absolute inset-0 transition-all duration-500 ease-in-out animate-in fade-in zoom-in" />
+                  ) : (
+                    <RefreshCw className={`w-5 h-5 absolute inset-0 transition-all duration-300 ease-in-out ${isSyncing ? 'animate-spin' : ''}`} />
+                  )}
+                </div>
+                <span>
+                  {syncSuccess ? 'Synced!' : isSyncing ? 'Syncing...' : 'Sync Now'}
+                </span>
               </button>
               
               <button
