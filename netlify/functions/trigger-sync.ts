@@ -48,12 +48,23 @@ async function triggerSyncFunction(siteUrl: string): Promise<any> {
       },
     });
     
+    console.log(`Sync function response status: ${response.status}`);
+    
+    // Try to get response body even if it failed
+    const responseText = await response.text();
+    console.log(`Sync function response body:`, responseText);
+    
     if (!response.ok) {
-      throw new Error(`Sync function returned ${response.status}`);
+      throw new Error(`Sync function returned ${response.status}: ${responseText.substring(0, 200)}`);
     }
     
-    const result = await response.json();
-    return result;
+    // Parse JSON if successful
+    try {
+      return JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse sync response as JSON:', e);
+      return { success: true, message: 'Sync completed (non-JSON response)' };
+    }
   } catch (error) {
     console.error('Error triggering sync function:', error);
     throw error;
