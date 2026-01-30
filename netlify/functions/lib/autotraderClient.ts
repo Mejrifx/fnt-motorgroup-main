@@ -364,11 +364,12 @@ class AutoTraderClient {
           // Log description-related fields to debug
           const desc2 = firstResult.adverts?.retailAdverts?.description2;
           console.log('📝 Description debugging:', {
-            'adverts.description': firstResult.adverts?.description,
+            'retailAdverts.description2 FULL TEXT': desc2,
             'retailAdverts.description2 length': desc2?.length,
-            'retailAdverts.description2 preview': desc2?.substring(0, 100),
-            'Has \\n line breaks?': desc2?.includes('\n'),
-            'Has \\r\\n line breaks?': desc2?.includes('\r\n'),
+            'Has \\n?': desc2?.includes('\n'),
+            'Has \\r\\n?': desc2?.includes('\r\n'),
+            'Has \\r?': desc2?.includes('\r'),
+            'Character codes (first 200 chars)': desc2?.substring(0, 200).split('').map((c, i) => `${c}(${c.charCodeAt(0)})`).join(''),
             'retailAdverts.attentionGrabber': firstResult.adverts?.retailAdverts?.attentionGrabber,
           });
         }
@@ -453,7 +454,7 @@ class AutoTraderClient {
                             `${vehicle.make} ${vehicle.model} available`;
               
               // AutoTrader sends descriptions without line breaks - add intelligent formatting
-              if (mainDesc && !mainDesc.includes('\n')) {
+              if (false && mainDesc && !mainDesc.includes('\n')) {  // TEMPORARILY DISABLED FOR DEBUGGING
                 // Protect compound words that should NEVER be split
                 const protectedTerms = ['xDrive', 'CarPlay', 'AppleCarPlay', 'AndroidAuto', 'iPhone', 'iPad', 'Android Auto'];
                 const placeholders: { [key: string]: string } = {};
