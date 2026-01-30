@@ -478,12 +478,30 @@ class AutoTraderClient {
                 // "OutOptions:" → "Out\n\nOptions:", "AutoPlease" → "Auto\n\nPlease"
                 mainDesc = mainDesc.replace(/([a-z])(Options:|Features:|Extras:|Please|Note|Contact)/gi, '$1\n\n$2');
                 
-                // STEP 4: Fix "Options: " - ensure space after colon if not present
-                mainDesc = mainDesc.replace(/Options:([^ \n-])/gi, 'Options: $1');
+                // STEP 4: Add line break AFTER "Options:" before dash (start of bullet list)
+                // "Options:- Sunroof" → "Options:\n- Sunroof"
+                mainDesc = mainDesc.replace(/(Options|Features|Extras):\s*(-)/gi, '$1:\n$2');
                 
                 // STEP 5: Split bullet points - dash followed by uppercase/digit is NEW bullet
                 // "Cameras-Bang" → "Cameras\n-Bang"
                 mainDesc = mainDesc.replace(/([a-zA-Z0-9 ])(-[A-Z0-9])/g, '$1\n$2');
+                
+                // STEP 6: GENERAL RULE - Split concatenated complete words (both 4+ letters)
+                // "PipesGhost", "ImmobiliserFull", "HistoryNew" → split them
+                // Very conservative: both must be real words (4+ consecutive letters each)
+                mainDesc = mainDesc.replace(/([a-z]{4,})([A-Z][a-z]{3,})/g, '$1\n$2');
+                
+                // STEP 7: Split word followed by digit (no space between)
+                // "Out2 Keys" → "Out\n2 Keys"
+                mainDesc = mainDesc.replace(/([a-z])(\d)/g, '$1\n$2');
+                
+                // STEP 8: Split after "+" when followed by digit
+                // "2+700" → "2+\n700"
+                mainDesc = mainDesc.replace(/\+(\d)/g, '+\n$1');
+                
+                // STEP 9: Split before asterisk (disclaimer/notes)
+                // "Tailgate*PRIVATE" → "Tailgate\n\n*PRIVATE"
+                mainDesc = mainDesc.replace(/([a-zA-Z])(\*)/g, '$1\n\n$2');
                 
                 // STEP 6: Clean up multiple consecutive line breaks (max 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
