@@ -10,17 +10,21 @@ import { createClient } from '@supabase/supabase-js';
 import { createAutoTraderClient } from './lib/autotraderClient';
 import { mapAutoTraderToDatabase, validateMappedCar } from './lib/dataMapper';
 
-// Initialize Supabase client with SERVICE ROLE key (bypasses RLS for backend operations)
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+/**
+ * Get Supabase client (initialized on-demand to avoid module-level errors)
+ */
+function getSupabaseClient() {
+  return createClient(
+    process.env.VITE_SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-);
+  );
+}
 
 interface SyncResult {
   success: boolean;
@@ -46,6 +50,9 @@ async function syncStock(): Promise<SyncResult> {
     errors: [],
     message: '',
   };
+
+  // Initialize Supabase client
+  const supabase = getSupabaseClient();
 
   try {
     console.log('===== AutoTrader Stock Sync Started =====');
@@ -256,6 +263,7 @@ async function syncStock(): Promise<SyncResult> {
  * Log sync results to database
  */
 async function logSyncResult(result: SyncResult): Promise<void> {
+  const supabase = getSupabaseClient();
   try {
     await supabase.from('autotrader_sync_logs').insert([{
       sync_type: 'full_sync',
