@@ -25,7 +25,8 @@ const Contact = () => {
                   <div>
                     <h4 className="font-semibold text-fnt-black mb-1">Location</h4>
                     <p className="text-gray-600">
-                      Redgate Lane, Manchester M12 4RX<br />
+                      Unit 1, Clayton Court, 5 Welcomb Street<br />
+                      Manchester M11 2NB<br />
                       United Kingdom
                     </p>
                   </div>

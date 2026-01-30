@@ -88,7 +88,8 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-fnt-red mt-1 flex-shrink-0" />
                 <div className="text-gray-300">
-                  Redgate Lane, Manchester M12 4RX<br />
+                  Unit 1, Clayton Court, 5 Welcomb Street<br />
+                  Manchester M11 2NB<br />
                   United Kingdom
                 </div>
               </div>
@@ -107,7 +108,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-300 text-sm">
-              © 2025 <button 
+              © 2026 <button 
                 onClick={handleAdminAccess}
                 className="hover:text-fnt-red transition-colors duration-300 cursor-pointer"
               >
