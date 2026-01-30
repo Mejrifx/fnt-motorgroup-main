@@ -5,19 +5,10 @@
  * Triggered every 30 minutes or manually from admin dashboard
  */
 
-console.log('🔍 [SYNC-STOCK] Module loading started...');
-
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
-console.log('🔍 [SYNC-STOCK] Netlify functions imported');
-
 import { createClient } from '@supabase/supabase-js';
-console.log('🔍 [SYNC-STOCK] Supabase imported');
-
 import { createAutoTraderClient } from './lib/autotraderClient';
-console.log('🔍 [SYNC-STOCK] AutoTrader client imported');
-
 import { mapAutoTraderToDatabase, validateMappedCar } from './lib/dataMapper';
-console.log('🔍 [SYNC-STOCK] Data mapper imported');
 
 /**
  * Get Supabase client (initialized on-demand to avoid module-level errors)
@@ -293,38 +284,46 @@ async function logSyncResult(result: SyncResult): Promise<void> {
 /**
  * Netlify Function handler
  */
-console.log('🔍 [SYNC-STOCK] Defining handler function...');
-
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
-  console.log('🔍 [SYNC-STOCK] Handler invoked! Method:', event.httpMethod);
-  // Set CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json',
-  };
-  
-  // Handle OPTIONS request for CORS
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
+  // Wrap EVERYTHING in try-catch to catch any initialization errors
+  try {
+    console.log('🚀 [SYNC-STOCK] Function invoked, method:', event.httpMethod);
+    
+    // Set CORS headers
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json',
     };
-  }
-  
-  // Only allow POST and GET requests
-  if (event.httpMethod !== 'POST' && event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
+    
+    // Handle OPTIONS request for CORS
+    if (event.httpMethod === 'OPTIONS') {
+      return {
+        statusCode: 200,
+        headers,
+        body: '',
+      };
+    }
+    
+    // Only allow POST and GET requests
+    if (event.httpMethod !== 'POST' && event.httpMethod !== 'GET') {
+      return {
+        statusCode: 405,
+        headers,
+        body: JSON.stringify({ error: 'Method not allowed' }),
+      };
+    }
   
   try {
-    console.log('Sync handler started');
+    console.log('===== SYNC-STOCK HANDLER STARTED =====');
     console.log('Request method:', event.httpMethod);
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasAutoTraderKey: !!process.env.AUTOTRADER_API_KEY,
+      hasAutoTraderSecret: !!process.env.AUTOTRADER_API_SECRET,
+      hasAdvertiserId: !!process.env.AUTOTRADER_ADVERTISER_ID,
+    });
     
     // Run sync
     const result = await syncStock();
@@ -341,20 +340,40 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       headers,
       body: JSON.stringify(result),
     };
-  } catch (error) {
-    console.error('===== Handler Error =====');
-    console.error('Error type:', error.constructor.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    } catch (error) {
+      console.error('===== Handler Error =====');
+      console.error('Error type:', error.constructor?.name || typeof error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: error.message || 'Unknown error',
+          message: 'Internal server error during sync',
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        }),
+      };
+    }
+  } catch (outerError) {
+    // Catch ANY error that happens before headers are defined
+    console.error('===== FATAL HANDLER ERROR (OUTER CATCH) =====');
+    console.error('Outer error type:', outerError.constructor?.name || typeof outerError);
+    console.error('Outer error message:', outerError.message);
+    console.error('Outer error stack:', outerError.stack);
     
     return {
       statusCode: 500,
-      headers,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         success: false,
-        error: error.message || 'Unknown error',
-        message: 'Internal server error during sync',
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        error: outerError.message || 'Fatal initialization error',
+        message: 'Function failed to initialize',
       }),
     };
   }
