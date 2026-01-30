@@ -438,8 +438,10 @@ class AutoTraderClient {
             doors: vehicle.doors || null,
             engine: engineSize ? `${engineSize}L` : null,
             
-            // Description - check multiple possible locations in AutoTrader response
-            description: adverts.description || 
+            // Description - AutoTrader stores it in retailAdverts.description2!
+            description: adverts.retailAdverts?.description2 ||
+                        adverts.retailAdverts?.description || 
+                        adverts.description || 
                         adverts.advert?.description || 
                         adverts.advertDescription ||
                         adverts.forecourtAdvert?.description ||
