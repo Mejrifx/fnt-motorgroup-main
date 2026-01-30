@@ -232,7 +232,19 @@ const CarDetails: React.FC = () => {
             {car.description && (
               <div className="bg-gray-900 rounded-2xl p-6">
                 <h3 className="text-2xl font-bold text-white mb-4">Description</h3>
-                <div className="text-gray-300 leading-relaxed text-lg whitespace-pre-line">{car.description}</div>
+                <div className="text-gray-300 leading-relaxed text-lg whitespace-pre-line">
+                  {/* Split description to highlight attention grabber if present */}
+                  {car.description.startsWith('✨') ? (
+                    <>
+                      <div className="text-fnt-red font-bold text-xl mb-4 pb-4 border-b border-gray-700">
+                        {car.description.split('\n\n')[0].replace('✨ ', '')}
+                      </div>
+                      <div>{car.description.split('\n\n').slice(1).join('\n\n')}</div>
+                    </>
+                  ) : (
+                    car.description
+                  )}
+                </div>
               </div>
             )}
           </div>

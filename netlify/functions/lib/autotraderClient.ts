@@ -362,12 +362,14 @@ class AutoTraderClient {
           });
           
           // Log description-related fields to debug
+          const desc2 = firstResult.adverts?.retailAdverts?.description2;
           console.log('📝 Description debugging:', {
             'adverts.description': firstResult.adverts?.description,
-            'adverts.advert?.description': firstResult.adverts?.advert?.description,
-            'adverts.advertDescription': firstResult.adverts?.advertDescription,
-            'vehicle.description': firstResult.vehicle?.description,
-            'advertsObject': firstResult.adverts,
+            'retailAdverts.description2 length': desc2?.length,
+            'retailAdverts.description2 preview': desc2?.substring(0, 100),
+            'Has \\n line breaks?': desc2?.includes('\n'),
+            'Has \\r\\n line breaks?': desc2?.includes('\r\n'),
+            'retailAdverts.attentionGrabber': firstResult.adverts?.retailAdverts?.attentionGrabber,
           });
         }
         
@@ -439,14 +441,27 @@ class AutoTraderClient {
             engine: engineSize ? `${engineSize}L` : null,
             
             // Description - AutoTrader stores it in retailAdverts.description2!
-            description: adverts.retailAdverts?.description2 ||
-                        adverts.retailAdverts?.description || 
-                        adverts.description || 
-                        adverts.advert?.description || 
-                        adverts.advertDescription ||
-                        adverts.forecourtAdvert?.description ||
-                        vehicle.description ||
-                        `${vehicle.make} ${vehicle.model} available`,
+            description: (() => {
+              // Get the main description
+              const mainDesc = adverts.retailAdverts?.description2 ||
+                              adverts.retailAdverts?.description || 
+                              adverts.description || 
+                              adverts.advert?.description || 
+                              adverts.advertDescription ||
+                              adverts.forecourtAdvert?.description ||
+                              vehicle.description ||
+                              `${vehicle.make} ${vehicle.model} available`;
+              
+              // Get the attention grabber (headline/key features)
+              const attentionGrabber = adverts.retailAdverts?.attentionGrabber;
+              
+              // If we have an attention grabber, prepend it as a bold headline
+              if (attentionGrabber && attentionGrabber.trim() !== '') {
+                return `✨ ${attentionGrabber}\n\n${mainDesc}`;
+              }
+              
+              return mainDesc;
+            })(),
             
             // Images - AutoTrader provides images in media object
             images: media.images?.map((img: any) => img.href || img.url) || [],
