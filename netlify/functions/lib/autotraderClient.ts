@@ -482,9 +482,9 @@ class AutoTraderClient {
                 // "Options:- Sunroof" → "Options:\n- Sunroof"
                 mainDesc = mainDesc.replace(/(Options|Features|Extras):\s*(-)/gi, '$1:\n$2');
                 
-                // STEP 5: Split bullet points - dash followed by uppercase/digit is NEW bullet
-                // "Cameras-Bang" → "Cameras\n-Bang"
-                mainDesc = mainDesc.replace(/([a-zA-Z0-9 ])(-[A-Z0-9])/g, '$1\n$2');
+                // STEP 5: Split bullet points - dash with OPTIONAL space followed by uppercase/digit
+                // "Sunroof- Harmon" → "Sunroof\n- Harmon" (handles both "-H" and "- H")
+                mainDesc = mainDesc.replace(/([a-zA-Z0-9])(-\s*[A-Z0-9])/g, '$1\n$2');
                 
                 // STEP 6: GENERAL RULE - Split concatenated complete words (both 4+ letters)
                 // "PipesGhost", "ImmobiliserFull", "HistoryNew" → split them
@@ -499,9 +499,9 @@ class AutoTraderClient {
                 // "2+700" → "2+\n700"
                 mainDesc = mainDesc.replace(/\+(\d)/g, '+\n$1');
                 
-                // STEP 9: Split before asterisk (disclaimer/notes)
-                // "Tailgate*PRIVATE" → "Tailgate\n\n*PRIVATE"
-                mainDesc = mainDesc.replace(/([a-zA-Z])(\*)/g, '$1\n\n$2');
+                // STEP 9: Split ONLY before asterisk when it STARTS a note (followed by uppercase)
+                // "Tailgate*PRIVATE PLATE*" → "Tailgate\n\n*PRIVATE PLATE*" (only first asterisk)
+                mainDesc = mainDesc.replace(/([a-zA-Z])(\*[A-Z])/g, '$1\n\n$2');
                 
                 // STEP 6: Clean up multiple consecutive line breaks (max 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
