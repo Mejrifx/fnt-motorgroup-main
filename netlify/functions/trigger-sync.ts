@@ -7,6 +7,7 @@
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
+import { handler as syncStockHandler } from './sync-stock';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -33,38 +34,55 @@ async function verifyAdmin(authToken: string): Promise<boolean> {
 }
 
 /**
- * Call the sync-stock function
+ * Call the sync-stock function directly (no HTTP request)
  */
-async function triggerSyncFunction(siteUrl: string): Promise<any> {
+async function triggerSyncFunction(): Promise<any> {
   try {
-    const syncUrl = `${siteUrl}/.netlify/functions/sync-stock`;
+    console.log('Triggering sync-stock handler directly...');
     
-    console.log(`Triggering sync at: ${syncUrl}`);
+    // Call sync-stock handler directly (same as scheduled function does)
+    const mockEvent: HandlerEvent = {
+      httpMethod: 'POST',
+      headers: {},
+      body: null,
+      isBase64Encoded: false,
+      rawUrl: '/.netlify/functions/sync-stock',
+      rawQuery: '',
+      path: '/.netlify/functions/sync-stock',
+      queryStringParameters: null,
+      multiValueQueryStringParameters: null,
+    };
     
-    const response = await fetch(syncUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const mockContext: HandlerContext = {
+      callbackWaitsForEmptyEventLoop: true,
+      functionName: 'sync-stock',
+      functionVersion: '1',
+      invokedFunctionArn: '',
+      memoryLimitInMB: '1024',
+      awsRequestId: '',
+      logGroupName: '',
+      logStreamName: '',
+      getRemainingTimeInMillis: () => 30000,
+      done: () => {},
+      fail: () => {},
+      succeed: () => {},
+    };
     
-    console.log(`Sync function response status: ${response.status}`);
+    // Invoke sync-stock handler directly
+    const response = await syncStockHandler(mockEvent, mockContext);
     
-    // Try to get response body even if it failed
-    const responseText = await response.text();
-    console.log(`Sync function response body:`, responseText);
+    console.log('Sync function response status:', response.statusCode);
     
-    if (!response.ok) {
-      throw new Error(`Sync function returned ${response.status}: ${responseText.substring(0, 200)}`);
+    if (response.statusCode !== 200 && response.statusCode !== 207) {
+      console.error('Sync function error response:', response.body);
+      throw new Error(`Sync function returned ${response.statusCode}`);
     }
     
-    // Parse JSON if successful
-    try {
-      return JSON.parse(responseText);
-    } catch (e) {
-      console.error('Failed to parse sync response as JSON:', e);
-      return { success: true, message: 'Sync completed (non-JSON response)' };
-    }
+    // Parse response body
+    const result = JSON.parse(response.body);
+    console.log('Sync completed:', result.message);
+    
+    return result;
   } catch (error) {
     console.error('Error triggering sync function:', error);
     throw error;
@@ -129,26 +147,10 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       };
     }
     
-    // Get site URL from headers or environment (extract base URL only)
-    let siteUrl = process.env.URL || 'http://localhost:8888';
-    
-    if (event.headers['x-forwarded-host']) {
-      siteUrl = `https://${event.headers['x-forwarded-host']}`;
-    } else if (event.headers['referer']) {
-      try {
-        // Extract base URL from referer (remove path like /admin/dashboard)
-        const refererUrl = new URL(event.headers['referer']);
-        siteUrl = `${refererUrl.protocol}//${refererUrl.host}`;
-      } catch (e) {
-        console.warn('Failed to parse referer URL, using fallback');
-      }
-    }
-    
     console.log('Manual sync triggered by admin');
-    console.log('Using site URL:', siteUrl);
     
-    // Trigger the sync function
-    const syncResult = await triggerSyncFunction(siteUrl);
+    // Trigger the sync function directly (no HTTP call)
+    const syncResult = await triggerSyncFunction();
     
     return {
       statusCode: 200,
