@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface AccordionItemProps {
   title: string;
@@ -22,13 +22,13 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-start gap-4 px-6 py-6 text-left hover:bg-gray-50 transition-colors duration-200"
       >
-        {/* Plus/X Icon on the left */}
+        {/* Plus Icon - rotates 45deg to become X */}
         <div className="flex-shrink-0 mt-1">
-          {isOpen ? (
-            <X className="w-5 h-5 text-gray-700 transition-all duration-200" />
-          ) : (
-            <Plus className="w-5 h-5 text-gray-700 transition-all duration-200" />
-          )}
+          <Plus 
+            className={`w-5 h-5 text-gray-700 transition-transform duration-300 ease-in-out ${
+              isOpen ? 'rotate-45' : 'rotate-0'
+            }`}
+          />
         </div>
         
         {/* Content */}
@@ -42,14 +42,19 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
         </div>
       </button>
       
-      {isOpen && (
+      {/* Smooth slide animation */}
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
         <div className="px-6 pb-6">
           {/* Add left padding to align with text above (icon width + gap) */}
           <div className="pl-9 text-gray-700 leading-relaxed space-y-4">
             {children}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
