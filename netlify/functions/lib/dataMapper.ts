@@ -193,9 +193,9 @@ function validateImageUrl(url: string | undefined | null): string {
   // Check if URL is from trusted sources
   const trustedDomains = [
     'autotrader.co.uk',
-    'at-cdn.co.uk',
+    'atcdn.co.uk',          // AutoTrader CDN (no hyphen!)
     'autotradercdn.com',
-    'images.pexels.com', // Our fallback
+    'images.pexels.com',    // Our fallback
   ];
   
   const isTrusted = trustedDomains.some(domain => trimmedUrl.includes(domain));
