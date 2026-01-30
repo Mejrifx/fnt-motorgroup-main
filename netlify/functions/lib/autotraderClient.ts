@@ -453,10 +453,11 @@ class AutoTraderClient {
                             vehicle.description ||
                             `${vehicle.make} ${vehicle.model} available`;
               
-              // AutoTrader sends descriptions without line breaks - add intelligent formatting
-              if (false && mainDesc && !mainDesc.includes('\n')) {  // TEMPORARILY DISABLED FOR DEBUGGING
-                // Protect compound words that should NEVER be split
-                const protectedTerms = ['xDrive', 'CarPlay', 'AppleCarPlay', 'AndroidAuto', 'iPhone', 'iPad', 'Android Auto'];
+              // AutoTrader sends descriptions as ONE CONTINUOUS STRING with NO line breaks
+              // Transform based on EXACT patterns seen in raw data
+              if (mainDesc && !mainDesc.includes('\n')) {
+                // Protect compound words that should stay together
+                const protectedTerms = ['CarPlay', 'AppleCarPlay', 'AndroidAuto', 'Android Auto', 'iPhone', 'iPad', 'xDrive'];
                 const placeholders: { [key: string]: string } = {};
                 protectedTerms.forEach((term, index) => {
                   const placeholder = `__PROTECTED_${index}__`;
@@ -464,41 +465,34 @@ class AutoTraderClient {
                   placeholders[placeholder] = term;
                 });
                 
-                // CONSERVATIVE APPROACH: Only fix OBVIOUS missing spaces/line breaks
+                // STEP 1: Fix period followed immediately by uppercase (missing space after sentence)
+                // "Miles.Options" → "Miles.\n\nOptions"
+                mainDesc = mainDesc.replace(/\.([A-Z])/g, '.\n\n$1');
                 
-                // 1. Fix period with NO space before next sentence: "Miles.Options" → "Miles.\n\nOptions"
-                mainDesc = mainDesc.replace(/([.!])([A-Z])/g, '$1\n\n$2');
+                // STEP 2: Fix "Options: " - ensure space after colon if not present
+                mainDesc = mainDesc.replace(/Options:([^ ])/gi, 'Options: $1');
                 
-                // 2. Fix section headers that are concatenated: "AutoPlease" → "Auto\n\nPlease"  
-                //    Only when it's clearly two complete words (4+ letters each, ending/starting with specific patterns)
-                mainDesc = mainDesc.replace(/([a-z]{4,})(Please|Note|Options|Features|Extras|Specification|Contact)/g, '$1\n\n$2');
+                // STEP 3: Split bullet points - dash followed by uppercase/digit is NEW bullet
+                // "Cameras-Bang" → "Cameras\n-Bang"
+                // Pattern: letter/digit/space followed by dash and then uppercase/digit
+                mainDesc = mainDesc.replace(/([a-zA-Z0-9 ])(-[A-Z0-9])/g, '$1\n$2');
                 
-                // 3. Fix "Options:" or similar with NO space before it
-                mainDesc = mainDesc.replace(/([a-z])(Options:|Features:|Extras:|Specification:)/gi, '$1\n\n$2');
+                // STEP 4: Ensure dash bullets have space after them if missing
+                // "-360Cameras" → "- 360 Cameras" (but this might not be needed)
+                mainDesc = mainDesc.replace(/\n-([A-Z0-9])/g, '\n-$1');  // Keep as is, dashes are already fine
                 
-                // 4. Add line break AFTER "Options:" when followed immediately by a dash
-                mainDesc = mainDesc.replace(/(Options|Features|Extras|Specification):\s*-/gi, '$1: \n-');
+                // STEP 5: Fix concatenated sentences with "Please"
+                // "AutoPlease" → "Auto\n\nPlease"
+                mainDesc = mainDesc.replace(/([a-z])(Please [A-Z])/g, '$1\n\n$2');
                 
-                // 5. Fix bullet points: dash with no line break before it
-                //    "-360 Cameras-Bang" → "-360 Cameras\n-Bang"
-                //    Look for: letter/digit followed by dash followed by letter/digit
-                mainDesc = mainDesc.replace(/([a-zA-Z0-9])(-[A-Z0-9])/g, '$1\n$2');
-                
-                // 6. Clean up: ensure spaces after dashes for bullet points
-                mainDesc = mainDesc.replace(/\n-([A-Z0-9])/g, '\n- $1');
-                
-                // 7. Fix concatenated complete words ONLY when both are 4+ letters
-                //    "HistoryNew", "ServiceFull", etc. BUT NOT "A4", "35", "2.0"
-                //    Very conservative: both words must be real words (4+ consecutive letters)
-                mainDesc = mainDesc.replace(/([a-z]{4,})([A-Z][a-z]{3,})/g, '$1\n$2');
-                
-                // 8. Clean up multiple line breaks (max 2 consecutive)
+                // STEP 6: Clean up multiple consecutive line breaks (max 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
                 
-                // 9. Remove trailing spaces from lines
+                // STEP 7: Remove trailing spaces
                 mainDesc = mainDesc.replace(/ +\n/g, '\n');
+                mainDesc = mainDesc.replace(/\n +/g, '\n');
                 
-                // 10. Restore protected terms
+                // STEP 8: Restore protected compound words
                 Object.keys(placeholders).forEach(placeholder => {
                   mainDesc = mainDesc.replace(new RegExp(placeholder, 'g'), placeholders[placeholder]);
                 });
