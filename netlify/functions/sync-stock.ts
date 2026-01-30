@@ -5,10 +5,19 @@
  * Triggered every 30 minutes or manually from admin dashboard
  */
 
+console.log('🔍 [SYNC-STOCK] Module loading started...');
+
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+console.log('🔍 [SYNC-STOCK] Netlify functions imported');
+
 import { createClient } from '@supabase/supabase-js';
+console.log('🔍 [SYNC-STOCK] Supabase imported');
+
 import { createAutoTraderClient } from './lib/autotraderClient';
+console.log('🔍 [SYNC-STOCK] AutoTrader client imported');
+
 import { mapAutoTraderToDatabase, validateMappedCar } from './lib/dataMapper';
+console.log('🔍 [SYNC-STOCK] Data mapper imported');
 
 /**
  * Get Supabase client (initialized on-demand to avoid module-level errors)
@@ -284,7 +293,10 @@ async function logSyncResult(result: SyncResult): Promise<void> {
 /**
  * Netlify Function handler
  */
+console.log('🔍 [SYNC-STOCK] Defining handler function...');
+
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  console.log('🔍 [SYNC-STOCK] Handler invoked! Method:', event.httpMethod);
   // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
