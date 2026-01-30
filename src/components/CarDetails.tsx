@@ -74,10 +74,20 @@ const CarDetails: React.FC = () => {
       images.push(car.cover_image_url);
     }
     
-    // Add gallery images
+    // Add gallery images from Supabase Storage (manually uploaded)
     if (car.gallery_image_paths && car.gallery_image_paths.length > 0) {
       car.gallery_image_paths.forEach(path => {
         images.push(getImageUrl(path));
+      });
+    }
+    
+    // Add gallery images from AutoTrader sync (direct URLs)
+    if (car.gallery_images && Array.isArray(car.gallery_images) && car.gallery_images.length > 0) {
+      car.gallery_images.forEach(url => {
+        // Only add if it's not already in the images array (avoid duplicates)
+        if (!images.includes(url)) {
+          images.push(url);
+        }
       });
     }
     
