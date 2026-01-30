@@ -454,58 +454,68 @@ class AutoTraderClient {
               
               // AutoTrader sends descriptions without line breaks - add intelligent formatting
               if (mainDesc && !mainDesc.includes('\n')) {
-                // First, protect compound words that should NOT be split
-                const protectedWords = ['xDrive', 'CarPlay', 'AppleCarPlay', 'AndroidAuto'];
+                // Step 1: Protect compound words and special terms that should NOT be split
+                const protectedTerms = ['xDrive', 'CarPlay', 'AppleCarPlay', 'AndroidAuto', 'iPhone', 'iPad'];
                 const placeholders: { [key: string]: string } = {};
-                protectedWords.forEach((word, index) => {
+                protectedTerms.forEach((term, index) => {
                   const placeholder = `__PROTECTED_${index}__`;
-                  const regex = new RegExp(word, 'gi');
+                  const regex = new RegExp(term, 'gi');
                   mainDesc = mainDesc.replace(regex, (match) => {
                     placeholders[placeholder] = match;
                     return placeholder;
                   });
                 });
                 
-                // 1. Add line break after "Miles" if followed by uppercase letter
-                mainDesc = mainDesc.replace(/Miles([A-Z])/g, 'Miles\n\n$1');
-                
-                // 2. Add line break after "Stage 2+" specifically
-                mainDesc = mainDesc.replace(/Stage\s*2\+([0-9])/g, 'Stage 2+\n$1');
-                
-                // 3. Add line break after "BHP & 900 + NM " before "Down"
-                mainDesc = mainDesc.replace(/NM\s+(Down|Pipes)/g, 'NM \n$1');
-                
-                // 4. Add line break when a word ends followed by uppercase starting a new phrase
-                //    BUT: Only for complete words, not mid-word (avoid breaking xDrive, CarPlay)
-                mainDesc = mainDesc.replace(/([a-z]{3,})([A-Z][a-z]{3,})/g, '$1\n$2');
-                
-                // 5. Add double line break after "Immobiliser" before "Full Service"
-                mainDesc = mainDesc.replace(/Immobiliser([A-Z])/g, 'Immobiliser\n\n$1');
-                
-                // 6. Add line break after common phrase endings before "Options:"
-                mainDesc = mainDesc.replace(/(Out|Fitted|Included|Added)(Options:|Features:|Extras:)/gi, '$1\n\n$2');
-                
-                // 7. Add line break after "Options:" followed by a dash
-                mainDesc = mainDesc.replace(/Options:\s*-/gi, 'Options:\n-');
-                
-                // 8. Add line break before each dash (bullet point) that's not already on a new line
-                mainDesc = mainDesc.replace(/([^\n])-\s+/g, '$1\n- ');
-                
-                // 9. Add line break after phrases that end sentences followed by uppercase letter
+                // Step 2: Add line breaks after sentences (. or !) followed by space and uppercase
                 mainDesc = mainDesc.replace(/([.!])\s+([A-Z])/g, '$1\n\n$2');
                 
-                // 10. Add line break after asterisk sections
-                mainDesc = mainDesc.replace(/\*([^*]+)\*/g, '\n\n*$1*\n\n');
+                // Step 3: Add line break after "Miles" at the start (after main title)
+                mainDesc = mainDesc.replace(/Miles\s+([A-Z])/g, 'Miles\n\n$1');
                 
-                // 11. Clean up any multiple consecutive line breaks (more than 2)
+                // Step 4: UNIVERSAL RULE - Add line break when lowercase letter is directly followed by uppercase
+                // This catches: "OutFull", "HistoryNew", "TyresAll", "ImmobiliserFull", etc.
+                mainDesc = mainDesc.replace(/([a-z])([A-Z])/g, '$1\n$2');
+                
+                // Step 5: Add line break when lowercase/punctuation is followed by a digit starting a phrase
+                // This catches: "Pads12", "Tyres2", etc.
+                mainDesc = mainDesc.replace(/([a-z])(\d)/g, '$1\n$2');
+                
+                // Step 6: Add line break after numbers/symbols followed by uppercase letters
+                // This catches: "2+700", "+ BHP", "NM Down", etc.
+                mainDesc = mainDesc.replace(/([0-9+])\s*([A-Z][a-z])/g, '$1\n$2');
+                
+                // Step 7: Special handling for section headers like "Options:", "Features:", "Extras:"
+                // Add double line break before these section headers if preceded by text
+                mainDesc = mainDesc.replace(/([a-zA-Z])(Options:|Features:|Extras:|Specification:)/gi, '$1\n\n$2');
+                
+                // Step 8: Add line break after section headers followed by a dash
+                mainDesc = mainDesc.replace(/(Options|Features|Extras|Specification):\s*-/gi, '$1:\n-');
+                
+                // Step 9: Add line break before each dash (bullet point) that's not already on a new line
+                mainDesc = mainDesc.replace(/([^\n])\s*-\s+/g, '$1\n- ');
+                
+                // Step 10: Handle uppercase-to-uppercase transitions (like "MOTOptions", "AMGGHOST")
+                // Insert double line break before major section keywords when preceded by uppercase
+                mainDesc = mainDesc.replace(/([A-Z]{2,})(Options|Features|Full|Service|History|Specification)/g, '$1\n\n$2');
+                
+                // Step 11: Add line breaks around asterisk sections (notes/disclaimers)
+                mainDesc = mainDesc.replace(/([^\n])\*([^*]+)\*/g, '$1\n\n*$2*');
+                mainDesc = mainDesc.replace(/\*([^*]+)\*([^\n])/g, '*$1*\n\n$2');
+                
+                // Step 12: Clean up formatting
+                // Remove spaces before line breaks
+                mainDesc = mainDesc.replace(/ +\n/g, '\n');
+                // Clean up multiple consecutive line breaks (max 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
+                // Clean up spaces around dashes
+                mainDesc = mainDesc.replace(/\n- +/g, '\n- ');
                 
-                // 12. Restore protected compound words
+                // Step 13: Restore protected compound words
                 Object.keys(placeholders).forEach(placeholder => {
-                  mainDesc = mainDesc.replace(placeholder, placeholders[placeholder]);
+                  mainDesc = mainDesc.replace(new RegExp(placeholder, 'g'), placeholders[placeholder]);
                 });
                 
-                // 13. Trim any leading/trailing whitespace and line breaks
+                // Step 14: Final trim
                 mainDesc = mainDesc.trim();
               }
               
