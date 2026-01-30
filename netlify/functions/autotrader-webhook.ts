@@ -303,32 +303,35 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     
     // If webhook secret is configured, enforce signature verification
     if (webhookSecret) {
-      // Reject if signature is missing
+      // Reject if signature is missing (AutoTrader Go-Live: return 2XX if valid)
       if (!signature) {
         console.error('❌ Webhook signature header missing (AUTOTRADER_WEBHOOK_SECRET is set)');
         return {
-          statusCode: 401,
+          statusCode: 403, // Go-Live requirement: Return 403 if auth fails
           headers,
           body: JSON.stringify({ error: 'Missing webhook signature' }),
         };
       }
       
-      // Verify signature
+      // Verify signature (AutoTrader Go-Live: return 403 if hash doesn't match)
       if (!verifyWebhookSignature(event.body, signature, webhookSecret)) {
         console.error('❌ Webhook signature verification FAILED - potential security threat!');
         return {
-          statusCode: 401,
+          statusCode: 403, // Go-Live requirement: Return 403 if auth fails
           headers,
           body: JSON.stringify({ error: 'Invalid webhook signature' }),
         };
       }
       
-      console.log('✅ Webhook signature verified - request is authentic');
+      console.log('✅ Webhook signature verified - request is authentic (returning 2XX)');
     } else {
       // Webhook secret not configured - log warning but allow (sandbox mode)
       console.warn('⚠️ WARNING: AUTOTRADER_WEBHOOK_SECRET not set - webhooks are NOT verified!');
       console.warn('⚠️ This is acceptable for sandbox testing but MUST be configured for production!');
     }
+    
+    // Identify notification type (AutoTrader Go-Live requirement)
+    console.log(`📦 Notification type identified: STOCK_UPDATE (${webhookEvent.eventType})`);
     
     // Log webhook receipt
     console.log(`Received webhook: ${webhookEvent.eventType} for vehicle ${webhookEvent.vehicleId}`);

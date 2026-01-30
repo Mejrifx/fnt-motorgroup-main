@@ -1,0 +1,258 @@
+Go Live checks for Integration Fundamentals
+ 
+To get live API access, your integration must pass certain tests. This will make sure that it meets our technical standards and best practices.
+
+For each capability, the tests cover Essential and Enhanced functionalities. Your integration must pass at least one of the Essential functionality tests to get live access.
+
+We recommend using the Enhanced functionalities to allow dealers to get the full benefits of the service.
+
+We'll cover the tests for the following functionalities:
+
+Authentication (Essential)
+Advertisers API (Enhanced) Advertiser update notifications (Enhanced)
+General error handling (Essential)
+There are three ways we check that tests are successful:
+
+Demonstration - We will expect you to show us your code or your UI 
+Call log validation - We will check your API calls to our service to make sure the call is made correctly
+Database check - We will check our database to see whether the correct attribute has been updated
+Authentication (Essential)
+When using your API key to authenticate, follow the below guidelines for getting an access token to use on our other API services and when to generate a new one.
+
+Test
+How we'll check it
+You can successfully get an API token with your given credentials
+Call log validation
+After the key expires, you can logically generate a new key
+Call log validation
+You do not authenticate on every call to our services
+Call log validation
+Advertisers API (Enhanced)
+All Autotrader Connect integrations have access to our Advertisers API, which gives information on the dealers that are configured to be on your integration.
+
+Test
+How we'll check it
+Able to get dealers on your integration via the Advertisers API
+Call log validation
+Included relevant pagination with page and pageSize parameters
+Call log validation
+Optional checks
+Able to call the Advertisers API for a specific advertiser ID to check if they are on your integration or not
+Call log validation
+Advertiser update notifications (Enhanced)
+As well as access to the Advertisers API, you can also use our advertiser update notifications, which will send a webhook when any data available on the Advertisers API has been updated in Autotrader.
+
+This will not send a notification when an dealer is added or removed from your integration.
+
+Test
+How we'll check it
+Implement hash authentication on your notification endpoint and return a successful response code (2XX) if the hash authentication matches
+Call log validation
+Able to identify the notification type of ADVERTISER for this functionality
+Demonstration
+Advertiser details are updated in your system when an dealer is updated in Autotrader
+Demonstration
+Fair Usage (Essential)
+
+
+429 Response Code - Too Many Requests
+Test
+How we'll check it
+When you get a 429 response code, you should temporarily pause all API activity for a seconds before retrying
+Demonstration
+503 Response Code - Service Unavailable
+Test
+How we'll check it
+When you get a 503 response code, you should temporarily pause API activity on the requested service for at least two seconds
+Demonstration
+General error handling (Essential)
+400 Response Code - Bad Request
+Test
+How we'll check it
+When you get a 400 response code, the API call should not be retried on a schedule and should flag to the partner or user that there was bad input
+Demonstration
+401 Response Code - Unauthorised
+Test
+How we'll check it
+When you get a 401 response code, all other API activity should be stopped until a new access token has been requested from the Authentication endpoint
+Demonstration
+403 Response Code - Forbidden
+You can get two types of a 403 error. The response body of the request will tell you which type of 403 error it is:
+
+Your integration does not have access to the advertiser ID requested in the query string
+The advertiser ID the request is for does not have access to the service you are requesting
+Test
+How we'll check it
+When you get a 403 response code due to the advertiser ID not being on your advertiser list, you should stop all API activity for that advertiser ID and/or raise an action internally to query with Autotrader
+Demonstration
+When you get a 403 response code due to incorrect products for the advertiser ID, you should stop API activity for that service for that advertiser ID and/or raise an action internally to query with Autotrader
+Demonstration
+Capture CF-Ray-ID
+To help us look into any issues, store the API call ID in your logging. When you raise an issue, give us this ID so we can locate the exact API call.
+
+Test
+How we'll check it
+Capture CF-RAY ID from the response header on API call failures
+Demonstration
+
+---
+
+Go Live checks for Stock Sync
+ 
+To get live API access, your integration must pass certain tests. This will make sure that it meets our technical standards and best practices.
+
+For each capability, the tests cover Essential and Enhanced functionalities. Your integration must pass at least one of the Essential functionality tests to get live access.
+
+We recommend using the Enhanced functionalities to allow dealers to get the full benefits of the service.
+
+We'll cover the tests for the following functionalities:
+
+Stock update notifications (Essential)
+Baseline stock (Essential)Stock charge times (Enhanced)
+Stock taxonomy features (Enhanced)
+There are three ways we check that tests are successful:
+
+Demonstration - We will expect you to show us your code or your UI 
+Call log validation - We will check your API calls to our service to make sure the call is made correctly
+Database check - We will check our database to see whether the correct attribute has been updated
+Stock update notifications (Essential)
+To keep your stock data up-to-date with Autotrader, make sure you successfully update your stock data based on stock update notifications that are sent to you.
+
+Hash authentication
+To validate that the notification has come from Autotrader, you will need to use our hash authentication, as covered in our API developer documentation.
+
+Test
+How we'll check it
+Implement hash authentication on your notification endpoint and return a successful response code (2XX) if the hash authentication matches
+Call log validation
+Able to identify the notification type of STOCK_UPDATE to know to update stock with this notification
+Demonstration
+Optional checks
+Implement hash authentication on your notification endpoint and return a forbidden response code (403) if the hash authentication does not match
+Call log validation
+ 
+Stock created
+You'll get a webhook when a stock record is created for a dealer that's on your integration. You should be able to handle this and create the stock in your system to match.
+
+Test
+How we'll check it
+Successfully able to create a stock item in your system when created in Portal
+Demonstration
+Able to store these essential stock identifiers from the notification:
+
+Autotrader Stock ID and/or Autotrader Search ID
+Autotrader Advertiser ID
+External Stock Reference and/or External Stock ID
+Demonstration
+ 
+
+Stock availability
+You'll get a webhook when the availability of stock updates in Autotrader. You should reflect any change to the availability of stock within your system.
+
+This is important for dealers who use our Deal Builder service and will be getting reservations on Autotrader (as well as reservations from other systems) so keeping this data up-to-date is crucial.
+
+Test
+How we'll check it
+If you are managing a dealer’s website, you are showing adverts with advertiserAdvert set to PUBLISHED, and not showing adverts where advertiserAdvert is set to NOT_PUBLISHED
+Demonstration
+Successfully update the availability of stock in your system when a notification is sent with a reservation status, or lifecycleState of SOLD, WASTEBIN, or DELETED
+Demonstration
+Stock updates
+Stock updates are split into different sections based on what you are implementing the Stock Sync capability for. We recommend storing and updating as much stock data as possible, but if you are only using a limited set of attributes from Autotrader, then you may not need to update all of the below.
+
+Vehicle data
+Test
+How we'll check it
+Successfully update vehicle data of stock in your system when vehicle data is updated on a stock item:
+
+Make and model
+Mileage
+First registration date
+Derivative ID
+Vehicle specification data, e.g. seats, doors, engine capacity and CO2 emissions
+Demonstration
+Media
+Test
+How we'll check it
+Successfully update media of stock in your system when media is updated on a stock item:
+
+Images
+Video URL
+Spin URL
+Demonstration
+Advert data
+Test
+How we'll check it
+Successfully update advert data of stock in your system when advert data is updated on a stock item:
+
+Attention grabber
+Description and description2
+Price indicator rating
+Demonstration
+Price data
+Test
+How we'll check it
+Successfully update the price of stock in your system when price data is updated on a stock item:
+
+Supplied price
+Admin fee
+Total price
+VAT status
+Demonstration
+Features
+Test
+How we'll check it
+Successfully update features of stock in your system when features are updated on a stock item:
+
+Standard features
+Optional features
+Demonstration
+Vehicle Highlights
+Test
+How we'll check it
+Successfully update vehicle highlights of stock in your system when highlights are updated on a stock item.
+Demonstration
+Successfully update highlight-related feature data of stock in your system when features are updated on a stock item
+
+Rarity rating
+Value rating
+ 
+Baseline stock (Essential)
+You should be able to call the Stock API to get the current stock in Autotrader, then pull this into your system. This will mean you can use the stock update notifications to keep your stock up-to-date.
+
+Test
+How we'll check it
+Get stock for a single retailer using the advertiserId parameter
+Call log validation
+Paginate through stock using page and pageSize parameters when total results are greater than the page size requested
+Call log validation
+Store essential stock identifiers Autotrader Stock ID and/or Autotrader Search ID
+Demonstration
+If you receive a 403 response code from the Stock API, you should not retry the call for this advertiser ID. You should log the error somewhere, with an action to contact Autotrader if incorrect.
+Demonstration
+Optional checks
+Response refinement is used, setting attributes to false where not being used, e.g. features=false if not using the features attribute of the results
+Call log validation
+ 
+Stock taxonomy features (Enhanced)
+If you want to get taxonomy feature data for a vehicle, you can make an API call to the stock features endpoint using the stock ID of the stock record you want to get this data for.
+
+Test
+How we'll check it
+Successfully able to get taxonomy feature data from the stock features endpoint for a given stock ID
+Call log validation
+This endpoint is only successfully called once per stock item, and calls are not repeated on a schedule. Calls should only be repeated if the derivative ID or features change on the stock item.
+Call log validation
+ 
+Stock charge times (Enhanced)
+You can also get 'charge time' data for in-stock vehicles. Using the Stock ID of the stock record you want to get this data for, you can make an API call to the stock charge time endpoint to get this data.
+
+Test
+How we'll check it
+Successfully able to get 'charge time' data from the stock charge-times endpoint for a given stock ID
+Call log validation
+Handle vehicles that are not electric or hybrid, either by only calling the endpoint for electric or hybrid vehicles or being able to handle a blank array being returned
+Demonstration
+This endpoint is only successfully called once per stock item, and calls are not repeated on a schedule. Calls should only be repeated if the derivative ID changes on the stock item.
+Call log validation
+

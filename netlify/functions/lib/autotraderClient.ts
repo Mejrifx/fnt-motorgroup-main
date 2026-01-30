@@ -170,39 +170,85 @@ class AutoTraderClient {
       
       const response = await fetch(fullUrl, options);
       console.log(`Response status: ${response.status} ${response.statusText}`);
+      
+      // Capture CF-Ray-ID for error tracking (AutoTrader Go-Live requirement)
+      const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray');
+      if (cfRayId) {
+        console.log(`CF-Ray-ID: ${cfRayId}`);
+      }
 
-      // Handle rate limiting (429 Too Many Requests)
+      // Handle 400 Bad Request - DO NOT RETRY (AutoTrader Go-Live requirement)
+      if (response.status === 400) {
+        const errorText = await response.text();
+        const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray') || 'N/A';
+        console.error(`❌ 400 Bad Request - Invalid input (CF-Ray-ID: ${cfRayId}):`, errorText);
+        console.error('⚠️ This request will NOT be retried - check input parameters');
+        throw new Error(`Bad Request (400): ${errorText} [CF-Ray-ID: ${cfRayId}]`);
+      }
+
+      // Handle 401 Unauthorized - Stop all API activity and re-authenticate (AutoTrader Go-Live requirement)
+      if (response.status === 401) {
+        const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray') || 'N/A';
+        if (retryCount < this.maxRetries) {
+          console.log(`🔐 401 Unauthorized - Token expired (CF-Ray-ID: ${cfRayId}). Re-authenticating...`);
+          this.token = null; // Clear cached token
+          return this.makeRequest(endpoint, method, body, retryCount + 1);
+        }
+        console.error(`❌ 401 Unauthorized after ${this.maxRetries} retries (CF-Ray-ID: ${cfRayId})`);
+        throw new Error(`Unauthorized (401): Authentication failed after retries [CF-Ray-ID: ${cfRayId}]`);
+      }
+
+      // Handle 403 Forbidden - Stop API activity for this advertiser (AutoTrader Go-Live requirement)
+      if (response.status === 403) {
+        const errorText = await response.text();
+        const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray') || 'N/A';
+        console.error(`❌ 403 Forbidden (CF-Ray-ID: ${cfRayId}):`, errorText);
+        console.error('⚠️ CRITICAL: This advertiser may not have access to this service or is not on your integration');
+        console.error('⚠️ API activity for this advertiser should be stopped. Contact AutoTrader support.');
+        
+        // Don't retry 403 errors - they indicate a permission/configuration issue
+        throw new Error(`Forbidden (403): Access denied - contact AutoTrader support [CF-Ray-ID: ${cfRayId}] - ${errorText}`);
+      }
+
+      // Handle 429 Too Many Requests - Pause and retry (AutoTrader Go-Live requirement)
       if (response.status === 429) {
+        const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray') || 'N/A';
         if (retryCount < this.maxRetries) {
           const retryAfter = response.headers.get('Retry-After');
           const delay = retryAfter ? parseInt(retryAfter) * 1000 : this.retryDelay * (retryCount + 1);
           
-          console.log(`Rate limited. Retrying after ${delay}ms...`);
+          console.log(`⏸️ 429 Rate Limited (CF-Ray-ID: ${cfRayId}). Pausing for ${delay}ms before retry...`);
           await this.sleep(delay);
           return this.makeRequest(endpoint, method, body, retryCount + 1);
         }
-        throw new Error('Rate limit exceeded. Max retries reached.');
+        console.error(`❌ 429 Rate limit exceeded after ${this.maxRetries} retries (CF-Ray-ID: ${cfRayId})`);
+        throw new Error(`Rate limit exceeded (429): Max retries reached [CF-Ray-ID: ${cfRayId}]`);
       }
 
-      // Handle unauthorized (token might have expired)
-      if (response.status === 401) {
+      // Handle 503 Service Unavailable - Pause for at least 2 seconds (AutoTrader Go-Live requirement)
+      if (response.status === 503) {
+        const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray') || 'N/A';
         if (retryCount < this.maxRetries) {
-          console.log('Token expired. Re-authenticating...');
-          this.token = null; // Clear cached token
+          const delay = Math.max(2000, this.retryDelay * (retryCount + 1)); // At least 2 seconds
+          console.log(`⏸️ 503 Service Unavailable (CF-Ray-ID: ${cfRayId}). Pausing for ${delay}ms before retry...`);
+          await this.sleep(delay);
           return this.makeRequest(endpoint, method, body, retryCount + 1);
         }
-        throw new Error('Unauthorized. Authentication failed after retries.');
+        console.error(`❌ 503 Service Unavailable after ${this.maxRetries} retries (CF-Ray-ID: ${cfRayId})`);
+        throw new Error(`Service Unavailable (503): AutoTrader API temporarily unavailable [CF-Ray-ID: ${cfRayId}]`);
       }
 
-      // Handle other errors with detailed logging
+      // Handle other errors with detailed logging and CF-Ray-ID
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`API request failed for ${fullUrl}:`, {
+        const cfRayId = response.headers.get('CF-RAY') || response.headers.get('cf-ray') || 'N/A';
+        console.error(`❌ API request failed for ${fullUrl} (CF-Ray-ID: ${cfRayId}):`, {
           status: response.status,
           statusText: response.statusText,
-          errorBody: errorText
+          errorBody: errorText,
+          cfRayId: cfRayId
         });
-        throw new Error(`API request failed: ${response.status} - ${errorText}`);
+        throw new Error(`API request failed (${response.status}): ${errorText} [CF-Ray-ID: ${cfRayId}]`);
       }
 
       return await response.json();
