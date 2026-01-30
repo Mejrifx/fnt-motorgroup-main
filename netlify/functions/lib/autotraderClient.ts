@@ -469,21 +469,20 @@ class AutoTraderClient {
                 // "Miles.Options" → "Miles.\n\nOptions"
                 mainDesc = mainDesc.replace(/\.([A-Z])/g, '.\n\n$1');
                 
-                // STEP 2: Fix "Options: " - ensure space after colon if not present
-                mainDesc = mainDesc.replace(/Options:([^ ])/gi, 'Options: $1');
+                // STEP 2: Fix "Miles" (no period) followed directly by uppercase (new section starts)
+                // "MilesFull" → "Miles\n\nFull", "MilesOptions" → "Miles\n\nOptions"
+                mainDesc = mainDesc.replace(/Miles([A-Z])/g, 'Miles\n\n$1');
                 
-                // STEP 3: Split bullet points - dash followed by uppercase/digit is NEW bullet
+                // STEP 3: Fix "Options: " - ensure space after colon if not present
+                mainDesc = mainDesc.replace(/Options:([^ \n])/gi, 'Options: $1');
+                
+                // STEP 4: Split bullet points - dash followed by uppercase/digit is NEW bullet
                 // "Cameras-Bang" → "Cameras\n-Bang"
-                // Pattern: letter/digit/space followed by dash and then uppercase/digit
                 mainDesc = mainDesc.replace(/([a-zA-Z0-9 ])(-[A-Z0-9])/g, '$1\n$2');
                 
-                // STEP 4: Ensure dash bullets have space after them if missing
-                // "-360Cameras" → "- 360 Cameras" (but this might not be needed)
-                mainDesc = mainDesc.replace(/\n-([A-Z0-9])/g, '\n-$1');  // Keep as is, dashes are already fine
-                
-                // STEP 5: Fix concatenated sentences with "Please"
+                // STEP 5: Fix concatenated word before "Please" (start of disclaimer section)
                 // "AutoPlease" → "Auto\n\nPlease"
-                mainDesc = mainDesc.replace(/([a-z])(Please [A-Z])/g, '$1\n\n$2');
+                mainDesc = mainDesc.replace(/([a-z])(Please)/g, '$1\n\n$2');
                 
                 // STEP 6: Clean up multiple consecutive line breaks (max 2)
                 mainDesc = mainDesc.replace(/\n{3,}/g, '\n\n');
