@@ -7,7 +7,7 @@
 
 # Build environment variables
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 # Redirects for SPA routing
 [[redirects]]
@@ -26,7 +26,6 @@
 # Function settings
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@supabase/supabase-js"]
 
 # Headers for security
 [[headers]]
