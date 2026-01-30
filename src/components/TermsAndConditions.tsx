@@ -61,8 +61,8 @@ const TermsAndConditions: React.FC = () => {
                   By proceeding with a purchase, viewing a vehicle, paying a deposit, or entering into any agreement with us, 
                   you agree to be bound by these Terms.
                 </p>
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
-                  <p className="text-blue-900">
+                <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                  <p className="text-gray-800">
                     <strong>Your Statutory Rights:</strong> Nothing in these Terms affects your statutory rights under 
                     the Consumer Rights Act 2015, the Consumer Protection from Unfair Trading Regulations 2008, 
                     or any other applicable consumer protection legislation.
@@ -121,8 +121,8 @@ const TermsAndConditions: React.FC = () => {
                   </ul>
                   
                   <h4 className="font-semibold text-gray-900 mt-6 mb-3">Deposits are NON-REFUNDABLE in the following circumstances:</h4>
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4 mt-3">
-                    <ul className="list-disc pl-6 space-y-2 text-red-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-3">
+                    <ul className="list-disc pl-6 space-y-2 text-gray-800">
                       <li>
                         <strong>Buyer changes their mind:</strong> If you decide not to proceed with the purchase for any reason, 
                         including finding another vehicle, financial difficulties, or simply changing your mind
@@ -139,8 +139,8 @@ const TermsAndConditions: React.FC = () => {
                   </div>
                   
                   <h4 className="font-semibold text-gray-900 mt-6 mb-3">Deposits are REFUNDABLE in the following circumstances:</h4>
-                  <div className="bg-green-50 border-l-4 border-green-400 p-4 mt-3">
-                    <ul className="list-disc pl-6 space-y-2 text-green-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-3">
+                    <ul className="list-disc pl-6 space-y-2 text-gray-800">
                       <li>
                         <strong>Vehicle is faulty or not as described:</strong> If the vehicle has defects that were not disclosed 
                         or the vehicle is materially different from the description or advertisement
@@ -192,12 +192,12 @@ const TermsAndConditions: React.FC = () => {
                   </p>
                   
                   <h4 className="font-semibold text-gray-900 mt-6 mb-3">Your responsibility to inspect:</h4>
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-3">
-                    <p className="text-yellow-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-3">
+                    <p className="text-gray-800">
                       <strong>Important:</strong> It is your responsibility to inspect and verify the vehicle prior to purchase. 
                       We strongly recommend:
                     </p>
-                    <ul className="list-disc pl-6 text-yellow-900 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
                       <li>Viewing the vehicle in person before purchase</li>
                       <li>Conducting a test drive (subject to valid insurance and driving license)</li>
                       <li>Requesting an independent inspection or vehicle history check</li>
@@ -276,11 +276,11 @@ const TermsAndConditions: React.FC = () => {
                   title="8. Warranty and After-Sales Support"
                 >
                   <h4 className="font-semibold text-gray-900 mb-3">Standard warranty:</h4>
-                  <div className="bg-green-50 border-l-4 border-green-400 p-4">
-                    <p className="text-green-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4">
+                    <p className="text-gray-800">
                       <strong>All vehicles come with:</strong>
                     </p>
-                    <ul className="list-disc pl-6 text-green-900 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
                       <li>6 months warranty (mechanical and electrical coverage)</li>
                       <li>6 months breakdown cover (nationwide roadside assistance and recovery)</li>
                     </ul>
@@ -333,11 +333,11 @@ const TermsAndConditions: React.FC = () => {
                     </li>
                   </ul>
                   
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
-                    <p className="text-blue-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Important:</strong> Under the Consumer Rights Act, goods must be:
                     </p>
-                    <ul className="list-disc pl-6 text-blue-900 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
                       <li>Of satisfactory quality</li>
                       <li>Fit for purpose</li>
                       <li>As described</li>
@@ -354,12 +354,12 @@ const TermsAndConditions: React.FC = () => {
                   </p>
                   
                   <h4 className="font-semibold text-gray-900 mt-6 mb-3">14-day cooling-off period:</h4>
-                  <div className="bg-green-50 border-l-4 border-green-400 p-4">
-                    <p className="text-green-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4">
+                    <p className="text-gray-800">
                       You have the right to cancel the purchase within <strong>14 days</strong> of receiving the vehicle, 
                       without giving a reason. To exercise this right, you must:
                     </p>
-                    <ul className="list-disc pl-6 text-green-900 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
                       <li>Inform us in writing (email or letter) of your decision to cancel</li>
                       <li>Return the vehicle in the same condition it was delivered (reasonable wear and tear excepted)</li>
                       <li>Cover the cost of returning the vehicle to us</li>
@@ -398,11 +398,11 @@ const TermsAndConditions: React.FC = () => {
                     </li>
                   </ul>
                   
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
-                    <p className="text-red-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Important:</strong> Nothing in these Terms limits our liability for:
                     </p>
-                    <ul className="list-disc pl-6 text-red-900 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
                       <li>Death or personal injury caused by our negligence</li>
                       <li>Fraud or fraudulent misrepresentation</li>
                       <li>Any liability that cannot be excluded by law</li>

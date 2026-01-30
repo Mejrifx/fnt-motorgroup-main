@@ -120,8 +120,8 @@ const CookiePolicy: React.FC = () => {
                     </li>
                   </ul>
                   
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
-                    <p className="text-blue-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Can you disable these cookies?</strong> Yes. You can manage your analytics cookie preferences through your browser settings 
                       or by using the opt-out tools provided by the third-party services.
                     </p>
@@ -146,8 +146,8 @@ const CookiePolicy: React.FC = () => {
                     <li><strong>Display preferences:</strong> To remember your preferred view (grid vs. list) for vehicle listings</li>
                   </ul>
                   
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
-                    <p className="text-yellow-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Can you disable these cookies?</strong> Yes. However, if you disable these cookies, 
                       some features may not work as expected, and you may need to re-enter your preferences each time you visit.
                     </p>
@@ -190,13 +190,13 @@ const CookiePolicy: React.FC = () => {
                     </li>
                   </ul>
                   
-                  <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mt-4">
-                    <p className="text-purple-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Can you disable these cookies?</strong> Yes. You can opt-out of personalized advertising through:
                     </p>
-                    <ul className="list-disc pl-6 text-purple-900 mt-2">
-                      <li><a href="http://www.youronlinechoices.eu/" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-700">Your Online Choices (EU)</a></li>
-                      <li><a href="http://www.networkadvertising.org/choices/" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-700">Network Advertising Initiative Opt-Out</a></li>
+                    <ul className="list-disc pl-6 text-gray-800 mt-2">
+                      <li><a href="http://www.youronlinechoices.eu/" target="_blank" rel="noopener noreferrer" className="underline hover:text-fnt-red">Your Online Choices (EU)</a></li>
+                      <li><a href="http://www.networkadvertising.org/choices/" target="_blank" rel="noopener noreferrer" className="underline hover:text-fnt-red">Network Advertising Initiative Opt-Out</a></li>
                       <li>Your browser settings (see "How to Manage Cookies" below)</li>
                     </ul>
                   </div>
@@ -320,8 +320,8 @@ const CookiePolicy: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-6">
-                    <p className="text-yellow-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-6">
+                    <p className="text-gray-800">
                       <strong>Warning:</strong> Blocking all cookies may prevent certain features of our website from working properly. 
                       You may not be able to save preferences, log in, or use certain interactive features.
                     </p>

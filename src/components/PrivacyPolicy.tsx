@@ -138,8 +138,8 @@ const PrivacyPolicy: React.FC = () => {
                     <li>To process part-exchange transactions</li>
                   </ul>
                   
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mt-4">
-                    <p className="text-blue-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Important:</strong> We may share your VRM with finance providers to identify vehicles 
                       with existing finance agreements and prevent fraudulent sales.
                     </p>
@@ -165,8 +165,8 @@ const PrivacyPolicy: React.FC = () => {
                     <li>To comply with regulatory requirements (FCA regulations)</li>
                   </ul>
                   
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
-                    <p className="text-yellow-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Third-party processors:</strong> Finance applications are processed by our approved finance partners. 
                       They have their own privacy policies, which you should review when applying for finance.
                     </p>
@@ -289,8 +289,8 @@ const PrivacyPolicy: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-green-50 border-l-4 border-green-400 p-4 mt-6">
-                    <p className="text-green-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-6">
+                    <p className="text-gray-800">
                       <strong>Important:</strong> We do not sell your personal data to third parties.
                     </p>
                   </div>
@@ -404,13 +404,13 @@ const PrivacyPolicy: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mt-6">
-                    <p className="text-blue-900 mb-2">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-6">
+                    <p className="text-gray-800 mb-2">
                       <strong>To exercise any of these rights, please contact us:</strong>
                     </p>
-                    <p className="text-blue-900">Email: fntgroupltd@gmail.com</p>
-                    <p className="text-blue-900">Phone: 07735770031</p>
-                    <p className="text-blue-900 mt-3">
+                    <p className="text-gray-800">Email: fntgroupltd@gmail.com</p>
+                    <p className="text-gray-800">Phone: 07735770031</p>
+                    <p className="text-gray-800 mt-3">
                       We will respond to your request within 30 days. Some rights may not apply in certain circumstances 
                       (e.g., we cannot erase data if we have a legal obligation to retain it).
                     </p>
@@ -459,8 +459,8 @@ const PrivacyPolicy: React.FC = () => {
                     Please review their privacy policies separately before providing any personal data.
                   </p>
                   
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
-                    <p className="text-yellow-900">
+                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
+                    <p className="text-gray-800">
                       <strong>Important:</strong> When you click on third-party links or use social media features (e.g., "Share" buttons), 
                       those third parties may collect data about you in accordance with their privacy policies.
                     </p>
