@@ -62,7 +62,7 @@ const InvoiceManager = () => {
                 <p className="text-sm text-red-100">
                   {currentTemplate === 'selling' 
                     ? 'For selling vehicles to customers' 
-                    : 'For purchasing vehicles from suppliers'}
+                    : 'For purchasing vehicles from customers'}
                 </p>
               </div>
             </div>
@@ -183,7 +183,7 @@ const InvoiceManager = () => {
               </div>
               <div>
                 <h4 className="text-lg font-bold text-gray-900">Purchase Invoice</h4>
-                <p className="text-sm text-gray-500">For purchasing vehicles from suppliers</p>
+                <p className="text-sm text-gray-500">For purchasing vehicles from customers</p>
               </div>
             </div>
           </div>
@@ -193,7 +193,7 @@ const InvoiceManager = () => {
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span>Supplier details</span>
+              <span>Customer details</span>
             </div>
             <div className="flex items-center text-sm text-gray-600">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,7 +250,7 @@ const InvoiceManager = () => {
             <p className="text-sm text-blue-700">
               <strong>Selling Invoice:</strong> Use when selling vehicles to customers. Includes customer details, sale price, and payment terms.
               <br />
-              <strong>Purchase Invoice:</strong> Use when purchasing vehicles from suppliers. Includes supplier details, purchase price, and terms.
+              <strong>Purchase Invoice:</strong> Use when purchasing vehicles from customers. Includes customer details, purchase price, and terms.
             </p>
           </div>
         </div>
