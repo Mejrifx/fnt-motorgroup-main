@@ -22,7 +22,7 @@ const InvoiceManager = () => {
   // Template URLs
   const TEMPLATES = {
     selling: 'https://qiml3vqj.simplepdf.com/documents/c97bf921-6b8d-460a-99a4-bcd9c4e80fb9',
-    purchase: 'https://qiml3vqj.simplepdf.com/documents/1db090aa-fd2b-42dc-a5ad-f0c9b47bf412'
+    purchase: 'https://qiml3vqj.simplepdf.com/documents/67fcfa1c-c8ea-4090-b39e-c5ebdac8e6c8'
   };
 
   const openSimplePDFEditor = (type: 'selling' | 'purchase') => {
