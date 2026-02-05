@@ -4,7 +4,7 @@
 
 Your invoice management system is now **100% integrated with SimplePDF** and ready to use!
 
-**Your SimplePDF Form:** [https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65](https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65)
+**Your SimplePDF Form:** [https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3](https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3)
 
 ---
 
@@ -47,7 +47,7 @@ Your invoice management system is now **100% integrated with SimplePDF** and rea
 #### 2. **Programmatic API Integration in `InvoiceManager.tsx`**
 ```typescript
 window.simplePDF.openEditor({
-  href: 'https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65',
+  href: 'https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3',
   context: {
     invoice_id: invoice.id,
     invoice_number: invoice.invoice_number,
@@ -255,7 +255,7 @@ Modify the `generateInvoiceNumber` function in `CreateInvoiceModal.tsx`.
 
 ## 📞 Resources
 
-- **Your SimplePDF Form:** [View Template](https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65)
+- **Your SimplePDF Form:** [View Template](https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3)
 - **SimplePDF Embed Docs:** [GitHub Repository](https://github.com/SimplePDF/simplepdf-embed/blob/main/web/README.md)
 - **SimplePDF Support:** [https://simplepdf.com/help](https://simplepdf.com/help)
 - **Webhook Documentation:** [SimplePDF Webhooks](https://simplepdf.com/help/how-to/configure-webhooks-pdf-form-submissions)

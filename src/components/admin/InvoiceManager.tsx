@@ -22,7 +22,7 @@ const InvoiceManager = () => {
     // Simply open SimplePDF editor - no pre-filled data needed
     if (window.simplePDF) {
       window.simplePDF.openEditor({
-        href: 'https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65'
+        href: 'https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3'
       });
     } else {
       alert('SimplePDF is loading... Please try again in a moment.');
@@ -63,7 +63,7 @@ const InvoiceManager = () => {
           {/* SimplePDF Iframe */}
           <div className="flex-1 bg-gray-100">
             <iframe
-              src="https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65"
+              src="https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3"
               className="w-full h-full border-0"
               title="SimplePDF Invoice Editor"
               allow="clipboard-read; clipboard-write"
@@ -87,7 +87,7 @@ const InvoiceManager = () => {
             </p>
             <div className="flex flex-wrap gap-2">
               <a
-                href="https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65"
+                href="https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
