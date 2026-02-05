@@ -42,7 +42,7 @@ const InvoiceManager = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSimplePDFEditor, setShowSimplePDFEditor] = useState(false);
 
   useEffect(() => {
     fetchInvoices();
@@ -136,44 +136,25 @@ const InvoiceManager = () => {
     );
   };
 
-  const openSimplePDFEditor = async (invoice: Invoice) => {
-    // Get the car details if linked
-    let carDetails = null;
-    if (invoice.car_id) {
-      const car = cars.find(c => c.id === invoice.car_id);
-      if (car) {
-        carDetails = {
-          make: car.make,
-          model: car.model,
-          year: car.year,
-          mileage: car.mileage
-        };
-      }
-    }
-
-    // Open SimplePDF editor with your form and pass invoice data as context
+  const openSimplePDFEditor = () => {
+    // Simply open SimplePDF editor - no pre-filled data needed
     if (window.simplePDF) {
       window.simplePDF.openEditor({
-        href: 'https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65',
-        context: {
-          invoice_id: invoice.id,
-          invoice_number: invoice.invoice_number,
-          customer_name: invoice.customer_name,
-          customer_email: invoice.customer_email || '',
-          customer_phone: invoice.customer_phone || '',
-          customer_address: invoice.customer_address || '',
-          sale_price: invoice.sale_price,
-          deposit: invoice.deposit,
-          balance: invoice.balance,
-          invoice_date: invoice.invoice_date,
-          payment_terms: invoice.payment_terms || '',
-          notes: invoice.notes || '',
-          car: carDetails
-        }
+        href: 'https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65'
       });
     } else {
       alert('SimplePDF is loading... Please try again in a moment.');
     }
+  };
+
+  const openSimplePDFEditorInline = () => {
+    setShowSimplePDFEditor(true);
+  };
+
+  const closeSimplePDFEditor = () => {
+    setShowSimplePDFEditor(false);
+    // Optionally refresh invoice list if using webhooks
+    fetchInvoices();
   };
 
   if (loading) {
@@ -186,10 +167,43 @@ const InvoiceManager = () => {
 
   return (
     <div>
+      {/* SimplePDF Editor - Full Screen */}
+      {showSimplePDFEditor && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between shadow-lg">
+            <div className="flex items-center space-x-3">
+              <FileText className="w-6 h-6" />
+              <div>
+                <h3 className="text-lg font-bold">Create Invoice</h3>
+                <p className="text-sm text-purple-100">Fill out your invoice template directly</p>
+              </div>
+            </div>
+            <button
+              onClick={closeSimplePDFEditor}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+            >
+              <XCircle className="w-5 h-5" />
+              <span>Close</span>
+            </button>
+          </div>
+          
+          {/* SimplePDF Iframe */}
+          <div className="flex-1 bg-gray-100">
+            <iframe
+              src="https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65"
+              className="w-full h-full border-0"
+              title="SimplePDF Invoice Editor"
+              allow="clipboard-read; clipboard-write"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Header with SimplePDF Info */}
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6 mb-6">
-        <div className="flex items-start justify-between">
-          <div>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
               Invoice Management with SimplePDF
               <span className="ml-3 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
@@ -197,7 +211,7 @@ const InvoiceManager = () => {
               </span>
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Create professional invoices and edit them using your SimplePDF template. All invoice data is passed automatically.
+              Click "Create Invoice" to fill out your invoice template directly on this website. No forms to fill - just your SimplePDF template!
             </p>
             <div className="flex flex-wrap gap-2">
               <a
@@ -207,17 +221,28 @@ const InvoiceManager = () => {
                 className="inline-flex items-center space-x-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
               >
                 <ExternalLink className="w-4 h-4" />
-                <span>View Template in SimplePDF</span>
+                <span>View Template</span>
               </a>
             </div>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors font-semibold"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Create Invoice</span>
-          </button>
+          
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={openSimplePDFEditorInline}
+              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all shadow-lg hover:shadow-xl font-semibold"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Create Invoice</span>
+            </button>
+            
+            <button
+              onClick={openSimplePDFEditor}
+              className="flex items-center justify-center space-x-2 bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg transition-colors font-semibold"
+            >
+              <ExternalLink className="w-5 h-5" />
+              <span>Open in Popup</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -253,11 +278,15 @@ const InvoiceManager = () => {
                   <td colSpan={6} className="px-6 py-12 text-center">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 mb-2">No invoices yet.</p>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Completed invoices will appear here (requires webhook setup)
+                    </p>
                     <button
-                      onClick={() => setShowCreateModal(true)}
-                      className="text-fnt-red hover:text-red-600 font-medium"
+                      onClick={openSimplePDFEditorInline}
+                      className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
                     >
-                      Create your first invoice
+                      <Plus className="w-5 h-5" />
+                      <span>Create your first invoice</span>
                     </button>
                   </td>
                 </tr>
@@ -330,14 +359,18 @@ const InvoiceManager = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => openSimplePDFEditor(invoice)}
-                          className="inline-flex items-center space-x-1 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-md transition-colors"
-                          title="Edit invoice in SimplePDF"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>Edit PDF</span>
-                        </button>
+                        {invoice.simplepdf_url && (
+                          <a
+                            href={invoice.simplepdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center space-x-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-md transition-colors"
+                            title="View completed PDF"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>View PDF</span>
+                          </a>
+                        )}
                         <button
                           onClick={() => handleDeleteInvoice(invoice.id)}
                           className="text-red-600 hover:text-red-900 transition-colors p-1"
@@ -404,17 +437,6 @@ const InvoiceManager = () => {
         </div>
       </div>
 
-      {/* Create Invoice Modal */}
-      {showCreateModal && (
-        <CreateInvoiceModal
-          cars={cars}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            fetchInvoices();
-            setShowCreateModal(false);
-          }}
-        />
-      )}
     </div>
   );
 };
