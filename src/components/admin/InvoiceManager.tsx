@@ -17,38 +17,53 @@ declare global {
 
 const InvoiceManager = () => {
   const [showSimplePDFEditor, setShowSimplePDFEditor] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState<'selling' | 'purchase' | null>(null);
 
-  const openSimplePDFEditor = () => {
-    // Simply open SimplePDF editor - no pre-filled data needed
+  // Template URLs
+  const TEMPLATES = {
+    selling: 'https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3',
+    purchase: 'https://qiml3vqj.simplepdf.com/documents/1db090aa-fd2b-42dc-a5ad-f0c9b47bf412'
+  };
+
+  const openSimplePDFEditor = (type: 'selling' | 'purchase') => {
+    // Open SimplePDF editor with selected template
     if (window.simplePDF) {
       window.simplePDF.openEditor({
-        href: 'https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3'
+        href: TEMPLATES[type]
       });
     } else {
       alert('SimplePDF is loading... Please try again in a moment.');
     }
   };
 
-  const openSimplePDFEditorInline = () => {
+  const openSimplePDFEditorInline = (type: 'selling' | 'purchase') => {
+    setCurrentTemplate(type);
     setShowSimplePDFEditor(true);
   };
 
   const closeSimplePDFEditor = () => {
     setShowSimplePDFEditor(false);
+    setCurrentTemplate(null);
   };
 
   return (
     <div>
       {/* SimplePDF Editor - Full Screen */}
-      {showSimplePDFEditor && (
+      {showSimplePDFEditor && currentTemplate && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col">
           {/* Header */}
           <div className="bg-fnt-red text-white px-6 py-4 flex items-center justify-between shadow-lg">
             <div className="flex items-center space-x-3">
               <FileText className="w-6 h-6" />
               <div>
-                <h3 className="text-lg font-bold">Create Invoice</h3>
-                <p className="text-sm text-red-100">Fill out your invoice template directly</p>
+                <h3 className="text-lg font-bold">
+                  Create {currentTemplate === 'selling' ? 'Selling' : 'Purchase'} Invoice
+                </h3>
+                <p className="text-sm text-red-100">
+                  {currentTemplate === 'selling' 
+                    ? 'For selling vehicles to customers' 
+                    : 'For purchasing vehicles from suppliers'}
+                </p>
               </div>
             </div>
             <button
@@ -63,7 +78,7 @@ const InvoiceManager = () => {
           {/* SimplePDF Iframe */}
           <div className="flex-1 bg-gray-100">
             <iframe
-              src="https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3"
+              src={TEMPLATES[currentTemplate]}
               className="w-full h-full border-0"
               title="SimplePDF Invoice Editor"
               allow="clipboard-read; clipboard-write"
@@ -74,7 +89,7 @@ const InvoiceManager = () => {
 
       {/* Header with SimplePDF Info */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6 mb-6">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="flex flex-col gap-4">
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
               Invoice Management
@@ -82,72 +97,161 @@ const InvoiceManager = () => {
                 ✓ Connected
               </span>
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Create professional invoices using your custom template. Click "Create Invoice" to get started.
+            <p className="text-sm text-gray-600">
+              Create professional invoices using your custom templates. Choose between selling or purchasing invoices.
             </p>
-            <div className="flex flex-wrap gap-2">
-              <a
-                href="https://qiml3vqj.simplepdf.com/documents/eee3e726-0cb8-42b8-96f4-8c2e40617ea3"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>View Template</span>
-              </a>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={openSimplePDFEditorInline}
-              className="flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all shadow-lg hover:shadow-xl font-semibold"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Create Invoice</span>
-            </button>
-            
-            <button
-              onClick={openSimplePDFEditor}
-              className="flex items-center justify-center space-x-2 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg transition-colors font-semibold"
-            >
-              <ExternalLink className="w-5 h-5" />
-              <span>Open in Popup</span>
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Info Section */}
-      <div className="bg-white shadow rounded-lg p-12">
-        <div className="max-w-2xl mx-auto text-center">
-          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-6" />
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">
-            Create Professional Invoices
-          </h3>
-          <p className="text-gray-600 mb-8">
-            Use your custom SimplePDF template to generate invoices quickly and easily. 
-            Click the button above to open the invoice editor and start creating.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Invoice Type Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Selling Invoice Card */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-gray-900">Selling Invoice</h4>
+                <p className="text-sm text-gray-500">For selling vehicles to customers</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span>Custom template</span>
+              <span>Customer details</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span>Easy to use</span>
+              <span>Vehicle information</span>
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span>Instant download</span>
+              <span>Sale price & payment terms</span>
             </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={() => openSimplePDFEditorInline('selling')}
+              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create</span>
+            </button>
+            
+            <button
+              onClick={() => openSimplePDFEditor('selling')}
+              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Popup</span>
+            </button>
+
+            <a
+              href={TEMPLATES.selling}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            >
+              <FileText className="w-4 h-4" />
+              <span>View</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Purchase Invoice Card */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-gray-900">Purchase Invoice</h4>
+                <p className="text-sm text-gray-500">For purchasing vehicles from suppliers</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Supplier details</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Vehicle information</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Purchase price & terms</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={() => openSimplePDFEditorInline('purchase')}
+              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create</span>
+            </button>
+            
+            <button
+              onClick={() => openSimplePDFEditor('purchase')}
+              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Popup</span>
+            </button>
+
+            <a
+              href={TEMPLATES.purchase}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            >
+              <FileText className="w-4 h-4" />
+              <span>View</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Info */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start space-x-3">
+          <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h4 className="text-sm font-semibold text-blue-900 mb-1">Invoice Templates</h4>
+            <p className="text-sm text-blue-700">
+              <strong>Selling Invoice:</strong> Use when selling vehicles to customers. Includes customer details, sale price, and payment terms.
+              <br />
+              <strong>Purchase Invoice:</strong> Use when purchasing vehicles from suppliers. Includes supplier details, purchase price, and terms.
+            </p>
           </div>
         </div>
       </div>
