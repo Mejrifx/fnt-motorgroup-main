@@ -21,7 +21,7 @@ const InvoiceManager = () => {
 
   // Template URLs
   const TEMPLATES = {
-    selling: 'https://qiml3vqj.simplepdf.com/documents/2e967a5b-39d2-4389-9850-9d1a27ed57b4',
+    selling: 'https://qiml3vqj.simplepdf.com/documents/c97bf921-6b8d-460a-99a4-bcd9c4e80fb9',
     purchase: 'https://qiml3vqj.simplepdf.com/documents/1db090aa-fd2b-42dc-a5ad-f0c9b47bf412'
   };
 
