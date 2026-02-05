@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
 import EditCarModal from './EditCarModal';
 import AddReviewModal from './AddReviewModal';
 import EditReviewModal from './EditReviewModal';
+import InvoiceManager from './InvoiceManager';
 import fntLogo from '../../assets/fnt-logo.png';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'cars' | 'reviews'>('cars');
+  const [activeTab, setActiveTab] = useState<'cars' | 'reviews' | 'invoices'>('cars');
   const [cars, setCars] = useState<Car[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -584,6 +585,18 @@ const AdminDashboard = () => {
               <MessageSquare className="w-5 h-5" />
               <span>Reviews</span>
             </button>
+            <button
+              onClick={() => setActiveTab('invoices')}
+              className={`
+                ${activeTab === 'invoices'
+                  ? 'border-fnt-red text-fnt-red'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+              `}
+            >
+              <FileText className="w-5 h-5" />
+              <span>Invoices</span>
+            </button>
           </nav>
         </div>
 
@@ -691,6 +704,11 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
+        )}
+
+        {/* Invoices Tab */}
+        {activeTab === 'invoices' && (
+          <InvoiceManager />
         )}
 
         {/* Reviews Tab */}
