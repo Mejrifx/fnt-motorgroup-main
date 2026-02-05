@@ -171,12 +171,12 @@ const InvoiceManager = () => {
       {showSimplePDFEditor && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between shadow-lg">
+          <div className="bg-fnt-red text-white px-6 py-4 flex items-center justify-between shadow-lg">
             <div className="flex items-center space-x-3">
               <FileText className="w-6 h-6" />
               <div>
                 <h3 className="text-lg font-bold">Create Invoice</h3>
-                <p className="text-sm text-purple-100">Fill out your invoice template directly</p>
+                <p className="text-sm text-red-100">Fill out your invoice template directly</p>
               </div>
             </div>
             <button
@@ -201,24 +201,24 @@ const InvoiceManager = () => {
       )}
 
       {/* Header with SimplePDF Info */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6 mb-6">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6 mb-6">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
-              Invoice Management with SimplePDF
+              Invoice Management
               <span className="ml-3 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                 ✓ Connected
               </span>
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Click "Create Invoice" to fill out your invoice template directly on this website. No forms to fill - just your SimplePDF template!
+              Create professional invoices using your custom template. Click "Create Invoice" to get started.
             </p>
             <div className="flex flex-wrap gap-2">
               <a
                 href="https://qiml3vqj.simplepdf.com/documents/3c391e33-e224-4de5-962f-62b625820c65"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
+                className="inline-flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>View Template</span>
@@ -229,7 +229,7 @@ const InvoiceManager = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={openSimplePDFEditorInline}
-              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all shadow-lg hover:shadow-xl font-semibold"
+              className="flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all shadow-lg hover:shadow-xl font-semibold"
             >
               <Plus className="w-5 h-5" />
               <span>Create Invoice</span>
@@ -237,7 +237,7 @@ const InvoiceManager = () => {
             
             <button
               onClick={openSimplePDFEditor}
-              className="flex items-center justify-center space-x-2 bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg transition-colors font-semibold"
+              className="flex items-center justify-center space-x-2 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg transition-colors font-semibold"
             >
               <ExternalLink className="w-5 h-5" />
               <span>Open in Popup</span>
@@ -283,7 +283,7 @@ const InvoiceManager = () => {
                     </p>
                     <button
                       onClick={openSimplePDFEditorInline}
-                      className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                      className="inline-flex items-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all"
                     >
                       <Plus className="w-5 h-5" />
                       <span>Create your first invoice</span>
