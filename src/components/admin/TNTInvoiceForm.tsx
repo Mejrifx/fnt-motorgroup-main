@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 
+interface LineItem {
+  description: string;
+  qty: string;
+  labour: string;
+  parts: string;
+  lineTotal: string;
+}
+
 interface TNTInvoiceFormProps {
   onClose: () => void;
 }
@@ -11,19 +19,24 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({
     invoiceNumber: '',
     invoiceDate: new Date().toISOString().split('T')[0],
+    vehicleReg: '',
+    mileage: '',
     customerName: '',
-    customerAddress: '',
     customerPhone: '',
     customerEmail: '',
-    serviceDescription: '',
-    quantity: '',
-    unitPrice: '',
-    totalAmount: '',
-    vatAmount: '',
-    grandTotal: '',
-    paymentTerms: '',
-    notes: ''
+    subtotal: '',
+    vat: '',
+    discount: '',
+    grandTotal: ''
   });
+
+  const [lineItems, setLineItems] = useState<LineItem[]>([
+    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+    { description: '', qty: '', labour: '', parts: '', lineTotal: '' }
+  ]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -31,22 +44,49 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
       ...prev,
       [name]: value
     }));
+  };
 
-    // Auto-calculate totals if unit price or quantity changes
-    if (name === 'unitPrice' || name === 'quantity') {
-      const qty = parseFloat(name === 'quantity' ? value : formData.quantity) || 0;
-      const price = parseFloat(name === 'unitPrice' ? value : formData.unitPrice) || 0;
-      const total = qty * price;
-      const vat = total * 0.20; // 20% VAT
-      const grand = total + vat;
+  const handleLineItemChange = (index: number, field: keyof LineItem, value: string) => {
+    const updatedItems = [...lineItems];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      [field]: value
+    };
 
-      setFormData(prev => ({
-        ...prev,
-        totalAmount: total.toFixed(2),
-        vatAmount: vat.toFixed(2),
-        grandTotal: grand.toFixed(2)
-      }));
+    // Auto-calculate line total if qty, labour, or parts changes
+    if (field === 'qty' || field === 'labour' || field === 'parts') {
+      const qty = parseFloat(field === 'qty' ? value : updatedItems[index].qty) || 1;
+      const labour = parseFloat(field === 'labour' ? value : updatedItems[index].labour) || 0;
+      const parts = parseFloat(field === 'parts' ? value : updatedItems[index].parts) || 0;
+      const lineTotal = (labour + parts) * qty;
+      updatedItems[index].lineTotal = lineTotal.toFixed(2);
     }
+
+    setLineItems(updatedItems);
+    calculateTotals(updatedItems);
+  };
+
+  const calculateTotals = (items: LineItem[]) => {
+    const subtotal = items.reduce((sum, item) => {
+      return sum + (parseFloat(item.lineTotal) || 0);
+    }, 0);
+
+    const discount = parseFloat(formData.discount) || 0;
+    const subtotalAfterDiscount = subtotal - discount;
+    const vat = subtotalAfterDiscount * 0.20; // 20% VAT
+    const grandTotal = subtotalAfterDiscount + vat;
+
+    setFormData(prev => ({
+      ...prev,
+      subtotal: subtotal.toFixed(2),
+      vat: vat.toFixed(2),
+      grandTotal: grandTotal.toFixed(2)
+    }));
+  };
+
+  const handleDiscountChange = (value: string) => {
+    setFormData(prev => ({ ...prev, discount: value }));
+    calculateTotals(lineItems);
   };
 
   const fillPDFForm = async () => {
@@ -59,32 +99,29 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
       const form = pdfDoc.getForm();
       
-      // Get all field names (for debugging - you can see what fields are available)
+      // Get all field names (for debugging)
       const fields = form.getFields();
       console.log('Available PDF fields:', fields.map(f => f.getName()));
       
-      // Fill the form fields (adjust field names based on your PDF)
-      // You may need to check the console to see the exact field names in your PDF
+      // Fill the form fields with correct field names
       try {
-        const fieldMapping: { [key: string]: string } = {
-          'Invoice Number': formData.invoiceNumber,
-          'Invoice Date': formData.invoiceDate,
-          'Customer Name': formData.customerName,
-          'Customer Address': formData.customerAddress,
-          'Customer Phone': formData.customerPhone,
-          'Customer Email': formData.customerEmail,
-          'Service Description': formData.serviceDescription,
-          'Quantity': formData.quantity,
-          'Unit Price': formData.unitPrice,
-          'Total Amount': formData.totalAmount,
-          'VAT Amount': formData.vatAmount,
-          'Grand Total': formData.grandTotal,
-          'Payment Terms': formData.paymentTerms,
-          'Notes': formData.notes
+        // Invoice/Vehicle Details
+        const invoiceFields: { [key: string]: string } = {
+          'invoice_no': formData.invoiceNumber,
+          'invoice_date': formData.invoiceDate,
+          'vehicle_reg': formData.vehicleReg,
+          'mileage': formData.mileage
         };
 
-        // Attempt to fill each field
-        Object.entries(fieldMapping).forEach(([fieldName, value]) => {
+        // Customer Details (Bill To)
+        const customerFields: { [key: string]: string } = {
+          'bill_0': formData.customerName,
+          'bill_1': formData.customerPhone,
+          'bill_2': formData.customerEmail
+        };
+
+        // Fill invoice and customer fields
+        Object.entries({ ...invoiceFields, ...customerFields }).forEach(([fieldName, value]) => {
           if (value) {
             try {
               const field = form.getTextField(fieldName);
@@ -94,6 +131,57 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
             }
           }
         });
+
+        // Fill line items (rows 0-4)
+        lineItems.forEach((item, rowIndex) => {
+          if (item.description || item.qty || item.labour || item.parts) {
+            try {
+              if (item.description) {
+                const descField = form.getTextField(`row${rowIndex}_0`);
+                descField.setText(item.description);
+              }
+              if (item.qty) {
+                const qtyField = form.getTextField(`row${rowIndex}_1`);
+                qtyField.setText(item.qty);
+              }
+              if (item.labour) {
+                const labourField = form.getTextField(`row${rowIndex}_2`);
+                labourField.setText(item.labour);
+              }
+              if (item.parts) {
+                const partsField = form.getTextField(`row${rowIndex}_3`);
+                partsField.setText(item.parts);
+              }
+              if (item.lineTotal) {
+                const totalField = form.getTextField(`row${rowIndex}_4`);
+                totalField.setText(item.lineTotal);
+              }
+            } catch (err) {
+              console.warn(`Error filling row ${rowIndex}:`, err);
+            }
+          }
+        });
+
+        // Fill totals
+        const totalFields: { [key: string]: string } = {
+          'total_0': formData.subtotal,
+          'total_1': formData.vat,
+          'total_2': formData.discount,
+          'total_3': formData.grandTotal
+        };
+
+        Object.entries(totalFields).forEach(([fieldName, value]) => {
+          if (value) {
+            try {
+              const field = form.getTextField(fieldName);
+              field.setText(value);
+            } catch (err) {
+              console.warn(`Field "${fieldName}" not found or not a text field`);
+            }
+          }
+        });
+
+        console.log('PDF fields filled successfully!');
       } catch (err) {
         console.error('Error filling form fields:', err);
       }
@@ -144,227 +232,252 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Invoice Details */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Invoice Number *
-                </label>
-                <input
-                  type="text"
-                  name="invoiceNumber"
-                  value={formData.invoiceNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="INV-001"
-                  required
-                />
-              </div>
+            {/* Invoice & Vehicle Details */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Invoice & Vehicle Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Invoice No *
+                  </label>
+                  <input
+                    type="text"
+                    name="invoiceNumber"
+                    value={formData.invoiceNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="INV-001"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Invoice Date *
-                </label>
-                <input
-                  type="date"
-                  name="invoiceDate"
-                  value={formData.invoiceDate}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  required
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Invoice Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="invoiceDate"
+                    value={formData.invoiceDate}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    required
+                  />
+                </div>
 
-              {/* Customer Details */}
-              <div className="md:col-span-2">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Customer Details</h4>
-              </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Vehicle Reg
+                  </label>
+                  <input
+                    type="text"
+                    name="vehicleReg"
+                    value={formData.vehicleReg}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="AB12 CDE"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Customer Name *
-                </label>
-                <input
-                  type="text"
-                  name="customerName"
-                  value={formData.customerName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="John Smith"
-                  required
-                />
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Mileage
+                  </label>
+                  <input
+                    type="text"
+                    name="mileage"
+                    value={formData.mileage}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="50000"
+                  />
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Customer Phone
-                </label>
-                <input
-                  type="tel"
-                  name="customerPhone"
-                  value={formData.customerPhone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="07123 456789"
-                />
+            {/* Customer Details (Bill To) */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Customer Details (Bill To)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Customer Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="customerName"
+                    value={formData.customerName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="John Smith"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="customerPhone"
+                    value={formData.customerPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="07123 456789"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="customerEmail"
+                    value={formData.customerEmail}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="john@example.com"
+                  />
+                </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Customer Email
-                </label>
-                <input
-                  type="email"
-                  name="customerEmail"
-                  value={formData.customerEmail}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="john@example.com"
-                />
+            {/* Line Items Table */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Work/Service Details</h4>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold">Description of Work</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold w-20">Qty</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold w-28">Labour (£)</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold w-28">Parts (£)</th>
+                      <th className="border border-gray-300 px-3 py-2 text-left text-sm font-semibold w-28">Line Total (£)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lineItems.map((item, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 px-2 py-1">
+                          <input
+                            type="text"
+                            value={item.description}
+                            onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                            className="w-full px-2 py-1 border-0 focus:ring-2 focus:ring-fnt-red rounded"
+                            placeholder={`Work item ${index + 1}`}
+                          />
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          <input
+                            type="number"
+                            value={item.qty}
+                            onChange={(e) => handleLineItemChange(index, 'qty', e.target.value)}
+                            className="w-full px-2 py-1 border-0 focus:ring-2 focus:ring-fnt-red rounded"
+                            placeholder="1"
+                            min="0"
+                            step="0.01"
+                          />
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          <input
+                            type="number"
+                            value={item.labour}
+                            onChange={(e) => handleLineItemChange(index, 'labour', e.target.value)}
+                            className="w-full px-2 py-1 border-0 focus:ring-2 focus:ring-fnt-red rounded"
+                            placeholder="0.00"
+                            min="0"
+                            step="0.01"
+                          />
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          <input
+                            type="number"
+                            value={item.parts}
+                            onChange={(e) => handleLineItemChange(index, 'parts', e.target.value)}
+                            className="w-full px-2 py-1 border-0 focus:ring-2 focus:ring-fnt-red rounded"
+                            placeholder="0.00"
+                            min="0"
+                            step="0.01"
+                          />
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          <input
+                            type="text"
+                            value={item.lineTotal}
+                            readOnly
+                            className="w-full px-2 py-1 bg-gray-50 border-0 rounded font-semibold"
+                            placeholder="0.00"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Customer Address
-                </label>
-                <input
-                  type="text"
-                  name="customerAddress"
-                  value={formData.customerAddress}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="123 Main Street, Manchester"
-                />
-              </div>
+            {/* Totals */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Totals</h4>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-2xl ml-auto">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Subtotal (£)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.subtotal}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
+                    placeholder="0.00"
+                  />
+                </div>
 
-              {/* Service Details */}
-              <div className="md:col-span-2">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Service Details</h4>
-              </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    VAT (20%) (£)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.vat}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
+                    placeholder="0.00"
+                  />
+                </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Service Description *
-                </label>
-                <textarea
-                  name="serviceDescription"
-                  value={formData.serviceDescription}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="Describe the service provided..."
-                  rows={3}
-                  required
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Discount (£)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.discount}
+                    onChange={(e) => handleDiscountChange(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="1"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Unit Price (£)
-                </label>
-                <input
-                  type="number"
-                  name="unitPrice"
-                  value={formData.unitPrice}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-
-              {/* Financial Details */}
-              <div className="md:col-span-2">
-                <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Financial Details</h4>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Total Amount (£)
-                </label>
-                <input
-                  type="text"
-                  name="totalAmount"
-                  value={formData.totalAmount}
-                  readOnly
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  VAT (20%) (£)
-                </label>
-                <input
-                  type="text"
-                  name="vatAmount"
-                  value={formData.vatAmount}
-                  readOnly
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Grand Total (£)
-                </label>
-                <input
-                  type="text"
-                  name="grandTotal"
-                  value={formData.grandTotal}
-                  readOnly
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-bold"
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Payment Terms
-                </label>
-                <input
-                  type="text"
-                  name="paymentTerms"
-                  value={formData.paymentTerms}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="Due on receipt"
-                />
-              </div>
-
-              {/* Additional Notes */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Additional Notes
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="Any additional information..."
-                  rows={3}
-                />
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Grand Total (£)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.grandTotal}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-green-50 font-bold text-lg"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
 
@@ -382,7 +495,7 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
                 </button>
                 <button
                   onClick={fillPDFForm}
-                  disabled={isGenerating || !formData.invoiceNumber || !formData.customerName || !formData.serviceDescription}
+                  disabled={isGenerating || !formData.invoiceNumber || !formData.customerName}
                   className="flex items-center space-x-2 px-6 py-3 bg-fnt-red hover:bg-red-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isGenerating ? (
