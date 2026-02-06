@@ -113,11 +113,11 @@ const InvoiceManager = () => {
         <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-4 bg-green-100 rounded-lg">
                 <img 
                   src="/fnt-logo.png" 
                   alt="FNT Motor Group" 
-                  className="w-6 h-6 object-contain"
+                  className="w-16 h-16 object-contain"
                 />
               </div>
               <div>
@@ -181,11 +181,11 @@ const InvoiceManager = () => {
         <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
+              <div className="p-4 bg-blue-100 rounded-lg">
                 <img 
                   src="/fnt-logo.png" 
                   alt="FNT Motor Group" 
-                  className="w-6 h-6 object-contain"
+                  className="w-16 h-16 object-contain"
                 />
               </div>
               <div>
