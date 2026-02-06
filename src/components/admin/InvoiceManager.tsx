@@ -114,9 +114,11 @@ const InvoiceManager = () => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-3 bg-green-100 rounded-lg">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <img 
+                  src="/fnt-logo.png" 
+                  alt="FNT Motor Group" 
+                  className="w-6 h-6 object-contain"
+                />
               </div>
               <div>
                 <h4 className="text-lg font-bold text-gray-900">Selling Invoice</h4>
@@ -180,9 +182,11 @@ const InvoiceManager = () => {
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+                <img 
+                  src="/fnt-logo.png" 
+                  alt="FNT Motor Group" 
+                  className="w-6 h-6 object-contain"
+                />
               </div>
               <div>
                 <h4 className="text-lg font-bold text-gray-900">Purchase Invoice</h4>
