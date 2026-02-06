@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, FileText, ExternalLink, XCircle } from 'lucide-react';
+import TNTInvoiceForm from './TNTInvoiceForm';
 
 // SimplePDF type declaration
 declare global {
@@ -18,6 +19,7 @@ declare global {
 const InvoiceManager = () => {
   const [showSimplePDFEditor, setShowSimplePDFEditor] = useState(false);
   const [currentTemplate, setCurrentTemplate] = useState<'selling' | 'purchase' | 'tnt' | null>(null);
+  const [showTNTForm, setShowTNTForm] = useState(false);
 
   // Template URLs
   const TEMPLATES = {
@@ -38,8 +40,12 @@ const InvoiceManager = () => {
   };
 
   const openSimplePDFEditorInline = (type: 'selling' | 'purchase' | 'tnt') => {
-    setCurrentTemplate(type);
-    setShowSimplePDFEditor(true);
+    if (type === 'tnt') {
+      setShowTNTForm(true);
+    } else {
+      setCurrentTemplate(type);
+      setShowSimplePDFEditor(true);
+    }
   };
 
   const closeSimplePDFEditor = () => {
@@ -49,6 +55,11 @@ const InvoiceManager = () => {
 
   return (
     <div>
+      {/* TNT Invoice Form */}
+      {showTNTForm && (
+        <TNTInvoiceForm onClose={() => setShowTNTForm(false)} />
+      )}
+
       {/* SimplePDF Editor - Full Screen */}
       {showSimplePDFEditor && currentTemplate && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col">
@@ -288,30 +299,19 @@ const InvoiceManager = () => {
             <button
               onClick={() => openSimplePDFEditorInline('tnt')}
               className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
-              disabled={!TEMPLATES.tnt}
             >
               <Plus className="w-4 h-4" />
-              <span>Create</span>
+              <span>Create Invoice</span>
             </button>
             
-            <button
-              onClick={() => openSimplePDFEditor('tnt')}
-              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
-              disabled={!TEMPLATES.tnt}
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Popup</span>
-            </button>
-
             <a
-              href={TEMPLATES.tnt || '#'}
-              target={TEMPLATES.tnt ? "_blank" : undefined}
+              href="/TNT Services Invoice Template.pdf"
+              target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold ${!TEMPLATES.tnt ? 'opacity-50 cursor-not-allowed' : ''}`}
-              onClick={(e) => !TEMPLATES.tnt && e.preventDefault()}
+              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
-              <span>View</span>
+              <span>View Template</span>
             </a>
           </div>
         </div>
