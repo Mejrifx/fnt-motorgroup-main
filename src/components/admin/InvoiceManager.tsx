@@ -17,15 +17,16 @@ declare global {
 
 const InvoiceManager = () => {
   const [showSimplePDFEditor, setShowSimplePDFEditor] = useState(false);
-  const [currentTemplate, setCurrentTemplate] = useState<'selling' | 'purchase' | null>(null);
+  const [currentTemplate, setCurrentTemplate] = useState<'selling' | 'purchase' | 'tnt' | null>(null);
 
   // Template URLs
   const TEMPLATES = {
     selling: 'https://qiml3vqj.simplepdf.com/documents/e3001c49-d97d-408b-8662-b73b7bbce355',
-    purchase: 'https://qiml3vqj.simplepdf.com/documents/1ae46b5b-569c-400d-a40c-5780aaee6287'
+    purchase: 'https://qiml3vqj.simplepdf.com/documents/1ae46b5b-569c-400d-a40c-5780aaee6287',
+    tnt: '' // Placeholder - will be updated with actual template URL
   };
 
-  const openSimplePDFEditor = (type: 'selling' | 'purchase') => {
+  const openSimplePDFEditor = (type: 'selling' | 'purchase' | 'tnt') => {
     // Open SimplePDF editor with selected template
     if (window.simplePDF) {
       window.simplePDF.openEditor({
@@ -36,7 +37,7 @@ const InvoiceManager = () => {
     }
   };
 
-  const openSimplePDFEditorInline = (type: 'selling' | 'purchase') => {
+  const openSimplePDFEditorInline = (type: 'selling' | 'purchase' | 'tnt') => {
     setCurrentTemplate(type);
     setShowSimplePDFEditor(true);
   };
@@ -57,12 +58,14 @@ const InvoiceManager = () => {
               <FileText className="w-6 h-6" />
               <div>
                 <h3 className="text-lg font-bold">
-                  Create {currentTemplate === 'selling' ? 'Selling' : 'Purchase'} Invoice
+                  Create {currentTemplate === 'selling' ? 'Selling' : currentTemplate === 'purchase' ? 'Purchase' : 'TNT Services'} Invoice
                 </h3>
                 <p className="text-sm text-red-100">
                   {currentTemplate === 'selling' 
                     ? 'For selling vehicles to customers' 
-                    : 'For purchasing vehicles from customers'}
+                    : currentTemplate === 'purchase'
+                    ? 'For purchasing vehicles from customers'
+                    : 'For TNT Services business operations'}
                 </p>
               </div>
             </div>
@@ -98,14 +101,14 @@ const InvoiceManager = () => {
               </span>
             </h3>
             <p className="text-sm text-gray-600">
-              Create professional invoices using your custom templates. Choose between selling or purchasing invoices.
+              Create professional invoices using your custom templates. Choose between FNT Motor Group invoices or TNT Services invoices.
             </p>
           </div>
         </div>
       </div>
 
       {/* Invoice Type Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Selling Invoice Card */}
         <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
@@ -237,6 +240,77 @@ const InvoiceManager = () => {
             </a>
           </div>
         </div>
+
+        {/* TNT Services Invoice Card */}
+        <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <img 
+                  src="/TNT Logo.png" 
+                  alt="TNT Services" 
+                  className="w-6 h-6 object-contain"
+                />
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-gray-900">TNT Services Invoice</h4>
+                <p className="text-sm text-gray-500">For TNT Services business</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Customer details</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Service information</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Service price & terms</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={() => openSimplePDFEditorInline('tnt')}
+              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+              disabled={!TEMPLATES.tnt}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create</span>
+            </button>
+            
+            <button
+              onClick={() => openSimplePDFEditor('tnt')}
+              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+              disabled={!TEMPLATES.tnt}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Popup</span>
+            </button>
+
+            <a
+              href={TEMPLATES.tnt || '#'}
+              target={TEMPLATES.tnt ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className={`flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold ${!TEMPLATES.tnt ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={(e) => !TEMPLATES.tnt && e.preventDefault()}
+            >
+              <FileText className="w-4 h-4" />
+              <span>View</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Quick Info */}
@@ -251,6 +325,8 @@ const InvoiceManager = () => {
               <strong>Selling Invoice:</strong> Use when selling vehicles to customers. Includes customer details, sale price, and payment terms.
               <br />
               <strong>Purchase Invoice:</strong> Use when purchasing vehicles from customers. Includes customer details, purchase price, and terms.
+              <br />
+              <strong>TNT Services Invoice:</strong> Use for TNT Services business operations. Includes service details and pricing.
             </p>
           </div>
         </div>
