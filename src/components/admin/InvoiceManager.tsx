@@ -21,8 +21,8 @@ const InvoiceManager = () => {
 
   // Template URLs
   const TEMPLATES = {
-    selling: 'https://qiml3vqj.simplepdf.com/documents/c97bf921-6b8d-460a-99a4-bcd9c4e80fb9',
-    purchase: 'https://qiml3vqj.simplepdf.com/documents/74303e5b-82f1-44ad-af53-f76c67d0f984'
+    selling: 'https://qiml3vqj.simplepdf.com/documents/e3001c49-d97d-408b-8662-b73b7bbce355',
+    purchase: 'https://qiml3vqj.simplepdf.com/documents/1ae46b5b-569c-400d-a40c-5780aaee6287'
   };
 
   const openSimplePDFEditor = (type: 'selling' | 'purchase') => {
