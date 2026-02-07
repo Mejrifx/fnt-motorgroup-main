@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument, PDFName, PDFBool } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 
 interface FNTSaleInvoiceFormProps {
   onClose: () => void;
@@ -60,37 +60,11 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     setIsGenerating(true);
     try {
       // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT_Sale_Invoice_TNTFieldConfig_v27.pdf').then(res => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch PDF: ${res.status} ${res.statusText}`);
-        }
-        return res.arrayBuffer();
-      });
-      
-      console.log('PDF fetched successfully, size:', existingPdfBytes.byteLength, 'bytes');
+      const existingPdfBytes = await fetch('/FNT_Sale_Invoice_TNTFieldConfig_v27.pdf').then(res => res.arrayBuffer());
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      console.log('PDF loaded successfully');
-      
-      // Check if the PDF has a form
-      let form;
-      try {
-        form = pdfDoc.getForm();
-        console.log('Form retrieved successfully');
-        
-        // CRITICAL FIX: Tell the PDF READER to generate appearances, not pdf-lib
-        // This makes the PDF reader use the field's font settings
-        try {
-          form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.True);
-          console.log('Set NeedAppearances to True - PDF reader will use field font settings');
-        } catch (appearanceErr) {
-          console.warn('Could not set NeedAppearances flag');
-        }
-      } catch (formError) {
-        console.error('Error getting form from PDF:', formError);
-        throw new Error('This PDF does not have fillable form fields. Please ensure the PDF template has an AcroForm with properly configured text fields.');
-      }
+      const form = pdfDoc.getForm();
       
       // Get all field names (for debugging)
       const fields = form.getFields();
@@ -137,9 +111,6 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       } catch (err) {
         console.error('Error filling form fields:', err);
       }
-
-      // DON'T call updateFieldAppearances() - let the PDF reader do it
-      // This preserves the field's original font settings
 
       // Flatten the form to make it non-editable
       form.flatten();
