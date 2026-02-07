@@ -25,7 +25,6 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
     customerPhone: '',
     customerEmail: '',
     subtotal: '',
-    vat: '',
     discount: '',
     grandTotal: ''
   });
@@ -72,14 +71,11 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
     }, 0);
 
     const discount = parseFloat(formData.discount) || 0;
-    const subtotalAfterDiscount = subtotal - discount;
-    const vat = subtotalAfterDiscount * 0.20; // 20% VAT
-    const grandTotal = subtotalAfterDiscount + vat;
+    const grandTotal = subtotal - discount;
 
     setFormData(prev => ({
       ...prev,
       subtotal: subtotal.toFixed(2),
-      vat: vat.toFixed(2),
       grandTotal: grandTotal.toFixed(2)
     }));
   };
@@ -162,10 +158,9 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
           }
         });
 
-        // Fill totals
+        // Fill totals (no VAT field)
         const totalFields: { [key: string]: string } = {
           'total_0': formData.subtotal,
-          'total_1': formData.vat,
           'total_2': formData.discount,
           'total_3': formData.grandTotal
         };
@@ -424,7 +419,7 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
             {/* Totals */}
             <div className="mb-6">
               <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Totals</h4>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-2xl ml-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-xl ml-auto">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Subtotal (£)
@@ -432,19 +427,6 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
                   <input
                     type="text"
                     value={formData.subtotal}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    VAT (20%) (£)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.vat}
                     readOnly
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
                     placeholder="0.00"
