@@ -158,11 +158,11 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
           }
         });
 
-        // Fill totals (no VAT field)
+        // Fill totals (VAT removed, fields renumbered)
         const totalFields: { [key: string]: string } = {
           'total_0': formData.subtotal,
-          'total_2': formData.discount,
-          'total_3': formData.grandTotal
+          'total_1': formData.discount,
+          'total_2': formData.grandTotal
         };
 
         Object.entries(totalFields).forEach(([fieldName, value]) => {
