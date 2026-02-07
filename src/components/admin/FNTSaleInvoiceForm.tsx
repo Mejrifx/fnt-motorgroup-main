@@ -123,11 +123,26 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'buyer_signature': formData.buyerSignature
         };
 
-        // Attempt to fill each field
+        // Attempt to fill each field with appropriate font sizes
         Object.entries(fieldMapping).forEach(([fieldName, value]) => {
           if (value) {
             try {
               const field = form.getTextField(fieldName);
+              
+              // Set font size based on field type
+              // Smaller font for address and notes fields
+              if (fieldName === 'buyer_address' || fieldName === 'notes') {
+                field.setFontSize(9);
+              }
+              // Medium font for VIN and long fields
+              else if (fieldName === 'car_vin_no' || fieldName === 'buyer_email') {
+                field.setFontSize(10);
+              }
+              // Standard font for most fields
+              else {
+                field.setFontSize(11);
+              }
+              
               field.setText(value);
             } catch (err) {
               console.warn(`Field "${fieldName}" not found or not a text field`);
