@@ -60,15 +60,43 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     setIsGenerating(true);
     try {
       // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Sale Invoice Template.pdf').then(res => res.arrayBuffer());
+      const existingPdfBytes = await fetch('/FNT Sale Invoice Template.pdf').then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch PDF: ${res.status} ${res.statusText}`);
+        }
+        return res.arrayBuffer();
+      });
+      
+      console.log('PDF fetched successfully, size:', existingPdfBytes.byteLength, 'bytes');
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
+      console.log('PDF loaded successfully');
+      
+      // Check if the PDF has a form
+      let form;
+      try {
+        form = pdfDoc.getForm();
+        console.log('Form retrieved successfully');
+      } catch (formError) {
+        console.error('Error getting form from PDF:', formError);
+        throw new Error('This PDF does not have fillable form fields. Please ensure the PDF template has an AcroForm with properly configured text fields.');
+      }
       
       // Get all field names (for debugging)
-      const fields = form.getFields();
-      console.log('Available PDF fields:', fields.map(f => f.getName()));
+      let fields;
+      try {
+        fields = form.getFields();
+        console.log('Available PDF fields:', fields.map(f => f.getName()));
+        console.log('Total fields found:', fields.length);
+      } catch (fieldsError) {
+        console.error('Error getting fields:', fieldsError);
+        throw new Error('Unable to read form fields from PDF. The PDF form structure may be corrupted.');
+      }
+      
+      if (fields.length === 0) {
+        throw new Error('No fillable fields found in the PDF template. Please add form fields to the PDF using Adobe Acrobat or a similar tool.');
+      }
       
       // Fill the form fields
       try {
