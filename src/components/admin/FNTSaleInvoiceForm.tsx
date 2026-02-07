@@ -79,11 +79,11 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
         form = pdfDoc.getForm();
         console.log('Form retrieved successfully');
         
-        // CRITICAL FIX: Tell pdf-lib to NOT auto-generate appearances
-        // This makes pdf-lib respect the PDF's existing font settings
+        // CRITICAL FIX: Tell the PDF READER to generate appearances, not pdf-lib
+        // This makes the PDF reader use the field's font settings
         try {
-          form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.False);
-          console.log('Set NeedAppearances to False - will use PDF font settings');
+          form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.True);
+          console.log('Set NeedAppearances to True - PDF reader will use field font settings');
         } catch (appearanceErr) {
           console.warn('Could not set NeedAppearances flag');
         }
@@ -138,13 +138,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
         console.error('Error filling form fields:', err);
       }
 
-      // Update field appearances to regenerate them with proper fonts
-      try {
-        form.updateFieldAppearances();
-        console.log('Field appearances updated');
-      } catch (appearanceErr) {
-        console.warn('Could not update field appearances:', appearanceErr);
-      }
+      // DON'T call updateFieldAppearances() - let the PDF reader do it
+      // This preserves the field's original font settings
 
       // Flatten the form to make it non-editable
       form.flatten();
