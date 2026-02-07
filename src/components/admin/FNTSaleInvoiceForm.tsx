@@ -129,7 +129,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
         let skippedCount = 0;
         let errorCount = 0;
 
-        // Attempt to fill each field (WITHOUT setting font size - let PDF use its own formatting)
+        // Attempt to fill each field with controlled font sizes
         Object.entries(fieldMapping).forEach(([fieldName, value]) => {
           if (!value) {
             skippedCount++;
@@ -138,6 +138,30 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
 
           try {
             const field = form.getTextField(fieldName);
+            
+            // Try to set font size to prevent pdf-lib from using huge defaults
+            try {
+              // Very small font for notes (multiline text)
+              if (fieldName === 'notes') {
+                field.setFontSize(8);
+              }
+              // Small font for address and long fields
+              else if (fieldName === 'buyer_address' || fieldName === 'car_vin_no') {
+                field.setFontSize(9);
+              }
+              // Medium font for email and other fields
+              else if (fieldName === 'buyer_email') {
+                field.setFontSize(10);
+              }
+              // Standard font for most fields
+              else {
+                field.setFontSize(11);
+              }
+            } catch (fontErr) {
+              // If setFontSize fails, just continue with setText
+              console.warn(`⚠️ Could not set font size for "${fieldName}", using default`);
+            }
+            
             field.setText(value);
             filledCount++;
             console.log(`✅ Filled "${fieldName}" with "${value}"`);
