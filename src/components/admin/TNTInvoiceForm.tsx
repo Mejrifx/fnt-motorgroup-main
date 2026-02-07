@@ -197,7 +197,6 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
       URL.revokeObjectURL(url);
 
       setIsGenerating(false);
-      alert('Invoice generated successfully!');
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating invoice. Please check the console for details.');
