@@ -178,7 +178,7 @@ const InvoiceManager = () => {
             </button>
             
             <a
-              href="/FNT_Sale_Invoice_TNTFieldConfig_v27.pdf"
+              href="/FNT_Sale_Invoice_v28_TNTStyleFields.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
