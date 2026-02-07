@@ -87,8 +87,9 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       let fields;
       try {
         fields = form.getFields();
-        console.log('Available PDF fields:', fields.map(f => f.getName()));
-        console.log('Total fields found:', fields.length);
+        const fieldNames = fields.map(f => f.getName());
+        console.log('📋 Available PDF fields:', fieldNames);
+        console.log('📊 Total fields found:', fields.length);
       } catch (fieldsError) {
         console.error('Error getting fields:', fieldsError);
         throw new Error('Unable to read form fields from PDF. The PDF form structure may be corrupted.');
@@ -123,34 +124,45 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'buyer_signature': formData.buyerSignature
         };
 
+        console.log('🔍 Attempting to fill fields...');
+        let filledCount = 0;
+        let skippedCount = 0;
+        let errorCount = 0;
+
         // Attempt to fill each field with appropriate font sizes
         Object.entries(fieldMapping).forEach(([fieldName, value]) => {
-          if (value) {
-            try {
-              const field = form.getTextField(fieldName);
-              
-              // Set font size based on field type
-              // Smaller font for address and notes fields
-              if (fieldName === 'buyer_address' || fieldName === 'notes') {
-                field.setFontSize(9);
-              }
-              // Medium font for VIN and long fields
-              else if (fieldName === 'car_vin_no' || fieldName === 'buyer_email') {
-                field.setFontSize(10);
-              }
-              // Standard font for most fields
-              else {
-                field.setFontSize(11);
-              }
-              
-              field.setText(value);
-            } catch (err) {
-              console.warn(`Field "${fieldName}" not found or not a text field`);
+          if (!value) {
+            skippedCount++;
+            return;
+          }
+
+          try {
+            const field = form.getTextField(fieldName);
+            
+            // Set font size based on field type
+            // Smaller font for address and notes fields
+            if (fieldName === 'buyer_address' || fieldName === 'notes') {
+              field.setFontSize(9);
             }
+            // Medium font for VIN and long fields
+            else if (fieldName === 'car_vin_no' || fieldName === 'buyer_email') {
+              field.setFontSize(10);
+            }
+            // Standard font for most fields
+            else {
+              field.setFontSize(11);
+            }
+            
+            field.setText(value);
+            filledCount++;
+            console.log(`✅ Filled "${fieldName}" with "${value}"`);
+          } catch (err) {
+            errorCount++;
+            console.warn(`❌ Field "${fieldName}" not found or error:`, err);
           }
         });
 
-        console.log('PDF fields filled successfully!');
+        console.log(`📝 Summary: ${filledCount} filled, ${skippedCount} skipped (empty), ${errorCount} errors`);
       } catch (err) {
         console.error('Error filling form fields:', err);
       }
