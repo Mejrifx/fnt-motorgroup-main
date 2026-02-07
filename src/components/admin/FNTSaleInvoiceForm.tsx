@@ -60,7 +60,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     setIsGenerating(true);
     try {
       // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT_Sale_Invoice_v25_IntegrationSafe.pdf').then(res => {
+      const existingPdfBytes = await fetch('/FNT_Sale_Invoice_v26_IntegrationSafe_FontFixed.pdf').then(res => {
         if (!res.ok) {
           throw new Error(`Failed to fetch PDF: ${res.status} ${res.statusText}`);
         }
