@@ -84,20 +84,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       }
       
       // Get all field names (for debugging)
-      let fields;
-      try {
-        fields = form.getFields();
-        const fieldNames = fields.map(f => f.getName());
-        console.log('📋 Available PDF fields:', fieldNames);
-        console.log('📊 Total fields found:', fields.length);
-      } catch (fieldsError) {
-        console.error('Error getting fields:', fieldsError);
-        throw new Error('Unable to read form fields from PDF. The PDF form structure may be corrupted.');
-      }
-      
-      if (fields.length === 0) {
-        throw new Error('No fillable fields found in the PDF template. Please add form fields to the PDF using Adobe Acrobat or a similar tool.');
-      }
+      const fields = form.getFields();
+      console.log('Available PDF fields:', fields.map(f => f.getName()));
       
       // Fill the form fields
       try {
@@ -124,54 +112,19 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'buyer_signature': formData.buyerSignature
         };
 
-        console.log('🔍 Attempting to fill fields...');
-        let filledCount = 0;
-        let skippedCount = 0;
-        let errorCount = 0;
-
-        // Attempt to fill each field with controlled font sizes
+        // Fill fields - exact same approach as TNT invoice
         Object.entries(fieldMapping).forEach(([fieldName, value]) => {
-          if (!value) {
-            skippedCount++;
-            return;
-          }
-
-          try {
-            const field = form.getTextField(fieldName);
-            
-            // Try to set font size to prevent pdf-lib from using huge defaults
+          if (value) {
             try {
-              // Very small font for notes (multiline text)
-              if (fieldName === 'notes') {
-                field.setFontSize(8);
-              }
-              // Small font for address and long fields
-              else if (fieldName === 'buyer_address' || fieldName === 'car_vin_no') {
-                field.setFontSize(9);
-              }
-              // Medium font for email and other fields
-              else if (fieldName === 'buyer_email') {
-                field.setFontSize(10);
-              }
-              // Standard font for most fields
-              else {
-                field.setFontSize(11);
-              }
-            } catch (fontErr) {
-              // If setFontSize fails, just continue with setText
-              console.warn(`⚠️ Could not set font size for "${fieldName}", using default`);
+              const field = form.getTextField(fieldName);
+              field.setText(value);
+            } catch (err) {
+              console.warn(`Field "${fieldName}" not found or not a text field`);
             }
-            
-            field.setText(value);
-            filledCount++;
-            console.log(`✅ Filled "${fieldName}" with "${value}"`);
-          } catch (err) {
-            errorCount++;
-            console.warn(`❌ Field "${fieldName}" not found or error:`, err);
           }
         });
 
-        console.log(`📝 Summary: ${filledCount} filled, ${skippedCount} skipped (empty), ${errorCount} errors`);
+        console.log('PDF fields filled successfully!');
       } catch (err) {
         console.error('Error filling form fields:', err);
       }
