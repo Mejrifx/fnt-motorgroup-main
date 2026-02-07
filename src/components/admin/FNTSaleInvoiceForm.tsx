@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFBool } from 'pdf-lib';
 
 interface FNTSaleInvoiceFormProps {
   onClose: () => void;
@@ -78,6 +78,15 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       try {
         form = pdfDoc.getForm();
         console.log('Form retrieved successfully');
+        
+        // CRITICAL FIX: Tell pdf-lib to NOT auto-generate appearances
+        // This makes pdf-lib respect the PDF's existing font settings
+        try {
+          form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.False);
+          console.log('Set NeedAppearances to False - will use PDF font settings');
+        } catch (appearanceErr) {
+          console.warn('Could not set NeedAppearances flag');
+        }
       } catch (formError) {
         console.error('Error getting form from PDF:', formError);
         throw new Error('This PDF does not have fillable form fields. Please ensure the PDF template has an AcroForm with properly configured text fields.');
@@ -127,6 +136,14 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
         console.log('PDF fields filled successfully!');
       } catch (err) {
         console.error('Error filling form fields:', err);
+      }
+
+      // Update field appearances to regenerate them with proper fonts
+      try {
+        form.updateFieldAppearances();
+        console.log('Field appearances updated');
+      } catch (appearanceErr) {
+        console.warn('Could not update field appearances:', appearanceErr);
       }
 
       // Flatten the form to make it non-editable
