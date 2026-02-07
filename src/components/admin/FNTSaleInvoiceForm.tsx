@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 
-interface FNTPurchaseInvoiceFormProps {
+interface FNTSaleInvoiceFormProps {
   onClose: () => void;
 }
 
-const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose }) => {
+const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState({
     invoiceNumber: '',
@@ -60,7 +60,7 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
     setIsGenerating(true);
     try {
       // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Purchase Invoice Template.pdf').then(res => res.arrayBuffer());
+      const existingPdfBytes = await fetch('/FNT Sale Invoice Template.pdf').then(res => res.arrayBuffer());
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -123,7 +123,7 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `FNT-Purchase-Invoice-${formData.invoiceNumber || 'Draft'}.pdf`;
+      link.download = `FNT-Sale-Invoice-${formData.invoiceNumber || 'Draft'}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
 
@@ -142,8 +142,8 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
         <div className="flex items-center space-x-3">
           <FileText className="w-6 h-6" />
           <div>
-            <h3 className="text-lg font-bold">FNT Purchase Invoice</h3>
-            <p className="text-sm text-red-100">For purchasing vehicles from customers</p>
+            <h3 className="text-lg font-bold">FNT Sale Invoice</h3>
+            <p className="text-sm text-red-100">For selling vehicles to customers</p>
           </div>
         </div>
         <button
@@ -520,4 +520,4 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
   );
 };
 
-export default FNTPurchaseInvoiceForm;
+export default FNTSaleInvoiceForm;
