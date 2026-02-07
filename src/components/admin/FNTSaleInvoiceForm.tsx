@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 interface FNTSaleInvoiceFormProps {
   onClose: () => void;
@@ -110,6 +110,16 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
         console.log('PDF fields filled successfully!');
       } catch (err) {
         console.error('Error filling form fields:', err);
+      }
+
+      // CRITICAL: ChatGPT says FNT v28 needs this (TNT doesn't because it was created differently)
+      // Load Helvetica font and update field appearances
+      try {
+        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        form.updateFieldAppearances(helveticaFont);
+        console.log('Field appearances updated with Helvetica font');
+      } catch (appearanceErr) {
+        console.warn('Could not update field appearances:', appearanceErr);
       }
 
       // Flatten the form to make it non-editable
