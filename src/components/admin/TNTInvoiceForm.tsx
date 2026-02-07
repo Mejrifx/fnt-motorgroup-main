@@ -65,12 +65,12 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
     calculateTotals(updatedItems);
   };
 
-  const calculateTotals = (items: LineItem[]) => {
+  const calculateTotals = (items: LineItem[], discountValue?: string) => {
     const subtotal = items.reduce((sum, item) => {
       return sum + (parseFloat(item.lineTotal) || 0);
     }, 0);
 
-    const discount = parseFloat(formData.discount) || 0;
+    const discount = parseFloat(discountValue !== undefined ? discountValue : formData.discount) || 0;
     const grandTotal = subtotal - discount;
 
     setFormData(prev => ({
@@ -82,7 +82,7 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
 
   const handleDiscountChange = (value: string) => {
     setFormData(prev => ({ ...prev, discount: value }));
-    calculateTotals(lineItems);
+    calculateTotals(lineItems, value);
   };
 
   const fillPDFForm = async () => {
