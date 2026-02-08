@@ -490,51 +490,60 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Retail Price (£) *
+                    Retail Price *
                   </label>
-                  <input
-                    type="number"
-                    name="retailPrice"
-                    value={formData.retailPrice}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
+                    <input
+                      type="number"
+                      name="retailPrice"
+                      value={formData.retailPrice}
+                      onChange={handleInputChange}
+                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Delivery Cost (£)
+                    Delivery Cost
                   </label>
-                  <input
-                    type="number"
-                    name="deliveryCost"
-                    value={formData.deliveryCost}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
+                    <input
+                      type="number"
+                      name="deliveryCost"
+                      value={formData.deliveryCost}
+                      onChange={handleInputChange}
+                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Warranty (£)
+                    Warranty
                   </label>
-                  <input
-                    type="number"
-                    name="warranty"
-                    value={formData.warranty}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
+                    <input
+                      type="number"
+                      name="warranty"
+                      value={formData.warranty}
+                      onChange={handleInputChange}
+                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -553,32 +562,38 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Deposit Paid (£)
+                    Deposit Paid
                   </label>
-                  <input
-                    type="number"
-                    name="depositPaid"
-                    value={formData.depositPaid}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
+                    <input
+                      type="number"
+                      name="depositPaid"
+                      value={formData.depositPaid}
+                      onChange={handleInputChange}
+                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Total Due (£)
+                    Total Due
                   </label>
-                  <input
-                    type="text"
-                    name="totalDue"
-                    value={formData.totalDue}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-green-50 font-bold text-lg"
-                    placeholder="0.00"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-700 font-bold text-lg">£</span>
+                    <input
+                      type="text"
+                      name="totalDue"
+                      value={formData.totalDue}
+                      readOnly
+                      className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg bg-green-50 font-bold text-lg"
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
