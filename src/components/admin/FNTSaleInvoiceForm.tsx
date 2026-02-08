@@ -113,13 +113,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'px_vin': formData.pxVin,
           'px_mileage': formData.pxMileage,
           
-          // Financial Details
-          'retail_price': formData.retailPrice,
-          'delivery_cost': formData.deliveryCost,
-          'warranty': formData.warranty,
+          // Financial Details (with £ symbol)
+          'retail_price': formData.retailPrice ? `£${formData.retailPrice}` : '',
+          'delivery_cost': formData.deliveryCost ? `£${formData.deliveryCost}` : '',
+          'warranty': formData.warranty ? `£${formData.warranty}` : '',
           'warranty_type': formData.warrantyType,
-          'deposit_paid': formData.depositPaid,
-          'total_due': formData.totalDue,
+          'deposit_paid': formData.depositPaid ? `£${formData.depositPaid}` : '',
+          'total_due': formData.totalDue ? `£${formData.totalDue}` : '',
           
           // Signatures
           'seller_signature': 'FNT MOTOR GROUP', // Auto-filled
