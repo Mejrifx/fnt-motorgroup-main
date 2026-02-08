@@ -72,8 +72,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
-      // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Motor Group Invoice Template FINAL.pdf').then(res => res.arrayBuffer());
+      // Fetch the PDF template (note: filename has space before .pdf)
+      const existingPdfBytes = await fetch('/FNT Motor Group Invoice Template FINAL .pdf').then(res => res.arrayBuffer());
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
