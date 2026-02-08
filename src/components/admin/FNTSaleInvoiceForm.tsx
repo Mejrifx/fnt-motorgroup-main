@@ -39,6 +39,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     retailPrice: '',
     deliveryCost: '',
     warranty: '',
+    warrantyType: '',
     depositPaid: '',
     totalDue: '',
     
@@ -72,8 +73,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
-      // Fetch the PDF template (note: filename has space before .pdf)
-      const existingPdfBytes = await fetch('/FNT Motor Group Invoice Template FINAL .pdf').then(res => res.arrayBuffer());
+      // Fetch the PDF template
+      const existingPdfBytes = await fetch('/FNT Sales Invoice Template.pdf').then(res => res.arrayBuffer());
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -116,6 +117,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'retail_price': formData.retailPrice,
           'delivery_cost': formData.deliveryCost,
           'warranty': formData.warranty,
+          'warranty_type': formData.warrantyType,
           'deposit_paid': formData.depositPaid,
           'total_due': formData.totalDue,
           
@@ -532,6 +534,20 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                     placeholder="0.00"
                     min="0"
                     step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Warranty Type
+                  </label>
+                  <input
+                    type="text"
+                    name="warrantyType"
+                    value={formData.warrantyType}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="e.g., 12 Month Warranty, Extended Warranty"
                   />
                 </div>
 
