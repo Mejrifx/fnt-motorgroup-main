@@ -9,25 +9,40 @@ interface FNTSaleInvoiceFormProps {
 const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState({
+    // Invoice Details
     invoiceNumber: '',
     invoiceDate: new Date().toISOString().split('T')[0],
+    
+    // Buyer Details (bill_)
     buyerName: '',
     buyerPhone: '',
     buyerEmail: '',
     buyerAddress: '',
-    carMake: '',
-    carModel: '',
-    carRegNo: '',
-    carColour: '',
-    carVinNo: '',
-    carMileage: '',
-    notes: '',
+    
+    // Vehicle Details (veh_)
+    vehMake: '',
+    vehModel: '',
+    vehReg: '',
+    vehColour: '',
+    vehVin: '',
+    vehMileage: '',
+    
+    // Part Exchange Vehicle (px_) - OPTIONAL
+    pxMake: '',
+    pxModel: '',
+    pxReg: '',
+    pxColour: '',
+    pxVin: '',
+    pxMileage: '',
+    
+    // Financial Details
     retailPrice: '',
     deliveryCost: '',
     warranty: '',
-    deposit: '',
-    lessDepositPaid: '',
+    depositPaid: '',
     totalDue: '',
+    
+    // Signatures
     buyerSignature: ''
   });
 
@@ -39,18 +54,16 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     }));
 
     // Auto-calculate totals if financial fields change
-    if (['retailPrice', 'deliveryCost', 'warranty', 'deposit'].includes(name)) {
+    if (['retailPrice', 'deliveryCost', 'warranty', 'depositPaid'].includes(name)) {
       const retail = parseFloat(name === 'retailPrice' ? value : formData.retailPrice) || 0;
       const delivery = parseFloat(name === 'deliveryCost' ? value : formData.deliveryCost) || 0;
       const warranty = parseFloat(name === 'warranty' ? value : formData.warranty) || 0;
-      const deposit = parseFloat(name === 'deposit' ? value : formData.deposit) || 0;
+      const deposit = parseFloat(name === 'depositPaid' ? value : formData.depositPaid) || 0;
       
-      const lessDepositPaid = deposit;
-      const totalDue = retail + delivery + warranty - lessDepositPaid;
+      const totalDue = retail + delivery + warranty - deposit;
 
       setFormData(prev => ({
         ...prev,
-        lessDepositPaid: lessDepositPaid.toFixed(2),
         totalDue: totalDue.toFixed(2)
       }));
     }
@@ -70,28 +83,44 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       const fields = form.getFields();
       console.log('Available PDF fields:', fields.map(f => f.getName()));
       
-      // Fill the form fields
+      // Fill the form fields - matching the exact field names from the PDF
       try {
         const fieldMapping: { [key: string]: string } = {
+          // Invoice Details
           'invoice_no': formData.invoiceNumber,
           'invoice_date': formData.invoiceDate,
-          'buyer_name': formData.buyerName,
-          'buyer_phone': formData.buyerPhone,
-          'buyer_email': formData.buyerEmail,
-          'buyer_address': formData.buyerAddress,
-          'car_make': formData.carMake,
-          'car_model': formData.carModel,
-          'car_reg_no': formData.carRegNo,
-          'car_colour': formData.carColour,
-          'car_vin_no': formData.carVinNo,
-          'car_mileage': formData.carMileage,
-          'notes': formData.notes,
-          'bill_retail_price': formData.retailPrice,
-          'bill_delivery_cost': formData.deliveryCost,
-          'bill_warranty': formData.warranty,
-          'bill_deposit': formData.deposit,
-          'bill_less_deposit_paid': formData.lessDepositPaid,
+          
+          // Buyer Details
+          'bill_full_name': formData.buyerName,
+          'bill_phone': formData.buyerPhone,
+          'bill_email': formData.buyerEmail,
+          'bill_address': formData.buyerAddress,
+          
+          // Vehicle Details
+          'veh_make': formData.vehMake,
+          'veh_model': formData.vehModel,
+          'veh_reg': formData.vehReg,
+          'veh_colour': formData.vehColour,
+          'veh_vin': formData.vehVin,
+          'veh_mileage': formData.vehMileage,
+          
+          // Part Exchange Vehicle (optional)
+          'px_make': formData.pxMake,
+          'px_model': formData.pxModel,
+          'px_reg': formData.pxReg,
+          'px_colour': formData.pxColour,
+          'px_vin': formData.pxVin,
+          'px_mileage': formData.pxMileage,
+          
+          // Financial Details
+          'retail_price': formData.retailPrice,
+          'delivery_cost': formData.deliveryCost,
+          'warranty': formData.warranty,
+          'deposit_paid': formData.depositPaid,
           'total_due': formData.totalDue,
+          
+          // Signatures
+          'seller_signature': 'FNT MOTOR GROUP', // Auto-filled
           'buyer_signature': formData.buyerSignature
         };
 
@@ -112,7 +141,6 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
         console.error('Error filling form fields:', err);
       }
 
-      // CRITICAL: ChatGPT says FNT v28 needs this (TNT doesn't because it was created differently)
       // Load Helvetica font and update field appearances
       try {
         const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -210,7 +238,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Buyer Name *
+                    Full Name *
                   </label>
                   <input
                     type="text"
@@ -269,7 +297,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
 
             {/* Vehicle Details */}
             <div className="mb-6">
-              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Vehicle Details</h4>
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Vehicle Being Sold</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -277,8 +305,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   </label>
                   <input
                     type="text"
-                    name="carMake"
-                    value={formData.carMake}
+                    name="vehMake"
+                    value={formData.vehMake}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="BMW"
@@ -292,8 +320,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   </label>
                   <input
                     type="text"
-                    name="carModel"
-                    value={formData.carModel}
+                    name="vehModel"
+                    value={formData.vehModel}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="3 Series"
@@ -303,12 +331,12 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Registration No
+                    Registration
                   </label>
                   <input
                     type="text"
-                    name="carRegNo"
-                    value={formData.carRegNo}
+                    name="vehReg"
+                    value={formData.vehReg}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="AB12 CDE"
@@ -321,8 +349,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   </label>
                   <input
                     type="text"
-                    name="carColour"
-                    value={formData.carColour}
+                    name="vehColour"
+                    value={formData.vehColour}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="Black"
@@ -331,12 +359,12 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    VIN No
+                    VIN
                   </label>
                   <input
                     type="text"
-                    name="carVinNo"
-                    value={formData.carVinNo}
+                    name="vehVin"
+                    value={formData.vehVin}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="WBADT43452G123456"
@@ -349,11 +377,106 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   </label>
                   <input
                     type="text"
-                    name="carMileage"
-                    value={formData.carMileage}
+                    name="vehMileage"
+                    value={formData.vehMileage}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="50000"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Part Exchange Vehicle (Optional) */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Part Exchange Vehicle (Optional)</h4>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800">
+                  <strong>Optional:</strong> Fill in these fields only if the customer is trading in a vehicle.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Make
+                  </label>
+                  <input
+                    type="text"
+                    name="pxMake"
+                    value={formData.pxMake}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="Audi"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Model
+                  </label>
+                  <input
+                    type="text"
+                    name="pxModel"
+                    value={formData.pxModel}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="A4"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Registration
+                  </label>
+                  <input
+                    type="text"
+                    name="pxReg"
+                    value={formData.pxReg}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="XY34 ZAB"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Colour
+                  </label>
+                  <input
+                    type="text"
+                    name="pxColour"
+                    value={formData.pxColour}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="Silver"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    VIN
+                  </label>
+                  <input
+                    type="text"
+                    name="pxVin"
+                    value={formData.pxVin}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="WAUZZZ8E8AA123456"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Mileage
+                  </label>
+                  <input
+                    type="text"
+                    name="pxMileage"
+                    value={formData.pxMileage}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="75000"
                   />
                 </div>
               </div>
@@ -414,12 +537,12 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Deposit (£)
+                    Deposit Paid (£)
                   </label>
                   <input
                     type="number"
-                    name="deposit"
-                    value={formData.deposit}
+                    name="depositPaid"
+                    value={formData.depositPaid}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="0.00"
@@ -428,21 +551,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Less Deposit Paid (£)
-                  </label>
-                  <input
-                    type="text"
-                    name="lessDepositPaid"
-                    value={formData.lessDepositPaid}
-                    readOnly
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Total Due (£)
                   </label>
@@ -458,22 +567,21 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
               </div>
             </div>
 
-            {/* Additional Information */}
+            {/* Signatures */}
             <div className="mb-6">
-              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Additional Information</h4>
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Signatures</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Notes
+                    Seller Signature
                   </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                    placeholder="Any additional notes..."
-                    rows={3}
+                  <input
+                    type="text"
+                    value="FNT MOTOR GROUP"
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Auto-filled</p>
                 </div>
 
                 <div>
@@ -506,7 +614,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                 </button>
                 <button
                   onClick={fillPDFForm}
-                  disabled={isGenerating || !formData.invoiceNumber || !formData.buyerName || !formData.carMake || !formData.carModel || !formData.retailPrice}
+                  disabled={isGenerating || !formData.invoiceNumber || !formData.buyerName || !formData.vehMake || !formData.vehModel || !formData.retailPrice}
                   className="flex items-center space-x-2 px-6 py-3 bg-fnt-red hover:bg-red-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isGenerating ? (
