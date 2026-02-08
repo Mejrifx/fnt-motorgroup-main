@@ -60,7 +60,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     setIsGenerating(true);
     try {
       // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT_Sale_Invoice_v28_TNTStyleFields.pdf').then(res => res.arrayBuffer());
+      const existingPdfBytes = await fetch('/FNT Invoice Template TEST.pdf').then(res => res.arrayBuffer());
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
