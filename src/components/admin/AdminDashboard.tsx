@@ -8,10 +8,11 @@ import EditCarModal from './EditCarModal';
 import AddReviewModal from './AddReviewModal';
 import EditReviewModal from './EditReviewModal';
 import InvoiceManager from './InvoiceManager';
+import InvoiceHistory from './InvoiceHistory';
 import fntLogo from '../../assets/fnt-logo.png';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'cars' | 'reviews' | 'invoices'>('cars');
+  const [activeTab, setActiveTab] = useState<'cars' | 'reviews' | 'invoices' | 'invoice_history'>('cars');
   const [cars, setCars] = useState<Car[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -597,6 +598,18 @@ const AdminDashboard = () => {
               <FileText className="w-5 h-5" />
               <span>Invoices</span>
             </button>
+            <button
+              onClick={() => setActiveTab('invoice_history')}
+              className={`
+                ${activeTab === 'invoice_history'
+                  ? 'border-fnt-red text-fnt-red'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+              `}
+            >
+              <FileText className="w-5 h-5" />
+              <span>Invoice History</span>
+            </button>
           </nav>
         </div>
 
@@ -709,6 +722,11 @@ const AdminDashboard = () => {
         {/* Invoices Tab */}
         {activeTab === 'invoices' && (
           <InvoiceManager />
+        )}
+
+        {/* Invoice History Tab */}
+        {activeTab === 'invoice_history' && (
+          <InvoiceHistory />
         )}
 
         {/* Reviews Tab */}

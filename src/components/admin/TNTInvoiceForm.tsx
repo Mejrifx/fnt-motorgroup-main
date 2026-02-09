@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase } from '../../lib/invoiceUtils';
 
 interface LineItem {
   description: string;
@@ -16,6 +17,7 @@ interface TNTInvoiceFormProps {
 
 const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState(true);
   const [formData, setFormData] = useState({
     invoiceNumber: '',
     invoiceDate: new Date().toISOString().split('T')[0],
@@ -84,6 +86,20 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
     setFormData(prev => ({ ...prev, discount: value }));
     calculateTotals(lineItems, value);
   };
+
+  // Auto-generate invoice number on mount
+  useEffect(() => {
+    const loadInvoiceNumber = async () => {
+      const invoiceNumber = await generateInvoiceNumber('tnt_service');
+      setFormData(prev => ({
+        ...prev,
+        invoiceNumber
+      }));
+      setLoadingInvoiceNumber(false);
+    };
+
+    loadInvoiceNumber();
+  }, []);
 
   const fillPDFForm = async () => {
     setIsGenerating(true);
@@ -187,16 +203,61 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
       // Serialize the PDF
       const pdfBytes = await pdfDoc.save();
 
-      // Create a blob and download
+      // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+      // Upload to Supabase Storage
+      console.log('Uploading PDF to Supabase Storage...');
+      const pdfUrl = await uploadInvoicePDF(blob, formData.invoiceNumber, 'tnt_service');
+
+      if (!pdfUrl) {
+        alert('Failed to upload invoice to storage. Please try again.');
+        setIsGenerating(false);
+        return;
+      }
+
+      // Save invoice metadata to database
+      console.log('Saving invoice metadata to database...');
+      const invoiceData = {
+        invoice_number: formData.invoiceNumber,
+        invoice_type: 'tnt_service' as const,
+        invoice_date: formData.invoiceDate,
+        customer_name: formData.customerName,
+        customer_email: formData.customerEmail,
+        customer_phone: formData.customerPhone,
+        vehicle_reg: formData.vehicleReg,
+        total_amount: parseFloat(formData.grandTotal) || 0,
+        pdf_url: pdfUrl,
+        metadata: {
+          mileage: formData.mileage,
+          line_items: lineItems.filter(item => item.description || item.qty || item.labour || item.parts),
+          subtotal: formData.subtotal,
+          discount: formData.discount,
+          grand_total: formData.grandTotal
+        }
+      };
+
+      const saved = await saveInvoiceToDatabase(invoiceData);
+
+      if (!saved) {
+        alert('Failed to save invoice to database. The PDF was uploaded but the record was not saved.');
+      }
+
+      // Download the PDF
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `TNT-Invoice-${formData.invoiceNumber || 'Draft'}.pdf`;
+      link.download = `${formData.invoiceNumber}.pdf`;
       link.click();
       URL.revokeObjectURL(url);
 
+      alert(`Invoice ${formData.invoiceNumber} generated and saved successfully!`);
       setIsGenerating(false);
+
+      // Close the form after successful generation
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating invoice. Please check the console for details.');
@@ -239,12 +300,13 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
                   <input
                     type="text"
                     name="invoiceNumber"
-                    value={formData.invoiceNumber}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                    placeholder="INV-001"
+                    value={loadingInvoiceNumber ? 'Generating...' : formData.invoiceNumber}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 font-semibold"
+                    placeholder="Auto-generated"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Auto-generated</p>
                 </div>
 
                 <div>
