@@ -262,11 +262,11 @@ const InvoiceManager = () => {
         <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-4 bg-purple-100 rounded-lg">
                 <img 
                   src="/TNT Logo.png" 
                   alt="TNT Services" 
-                  className="w-6 h-6 object-contain"
+                  className="w-16 h-16 object-contain"
                 />
               </div>
               <div>
