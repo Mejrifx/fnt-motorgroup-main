@@ -82,7 +82,9 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       
       // Get all field names (for debugging)
       const fields = form.getFields();
-      console.log('Available PDF fields:', fields.map(f => f.getName()));
+      const availableFieldNames = fields.map(f => f.getName());
+      console.log('📋 Available PDF fields:', availableFieldNames);
+      console.log('📊 Total fields in PDF:', availableFieldNames.length);
       
       // Fill the form fields - matching the exact field names from the PDF
       try {
@@ -126,19 +128,29 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'buyer_signature': formData.buyerSignature
         };
 
+        let filledCount = 0;
+        let skippedCount = 0;
+        let errorCount = 0;
+
         // Fill fields - exact same approach as TNT invoice
         Object.entries(fieldMapping).forEach(([fieldName, value]) => {
           if (value) {
             try {
               const field = form.getTextField(fieldName);
               field.setText(value);
+              console.log(`✅ Filled "${fieldName}" with: "${value}"`);
+              filledCount++;
             } catch (err) {
-              console.warn(`Field "${fieldName}" not found or not a text field`);
+              console.warn(`❌ Field "${fieldName}" not found or error:`, err);
+              errorCount++;
             }
+          } else {
+            console.log(`⏭️ Skipped "${fieldName}" (empty value)`);
+            skippedCount++;
           }
         });
 
-        console.log('PDF fields filled successfully!');
+        console.log(`📝 Summary: ${filledCount} filled, ${skippedCount} skipped (empty), ${errorCount} errors`);
       } catch (err) {
         console.error('Error filling form fields:', err);
       }
