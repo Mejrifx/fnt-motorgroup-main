@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, FileText, ExternalLink, XCircle } from 'lucide-react';
 import TNTInvoiceForm from './TNTInvoiceForm';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
+import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 
 // SimplePDF type declaration
 declare global {
@@ -22,6 +23,7 @@ const InvoiceManager = () => {
   const [currentTemplate, setCurrentTemplate] = useState<'selling' | 'purchase' | 'tnt' | null>(null);
   const [showTNTForm, setShowTNTForm] = useState(false);
   const [showFNTSaleForm, setShowFNTSaleForm] = useState(false);
+  const [showFNTPurchaseForm, setShowFNTPurchaseForm] = useState(false);
 
   // Template URLs
   const TEMPLATES = {
@@ -46,6 +48,8 @@ const InvoiceManager = () => {
       setShowTNTForm(true);
     } else if (type === 'selling') {
       setShowFNTSaleForm(true);
+    } else if (type === 'purchase') {
+      setShowFNTPurchaseForm(true);
     } else {
       setCurrentTemplate(type);
       setShowSimplePDFEditor(true);
@@ -67,6 +71,11 @@ const InvoiceManager = () => {
       {/* FNT Sale Invoice Form */}
       {showFNTSaleForm && (
         <FNTSaleInvoiceForm onClose={() => setShowFNTSaleForm(false)} />
+      )}
+
+      {/* FNT Purchase Invoice Form */}
+      {showFNTPurchaseForm && (
+        <FNTPurchaseInvoiceForm onClose={() => setShowFNTPurchaseForm(false)} />
       )}
 
       {/* SimplePDF Editor - Full Screen */}
@@ -234,25 +243,17 @@ const InvoiceManager = () => {
               className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
             >
               <Plus className="w-4 h-4" />
-              <span>Create</span>
+              <span>Create Invoice</span>
             </button>
             
-            <button
-              onClick={() => openSimplePDFEditor('purchase')}
-              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Popup</span>
-            </button>
-
             <a
-              href={TEMPLATES.purchase}
+              href="/FNT Purchase Invoice Template.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
-              <span>View</span>
+              <span>View Template</span>
             </a>
           </div>
         </div>
