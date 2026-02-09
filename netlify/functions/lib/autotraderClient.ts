@@ -276,8 +276,10 @@ class AutoTraderClient {
     try {
       console.log(`Fetching stock for advertiser ${id}...`);
       
-      // Fetch first page
-      const endpoint = `/stock`;
+      // Fetch first page with advertiserId, page, and pageSize parameters
+      // AutoTrader requires these parameters for proper pagination
+      const pageSize = 100; // Request 100 vehicles per page (AutoTrader default/max)
+      const endpoint = `/stock?advertiserId=${id}&page=1&pageSize=${pageSize}`;
       console.log(`Calling stock endpoint: ${this.baseUrl}${endpoint}`);
       
       const firstPageResponse = await this.makeRequest(endpoint);
@@ -292,34 +294,27 @@ class AutoTraderClient {
       // Check if pagination is needed
       let allResults = firstPageResponse.results || [];
       const totalResults = firstPageResponse.totalResults || 0;
-      const resultsPerPage = firstPageResponse.results?.length || 20;
+      
+      console.log(`📄 First page fetched: ${allResults.length} vehicles, ${totalResults} total available`);
       
       // If there are more results than what we got, fetch additional pages
-      if (totalResults > resultsPerPage && this.credentials.environment === 'production') {
-        console.log(`📄 Pagination detected: ${resultsPerPage} results per page, ${totalResults} total`);
-        console.log(`📄 Need to fetch ${Math.ceil(totalResults / resultsPerPage) - 1} more page(s)`);
-        
-        const totalPages = Math.ceil(totalResults / resultsPerPage);
+      if (totalResults > pageSize) {
+        const totalPages = Math.ceil(totalResults / pageSize);
+        console.log(`📄 Pagination needed: ${pageSize} results per page, ${totalResults} total`);
+        console.log(`📄 Need to fetch ${totalPages - 1} more page(s)`);
         
         // Fetch remaining pages (start from page 2)
         for (let page = 2; page <= totalPages; page++) {
           try {
             console.log(`📄 Fetching page ${page} of ${totalPages}...`);
             
-            // Try different pagination parameter formats (AutoTrader might use any of these)
-            let nextPageResponse;
-            try {
-              // Try page parameter
-              nextPageResponse = await this.makeRequest(`${endpoint}?page=${page}`);
-            } catch (error) {
-              // Try offset/limit parameters
-              const offset = (page - 1) * resultsPerPage;
-              nextPageResponse = await this.makeRequest(`${endpoint}?limit=${resultsPerPage}&offset=${offset}`);
-            }
+            // Use standard AutoTrader pagination: advertiserId, page, pageSize
+            const paginatedEndpoint = `/stock?advertiserId=${id}&page=${page}&pageSize=${pageSize}`;
+            const nextPageResponse = await this.makeRequest(paginatedEndpoint);
             
             if (nextPageResponse.results && Array.isArray(nextPageResponse.results)) {
               allResults = allResults.concat(nextPageResponse.results);
-              console.log(`📄 Page ${page} fetched: ${nextPageResponse.results.length} vehicles (total: ${allResults.length})`);
+              console.log(`📄 Page ${page} fetched: ${nextPageResponse.results.length} vehicles (total: ${allResults.length}/${totalResults})`);
             } else {
               console.warn(`⚠️ Page ${page} returned no results, stopping pagination`);
               break;
@@ -332,10 +327,8 @@ class AutoTraderClient {
         }
         
         console.log(`✅ Pagination complete: Fetched ${allResults.length} of ${totalResults} total vehicles`);
-      } else if (totalResults > resultsPerPage && this.credentials.environment === 'sandbox') {
-        console.warn(`⚠️ SANDBOX MODE: Pagination skipped (sandbox may not support it)`);
-        console.warn(`⚠️ Fetched ${resultsPerPage} vehicles, but ${totalResults} are available`);
-        console.warn(`⚠️ In production, all ${totalResults} vehicles will be synced`);
+      } else {
+        console.log(`✅ All vehicles fetched in single page (${allResults.length} vehicles)`);
       }
       
       // AutoTrader returns { results: [...], totalResults: N }
