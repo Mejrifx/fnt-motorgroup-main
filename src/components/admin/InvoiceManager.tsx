@@ -144,7 +144,7 @@ const InvoiceManager = () => {
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-green-100 rounded-lg">
                 <img 
-                  src="/FNT Invoice Logo.png" 
+                  src="/FNT Favicon.png" 
                   alt="FNT Motor Group" 
                   className="w-16 h-16 object-contain"
                 />
@@ -204,7 +204,7 @@ const InvoiceManager = () => {
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-blue-100 rounded-lg">
                 <img 
-                  src="/FNT Invoice Logo.png" 
+                  src="/FNT Favicon.png" 
                   alt="FNT Motor Group" 
                   className="w-16 h-16 object-contain"
                 />
