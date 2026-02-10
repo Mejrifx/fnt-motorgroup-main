@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw } from 'lucide-react';
 import { getInvoicesByType, searchInvoices, deleteInvoice, type InvoiceType } from '../../lib/invoiceUtils';
+import { useToast } from '../ui/ToastContainer';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 interface Invoice {
   id: string;
@@ -24,6 +26,11 @@ const InvoiceHistory: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; invoice: Invoice | null }>({
+    isOpen: false,
+    invoice: null
+  });
+  const { showToast } = useToast();
 
   // Load invoices for the active tab
   const loadInvoices = async () => {
@@ -48,16 +55,18 @@ const InvoiceHistory: React.FC = () => {
 
   // Delete invoice
   const handleDelete = async (invoice: Invoice) => {
-    if (!confirm(`Are you sure you want to delete invoice ${invoice.invoice_number}?`)) {
-      return;
-    }
+    setDeleteConfirm({ isOpen: true, invoice });
+  };
 
-    const success = await deleteInvoice(invoice.id, invoice.pdf_url);
+  const confirmDelete = async () => {
+    if (!deleteConfirm.invoice) return;
+
+    const success = await deleteInvoice(deleteConfirm.invoice.id, deleteConfirm.invoice.pdf_url);
     if (success) {
-      alert('Invoice deleted successfully');
+      showToast(`Invoice ${deleteConfirm.invoice.invoice_number} deleted successfully`, 'success');
       loadInvoices();
     } else {
-      alert('Failed to delete invoice. Please try again.');
+      showToast('Failed to delete invoice. Please try again.', 'error');
     }
   };
 
@@ -311,6 +320,18 @@ const InvoiceHistory: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Invoice"
+        message={`Are you sure you want to delete invoice ${deleteConfirm.invoice?.invoice_number}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, invoice: null })}
+      />
     </div>
   );
 };

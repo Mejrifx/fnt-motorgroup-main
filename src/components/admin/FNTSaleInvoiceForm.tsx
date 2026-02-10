@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase } from '../../lib/invoiceUtils';
+import { useToast } from '../ui/ToastContainer';
 
 interface FNTSaleInvoiceFormProps {
   onClose: () => void;
 }
 
 const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
+  const { showToast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState(true);
   const [formData, setFormData] = useState({
@@ -249,13 +251,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       link.click();
       URL.revokeObjectURL(url);
 
-      alert(`Invoice ${formData.invoiceNumber} generated and saved successfully!`);
+      showToast(`Invoice ${formData.invoiceNumber} generated and saved successfully!`, 'success');
       setIsGenerating(false);
 
       // Close the form after successful generation
       setTimeout(() => {
         onClose();
-      }, 1000);
+      }, 500);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating invoice. Please check the console for details.');
