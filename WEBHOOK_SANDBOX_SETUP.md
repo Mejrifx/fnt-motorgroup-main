@@ -87,11 +87,13 @@ Paul has given you access to the AutoTrader Portal where you can:
 
 ## 📊 Expected Webhook Flow
 
+**Note:** AutoTrader sends webhooks as **PUT requests** (not POST), which is handled by our webhook endpoint.
+
 ### 1. Vehicle Created
 ```
 AutoTrader Portal: Create new vehicle
     ↓
-Webhook fires → /.netlify/functions/autotrader-webhook
+Webhook fires (PUT request) → /.netlify/functions/autotrader-webhook
     ↓
 Signature verified with secret key
     ↓

@@ -263,6 +263,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, PUT, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-Autotrader-Signature',
     'Content-Type': 'application/json',
   };
@@ -276,12 +277,12 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     };
   }
   
-  // Only allow POST requests
-  if (event.httpMethod !== 'POST') {
+  // Only allow POST and PUT requests (AutoTrader sends both)
+  if (event.httpMethod !== 'POST' && event.httpMethod !== 'PUT') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Method not allowed. Use POST.' }),
+      body: JSON.stringify({ error: 'Method not allowed. Use POST or PUT.' }),
     };
   }
   
