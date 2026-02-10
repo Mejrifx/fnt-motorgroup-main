@@ -198,7 +198,14 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
       }
 
       // Flatten the form to make it non-editable
-      form.flatten();
+      // Wrap in try-catch in case of PDF reference issues
+      try {
+        form.flatten();
+        console.log('PDF form flattened successfully');
+      } catch (flattenError) {
+        console.warn('Could not flatten PDF form (form will remain editable):', flattenError);
+        // Continue without flattening - the PDF will still work, just remain editable
+      }
 
       // Serialize the PDF
       const pdfBytes = await pdfDoc.save();
