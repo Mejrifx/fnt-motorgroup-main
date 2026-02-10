@@ -30,6 +30,11 @@ const InvoiceHistory: React.FC = () => {
     isOpen: false,
     invoice: null
   });
+  const [invoiceCounts, setInvoiceCounts] = useState<Record<InvoiceType, number>>({
+    fnt_sale: 0,
+    fnt_purchase: 0,
+    tnt_service: 0
+  });
   const { showToast } = useToast();
 
   // Load invoices for the active tab
@@ -37,7 +42,29 @@ const InvoiceHistory: React.FC = () => {
     setLoading(true);
     const data = await getInvoicesByType(activeTab);
     setInvoices(data as Invoice[]);
+    // Update the count for the active tab
+    setInvoiceCounts(prev => ({
+      ...prev,
+      [activeTab]: data.length
+    }));
     setLoading(false);
+  };
+
+  // Load counts for all invoice types
+  const loadAllCounts = async () => {
+    const types: InvoiceType[] = ['fnt_sale', 'fnt_purchase', 'tnt_service'];
+    const counts: Record<InvoiceType, number> = {
+      fnt_sale: 0,
+      fnt_purchase: 0,
+      tnt_service: 0
+    };
+
+    for (const type of types) {
+      const data = await getInvoicesByType(type);
+      counts[type] = data.length;
+    }
+
+    setInvoiceCounts(counts);
   };
 
   // Search invoices
@@ -64,11 +91,17 @@ const InvoiceHistory: React.FC = () => {
     const success = await deleteInvoice(deleteConfirm.invoice.id, deleteConfirm.invoice.pdf_url);
     if (success) {
       showToast(`Invoice ${deleteConfirm.invoice.invoice_number} deleted successfully`, 'success');
-      loadInvoices();
+      loadInvoices(); // Reload current tab invoices
+      loadAllCounts(); // Reload all counts to update all tab badges
     } else {
       showToast('Failed to delete invoice. Please try again.', 'error');
     }
   };
+
+  // Load all counts on mount
+  useEffect(() => {
+    loadAllCounts();
+  }, []);
 
   // Load invoices when tab changes
   useEffect(() => {
@@ -124,7 +157,10 @@ const InvoiceHistory: React.FC = () => {
             </p>
           </div>
           <button
-            onClick={loadInvoices}
+            onClick={() => {
+              loadInvoices();
+              loadAllCounts();
+            }}
             className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -147,7 +183,7 @@ const InvoiceHistory: React.FC = () => {
           >
             {getTabLabel(type)}
             <span className="ml-2 px-2 py-1 text-xs rounded-full bg-gray-100">
-              {invoices.length}
+              {invoiceCounts[type]}
             </span>
           </button>
         ))}
