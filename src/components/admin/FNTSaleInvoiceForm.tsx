@@ -187,7 +187,14 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
       }
 
       // Flatten the form to make it non-editable
-      form.flatten();
+      // Wrap in try-catch in case of PDF reference issues
+      try {
+        form.flatten();
+        console.log('PDF form flattened successfully');
+      } catch (flattenError) {
+        console.warn('Could not flatten PDF form (form will remain editable):', flattenError);
+        // Continue without flattening - the PDF will still work, just remain editable
+      }
 
       // Serialize the PDF
       const pdfBytes = await pdfDoc.save();
@@ -586,13 +593,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       name="pxPrice"
                       value={formData.pxPrice}
                       onChange={handleInputChange}
                       className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                       placeholder="5000"
-                      step="0.01"
                     />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">This amount will be deducted from the total due</p>
@@ -611,14 +618,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       name="retailPrice"
                       value={formData.retailPrice}
                       onChange={handleInputChange}
                       className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                       placeholder="0.00"
-                      min="0"
-                      step="0.01"
                       required
                     />
                   </div>
@@ -631,14 +637,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       name="deliveryCost"
                       value={formData.deliveryCost}
                       onChange={handleInputChange}
                       className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                       placeholder="0.00"
-                      min="0"
-                      step="0.01"
                     />
                   </div>
                 </div>
@@ -650,14 +655,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       name="warranty"
                       value={formData.warranty}
                       onChange={handleInputChange}
                       className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                       placeholder="0.00"
-                      min="0"
-                      step="0.01"
                     />
                   </div>
                 </div>
@@ -683,14 +687,13 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       name="depositPaid"
                       value={formData.depositPaid}
                       onChange={handleInputChange}
                       className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                       placeholder="0.00"
-                      min="0"
-                      step="0.01"
                     />
                   </div>
                 </div>
