@@ -38,6 +38,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     pxColour: '',
     pxVin: '',
     pxMileage: '',
+    pxPrice: '', // Part exchange price (deducted from total)
     
     // Financial Details
     retailPrice: '',
@@ -59,13 +60,15 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     }));
 
     // Auto-calculate totals if financial fields change
-    if (['retailPrice', 'deliveryCost', 'warranty', 'depositPaid'].includes(name)) {
+    if (['retailPrice', 'deliveryCost', 'warranty', 'depositPaid', 'pxPrice'].includes(name)) {
       const retail = parseFloat(name === 'retailPrice' ? value : formData.retailPrice) || 0;
       const delivery = parseFloat(name === 'deliveryCost' ? value : formData.deliveryCost) || 0;
       const warranty = parseFloat(name === 'warranty' ? value : formData.warranty) || 0;
       const deposit = parseFloat(name === 'depositPaid' ? value : formData.depositPaid) || 0;
+      const pxPrice = parseFloat(name === 'pxPrice' ? value : formData.pxPrice) || 0;
       
-      const totalDue = retail + delivery + warranty - deposit;
+      // Total Due = Retail + Delivery + Warranty - Deposit - Part Exchange Price
+      const totalDue = retail + delivery + warranty - deposit - pxPrice;
 
       setFormData(prev => ({
         ...prev,
@@ -92,7 +95,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
     setIsGenerating(true);
     try {
       // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Sales invoice + terms copy.pdf').then(res => res.arrayBuffer());
+      const existingPdfBytes = await fetch('/FNT Sales Invoice + Terms Clean.pdf').then(res => res.arrayBuffer());
       
       // Load the PDF
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -132,6 +135,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
           'px_colour': formData.pxColour,
           'px_vin': formData.pxVin,
           'px_mileage': formData.pxMileage,
+          'partex_price': formData.pxPrice ? `£${formData.pxPrice}` : '', // Part exchange price
           
           // Financial Details (with £ symbol)
           'retail_price': formData.retailPrice ? `£${formData.retailPrice}` : '',
@@ -226,13 +230,15 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
             reg: formData.pxReg,
             colour: formData.pxColour,
             vin: formData.pxVin,
-            mileage: formData.pxMileage
+            mileage: formData.pxMileage,
+            price: formData.pxPrice
           } : null,
           retail_price: formData.retailPrice,
           delivery_cost: formData.deliveryCost,
           warranty: formData.warranty,
           warranty_type: formData.warrantyType,
           deposit_paid: formData.depositPaid,
+          px_price: formData.pxPrice,
           buyer_signature: formData.buyerSignature
         }
       };
@@ -571,6 +577,25 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose }) => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="75000"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Part Exchange Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
+                    <input
+                      type="number"
+                      name="pxPrice"
+                      value={formData.pxPrice}
+                      onChange={handleInputChange}
+                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                      placeholder="5000"
+                      step="0.01"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">This amount will be deducted from the total due</p>
                 </div>
               </div>
             </div>
