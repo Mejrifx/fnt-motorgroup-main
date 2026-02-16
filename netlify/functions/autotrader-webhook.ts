@@ -105,14 +105,68 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
 }
 
 /**
+ * Transform webhook payload to API format (for data mapper)
+ * Webhook sends data in a different structure than the API
+ */
+function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
+  const { vehicle, adverts, metadata, media } = webhookEvent.data;
+  
+  // Extract price from nested structure
+  const price = adverts?.retailAdverts?.price?.amountGBP || 
+                adverts?.forecourtPrice?.amountGBP || 
+                0;
+  
+  // Extract description
+  const description = adverts?.retailAdverts?.description2 || 
+                      adverts?.retailAdverts?.description || 
+                      '';
+  
+  // Extract first image URL
+  const firstImage = media?.images?.[0]?.href || '';
+  const imageUrl = firstImage ? firstImage.replace('{resize}', '800x600') : '';
+  
+  // Extract all gallery images
+  const galleryImages = (media?.images || [])
+    .slice(0, 10) // Limit to 10 images
+    .map((img: any) => img.href?.replace('{resize}', '800x600') || '')
+    .filter((url: string) => url.length > 0);
+  
+  // Transform to API format that the data mapper expects
+  return {
+    id: metadata.stockId,
+    make: vehicle.make,
+    model: vehicle.model,
+    year: vehicle.yearOfManufacture,
+    price: price,
+    mileage: vehicle.odometerReadingMiles,
+    fuelType: vehicle.fuelType,
+    transmission: vehicle.transmissionType,
+    bodyType: vehicle.bodyType,
+    colour: vehicle.colour,
+    registration: vehicle.registration,
+    vin: vehicle.vin,
+    variant: vehicle.derivative || vehicle.trim,
+    description: description,
+    doors: vehicle.doors,
+    engine: `${vehicle.badgeEngineSizeLitres}L`,
+    imageUrl: imageUrl,
+    images: galleryImages,
+    owners: vehicle.owners,
+    attentionGrabber: adverts?.retailAdverts?.attentionGrabber,
+  };
+}
+
+/**
  * Handle STOCK_UPDATE event (vehicle created or updated)
  */
 async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   const stockId = webhookEvent.data.metadata.stockId;
   const advertiserId = webhookEvent.data.advertiser.advertiserId;
-  const vehicleData = webhookEvent.data.vehicle;
   
   console.log(`Handling STOCK_UPDATE for vehicle ${stockId}`);
+  
+  // Transform webhook data to API format
+  const vehicleData = transformWebhookToApiFormat(webhookEvent);
   
   // Map AutoTrader webhook data to our database schema
   const mappedCar = mapAutoTraderToDatabase(vehicleData, advertiserId);
