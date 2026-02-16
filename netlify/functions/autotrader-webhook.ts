@@ -134,6 +134,7 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
   // Transform to API format that the data mapper expects
   return {
     id: metadata.stockId,
+    vehicleId: metadata.stockId, // Required by data mapper (autotrader_id field)
     make: vehicle.make,
     model: vehicle.model,
     year: vehicle.yearOfManufacture,
