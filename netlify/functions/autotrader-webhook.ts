@@ -163,9 +163,40 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
 async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   const stockId = webhookEvent.data.metadata.stockId;
   const advertiserId = webhookEvent.data.advertiser.advertiserId;
+  const lifecycleState = webhookEvent.data.metadata.lifecycleState;
   
-  console.log(`Handling STOCK_UPDATE for vehicle ${stockId}`);
+  console.log(`Handling STOCK_UPDATE for vehicle ${stockId} (lifecycleState: ${lifecycleState})`);
   
+  // Check if vehicle is being removed from forecourt (unadvertised)
+  // lifecycleState can be: FORECOURT, WITHDRAWN, SOLD, etc.
+  const isUnavailable = lifecycleState !== 'FORECOURT';
+  
+  if (isUnavailable) {
+    console.log(`⚠️ Vehicle ${stockId} is no longer on forecourt (${lifecycleState}), marking as unavailable`);
+    
+    // Find and mark as unavailable
+    const { data: existingCar } = await supabase
+      .from('cars')
+      .select('id, sync_override')
+      .eq('autotrader_id', stockId)
+      .single();
+    
+    if (existingCar && !existingCar.sync_override) {
+      await supabase
+        .from('cars')
+        .update({
+          is_available: false,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingCar.id);
+      
+      console.log(`✅ Marked vehicle as unavailable: ${stockId}`);
+      await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'marked_unavailable');
+    }
+    return;
+  }
+  
+  // Vehicle is on forecourt, proceed with normal update
   // Transform webhook data to API format
   const vehicleData = transformWebhookToApiFormat(webhookEvent);
   
