@@ -24,10 +24,28 @@ const supabase = createClient(
 );
 
 interface WebhookEvent {
-  eventType: 'vehicle.created' | 'vehicle.updated' | 'vehicle.deleted';
-  vehicleId: string;
-  advertiserId: string;
-  timestamp: string;
+  id: string; // stockId
+  time: string;
+  type: 'STOCK_UPDATE' | 'STOCK_DELETE';
+  data: {
+    advertiser: {
+      advertiserId: string;
+    };
+    metadata: {
+      stockId: string;
+      lifecycleState: string;
+      lastUpdated: string;
+    };
+    vehicle: any; // Complete vehicle data
+    adverts: {
+      retailAdverts?: {
+        price?: {
+          amountGBP?: number;
+        };
+      };
+    };
+  };
+  changedFields?: Array<{ path: string }>;
   [key: string]: any;
 }
 
@@ -87,17 +105,17 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
 }
 
 /**
- * Handle vehicle created event
+ * Handle STOCK_UPDATE event (vehicle created or updated)
  */
-async function handleVehicleCreated(vehicleId: string, advertiserId: string): Promise<void> {
-  console.log(`Handling vehicle.created: ${vehicleId}`);
+async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
+  const stockId = webhookEvent.data.metadata.stockId;
+  const advertiserId = webhookEvent.data.advertiser.advertiserId;
+  const vehicleData = webhookEvent.data.vehicle;
   
-  // Fetch vehicle details from AutoTrader
-  const autotraderClient = createAutoTraderClient();
-  const vehicle = await autotraderClient.getVehicle(vehicleId);
+  console.log(`Handling STOCK_UPDATE for vehicle ${stockId}`);
   
-  // Map to database schema
-  const mappedCar = mapAutoTraderToDatabase(vehicle, advertiserId);
+  // Map AutoTrader webhook data to our database schema
+  const mappedCar = mapAutoTraderToDatabase(vehicleData, advertiserId);
   
   // Validate
   const validation = validateMappedCar(mappedCar);
@@ -109,7 +127,7 @@ async function handleVehicleCreated(vehicleId: string, advertiserId: string): Pr
   const { data: existingCar } = await supabase
     .from('cars')
     .select('id, sync_override')
-    .eq('autotrader_id', vehicleId)
+    .eq('autotrader_id', stockId)
     .single();
   
   if (existingCar) {
@@ -123,9 +141,11 @@ async function handleVehicleCreated(vehicleId: string, advertiserId: string): Pr
         })
         .eq('id', existingCar.id);
       
-      console.log(`Updated existing vehicle: ${vehicleId}`);
+      console.log(`✅ Updated existing vehicle: ${stockId}`);
+      await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'updated');
     } else {
-      console.log(`Skipped update for ${vehicleId} - manual override enabled`);
+      console.log(`⏭️ Skipped update for ${stockId} - manual override enabled`);
+      await logWebhookEvent('STOCK_UPDATE', stockId, 'skipped');
     }
   } else {
     // New vehicle, insert it
@@ -137,83 +157,35 @@ async function handleVehicleCreated(vehicleId: string, advertiserId: string): Pr
         updated_at: new Date().toISOString(),
       }]);
     
-    console.log(`Inserted new vehicle: ${vehicleId}`);
+    console.log(`✅ Inserted new vehicle: ${stockId}`);
+    await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'created');
   }
-  
-  // Log webhook event
-  await logWebhookEvent('vehicle.created', vehicleId, 'success');
 }
 
 /**
- * Handle vehicle updated event
+ * Handle STOCK_DELETE event (vehicle removed from forecourt)
  */
-async function handleVehicleUpdated(vehicleId: string, advertiserId: string): Promise<void> {
-  console.log(`Handling vehicle.updated: ${vehicleId}`);
+async function handleStockDelete(webhookEvent: WebhookEvent): Promise<void> {
+  const stockId = webhookEvent.data.metadata.stockId;
   
-  // Check if vehicle exists and is not overridden
-  const { data: existingCar } = await supabase
-    .from('cars')
-    .select('id, sync_override')
-    .eq('autotrader_id', vehicleId)
-    .single();
-  
-  if (!existingCar) {
-    console.log(`Vehicle ${vehicleId} not found in database, fetching...`);
-    // Vehicle doesn't exist, treat as created
-    await handleVehicleCreated(vehicleId, advertiserId);
-    return;
-  }
-  
-  if (existingCar.sync_override) {
-    console.log(`Skipped update for ${vehicleId} - manual override enabled`);
-    await logWebhookEvent('vehicle.updated', vehicleId, 'skipped');
-    return;
-  }
-  
-  // Fetch updated vehicle details from AutoTrader
-  const autotraderClient = createAutoTraderClient();
-  const vehicle = await autotraderClient.getVehicle(vehicleId);
-  
-  // Map to database schema
-  const mappedCar = mapAutoTraderToDatabase(vehicle, advertiserId);
-  
-  // Update in database
-  await supabase
-    .from('cars')
-    .update({
-      ...mappedCar,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', existingCar.id);
-  
-  console.log(`Updated vehicle: ${vehicleId}`);
-  
-  // Log webhook event
-  await logWebhookEvent('vehicle.updated', vehicleId, 'success');
-}
-
-/**
- * Handle vehicle deleted event
- */
-async function handleVehicleDeleted(vehicleId: string): Promise<void> {
-  console.log(`Handling vehicle.deleted: ${vehicleId}`);
+  console.log(`Handling STOCK_DELETE for vehicle ${stockId}`);
   
   // Check if vehicle exists
   const { data: existingCar } = await supabase
     .from('cars')
     .select('id, sync_override')
-    .eq('autotrader_id', vehicleId)
+    .eq('autotrader_id', stockId)
     .single();
   
   if (!existingCar) {
-    console.log(`Vehicle ${vehicleId} not found in database`);
-    await logWebhookEvent('vehicle.deleted', vehicleId, 'not_found');
+    console.log(`Vehicle ${stockId} not found in database`);
+    await logWebhookEvent('STOCK_DELETE', stockId, 'not_found');
     return;
   }
   
   if (existingCar.sync_override) {
-    console.log(`Skipped deletion for ${vehicleId} - manual override enabled`);
-    await logWebhookEvent('vehicle.deleted', vehicleId, 'skipped');
+    console.log(`⏭️ Skipped deletion for ${stockId} - manual override enabled`);
+    await logWebhookEvent('STOCK_DELETE', stockId, 'skipped');
     return;
   }
   
@@ -226,10 +198,8 @@ async function handleVehicleDeleted(vehicleId: string): Promise<void> {
     })
     .eq('id', existingCar.id);
   
-  console.log(`Marked vehicle as unavailable: ${vehicleId}`);
-  
-  // Log webhook event
-  await logWebhookEvent('vehicle.deleted', vehicleId, 'success');
+  console.log(`✅ Marked vehicle as unavailable: ${stockId}`);
+  await logWebhookEvent('STOCK_DELETE', stockId, 'success');
 }
 
 /**
@@ -239,16 +209,16 @@ async function logWebhookEvent(
   eventType: string,
   vehicleId: string,
   status: string,
-  errorMessage?: string
+  action?: string
 ): Promise<void> {
   try {
     await supabase.from('autotrader_sync_logs').insert([{
       sync_type: 'webhook',
       status: status === 'success' ? 'success' : 'failed',
-      cars_added: eventType === 'vehicle.created' && status === 'success' ? 1 : 0,
-      cars_updated: eventType === 'vehicle.updated' && status === 'success' ? 1 : 0,
-      cars_marked_unavailable: eventType === 'vehicle.deleted' && status === 'success' ? 1 : 0,
-      error_message: errorMessage || null,
+      cars_added: action === 'created' ? 1 : 0,
+      cars_updated: action === 'updated' ? 1 : 0,
+      cars_marked_unavailable: eventType === 'STOCK_DELETE' && status === 'success' ? 1 : 0,
+      error_message: status === 'not_found' ? `Vehicle ${vehicleId} not found` : null,
       sync_duration_ms: 0,
     }]);
   } catch (logError) {
@@ -332,27 +302,25 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     }
     
     // Identify notification type (AutoTrader Go-Live requirement)
-    console.log(`📦 Notification type identified: STOCK_UPDATE (${webhookEvent.eventType})`);
+    console.log(`📦 Webhook received: ${webhookEvent.type} (stockId: ${webhookEvent.data?.metadata?.stockId})`);
     
-    // Log webhook receipt
-    console.log(`Received webhook: ${webhookEvent.eventType} for vehicle ${webhookEvent.vehicleId}`);
+    // Log webhook receipt with changed fields
+    if (webhookEvent.changedFields) {
+      console.log(`🔄 Changed fields:`, webhookEvent.changedFields.map(f => f.path).join(', '));
+    }
     
     // Process webhook based on event type
-    switch (webhookEvent.eventType) {
-      case 'vehicle.created':
-        await handleVehicleCreated(webhookEvent.vehicleId, webhookEvent.advertiserId);
+    switch (webhookEvent.type) {
+      case 'STOCK_UPDATE':
+        await handleStockUpdate(webhookEvent);
         break;
       
-      case 'vehicle.updated':
-        await handleVehicleUpdated(webhookEvent.vehicleId, webhookEvent.advertiserId);
-        break;
-      
-      case 'vehicle.deleted':
-        await handleVehicleDeleted(webhookEvent.vehicleId);
+      case 'STOCK_DELETE':
+        await handleStockDelete(webhookEvent);
         break;
       
       default:
-        console.warn(`Unknown event type: ${webhookEvent.eventType}`);
+        console.warn(`Unknown event type: ${webhookEvent.type}`);
         return {
           statusCode: 400,
           headers,
@@ -366,7 +334,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       headers,
       body: JSON.stringify({
         success: true,
-        message: `Processed ${webhookEvent.eventType} for vehicle ${webhookEvent.vehicleId}`,
+        message: `Processed ${webhookEvent.type} for vehicle ${webhookEvent.data.metadata.stockId}`,
       }),
     };
   } catch (error) {
