@@ -236,13 +236,28 @@ export function mapAutoTraderToDatabase(
   vehicle: VehicleResponse,
   advertiserId: string
 ): MappedCar {
-  // Check if vehicle is published/advertised
-  // AutoTrader API includes advert status in the response
-  const isPublished = vehicle.advertiserAdvert?.status === 'PUBLISHED' || 
-                      vehicle.autotraderAdvert?.status === 'PUBLISHED';
+  // Check if vehicle is actually advertised/published
+  // AutoTrader includes status in: advertiserAdvert (YOUR ad) and autotraderAdvert (AT's ad)
+  // Vehicle must be PUBLISHED to show on website
+  const isAdvertised = vehicle.advertiserAdvertStatus === 'PUBLISHED' || 
+                       vehicle.autotraderAdvertStatus === 'PUBLISHED';
   
-  // Only show vehicles that are published on AutoTrader
-  const isAvailable = isPublished && (vehicle.lifecycleState === 'FORECOURT' || !vehicle.lifecycleState);
+  // Also check lifecycle state - must be on FORECOURT
+  const isOnForecourt = !vehicle.lifecycleState || vehicle.lifecycleState === 'FORECOURT';
+  
+  // Vehicle is available if it's advertised AND on forecourt
+  const isAvailable = isAdvertised && isOnForecourt;
+  
+  // Log availability decision for debugging
+  if (!isAvailable) {
+    console.log(`Vehicle ${vehicle.vehicleId} marked unavailable:`, {
+      advertiserStatus: vehicle.advertiserAdvertStatus,
+      autotraderStatus: vehicle.autotraderAdvertStatus,
+      lifecycleState: vehicle.lifecycleState,
+      isAdvertised,
+      isOnForecourt,
+    });
+  }
   
   return {
     // Core fields
@@ -275,7 +290,7 @@ export function mapAutoTraderToDatabase(
     last_synced_at: new Date().toISOString(),
     autotrader_data: vehicle, // Store entire response for debugging
     
-    // Availability - based on AutoTrader's advertiser status
+    // Availability - based on AutoTrader's actual advert status
     is_available: isAvailable,
   };
 }

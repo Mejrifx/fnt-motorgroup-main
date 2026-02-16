@@ -434,6 +434,11 @@ class AutoTraderClient {
             doors: vehicle.doors || null,
             engine: engineSize ? `${engineSize}L` : null,
             
+            // Advert status - critical for determining if vehicle should be shown
+            advertiserAdvertStatus: adverts.retailAdverts?.advertiserAdvert?.status || 'NOT_PUBLISHED',
+            autotraderAdvertStatus: adverts.retailAdverts?.autotraderAdvert?.status || 'NOT_PUBLISHED',
+            lifecycleState: metadata.lifecycleState || 'FORECOURT',
+            
             // Description - AutoTrader stores it in retailAdverts.description2!
             description: (() => {
               // Get the main description
