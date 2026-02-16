@@ -181,17 +181,32 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   // Check if vehicle already exists
   const { data: existingCar } = await supabase
     .from('cars')
-    .select('id, sync_override')
+    .select('id, sync_override, cover_image_url, gallery_images')
     .eq('autotrader_id', stockId)
     .single();
   
   if (existingCar) {
     // Vehicle exists, update it (unless override is set)
     if (!existingCar.sync_override) {
+      // Preserve existing images if webhook images are invalid (QA/sandbox URLs)
+      const updateData: any = { ...mappedCar };
+      
+      // Check if webhook images are from QA/sandbox (m-qa domain)
+      const isQaImage = (url: string) => url && url.includes('m-qa.atcdn.co.uk');
+      const hasQaImages = isQaImage(mappedCar.cover_image_url) || 
+                          mappedCar.gallery_images.some(isQaImage);
+      
+      // If webhook has QA images and we have existing good images, keep the existing ones
+      if (hasQaImages && existingCar.cover_image_url) {
+        console.log(`⚠️ Webhook contains QA/sandbox images, preserving existing production images`);
+        updateData.cover_image_url = existingCar.cover_image_url;
+        updateData.gallery_images = existingCar.gallery_images || [];
+      }
+      
       await supabase
         .from('cars')
         .update({
-          ...mappedCar,
+          ...updateData,
           updated_at: new Date().toISOString(),
         })
         .eq('id', existingCar.id);
