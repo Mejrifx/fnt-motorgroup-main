@@ -296,7 +296,13 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       };
     }
     
+    // Log the raw payload to see what AutoTrader is actually sending
+    console.log('📥 RAW WEBHOOK PAYLOAD:', event.body);
+    
     const webhookEvent: WebhookEvent = JSON.parse(event.body);
+    
+    // Log parsed payload structure
+    console.log('📦 PARSED PAYLOAD:', JSON.stringify(webhookEvent, null, 2));
     
     // Get webhook signature and secret
     const signature = event.headers['x-autotrader-signature'] || event.headers['X-Autotrader-Signature'];
