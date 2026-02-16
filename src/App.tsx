@@ -15,6 +15,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import CookiePolicy from './components/CookiePolicy';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
+import PasswordGate from './components/PasswordGate';
 import { ToastProvider } from './components/ui/ToastContainer';
 
 // Main Site Component
@@ -42,20 +43,22 @@ const MainSite = () => {
 function App() {
   return (
     <ToastProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<MainSite />} />
-          <Route path="/car/:id" element={<CarDetails />} />
-          <Route path="/warranty-financing" element={<WarrantyFinancing />} />
-          <Route path="/terms-conditions" element={<TermsAndConditions />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/cookie-policy" element={<CookiePolicy />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          {/* Catch all route - redirect to home */}
-          <Route path="*" element={<MainSite />} />
-        </Routes>
-      </Router>
+      <PasswordGate>
+        <Router>
+          <Routes>
+            <Route path="/" element={<MainSite />} />
+            <Route path="/car/:id" element={<CarDetails />} />
+            <Route path="/warranty-financing" element={<WarrantyFinancing />} />
+            <Route path="/terms-conditions" element={<TermsAndConditions />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* Catch all route - redirect to home */}
+            <Route path="*" element={<MainSite />} />
+          </Routes>
+        </Router>
+      </PasswordGate>
     </ToastProvider>
   );
 }
