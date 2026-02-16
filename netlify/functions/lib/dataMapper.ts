@@ -236,6 +236,14 @@ export function mapAutoTraderToDatabase(
   vehicle: VehicleResponse,
   advertiserId: string
 ): MappedCar {
+  // Check if vehicle is published/advertised
+  // AutoTrader API includes advert status in the response
+  const isPublished = vehicle.advertiserAdvert?.status === 'PUBLISHED' || 
+                      vehicle.autotraderAdvert?.status === 'PUBLISHED';
+  
+  // Only show vehicles that are published on AutoTrader
+  const isAvailable = isPublished && (vehicle.lifecycleState === 'FORECOURT' || !vehicle.lifecycleState);
+  
   return {
     // Core fields
     make: vehicle.make || 'Unknown',
@@ -267,8 +275,8 @@ export function mapAutoTraderToDatabase(
     last_synced_at: new Date().toISOString(),
     autotrader_data: vehicle, // Store entire response for debugging
     
-    // Availability
-    is_available: true,
+    // Availability - based on AutoTrader's advertiser status
+    is_available: isAvailable,
   };
 }
 
