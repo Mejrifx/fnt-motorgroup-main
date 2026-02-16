@@ -378,9 +378,9 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     // Get webhook signature and secret
     const signature = event.headers['x-autotrader-signature'] || event.headers['X-Autotrader-Signature'];
     const webhookSecret = process.env.AUTOTRADER_WEBHOOK_SECRET;
+    const allowUnsignedWebhooks = process.env.ALLOW_UNSIGNED_WEBHOOKS === 'true'; // Explicit opt-in for testing
     
-    // Check if we should verify signatures
-    // Allow webhooks without signatures if signature is missing (sandbox testing mode)
+    // PRODUCTION SECURITY: Verify webhook signatures
     if (webhookSecret && signature) {
       // Both secret AND signature present - verify it
       if (!verifyWebhookSignature(event.body, signature, webhookSecret)) {
@@ -393,13 +393,37 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       }
       console.log('✅ Webhook signature verified - request is authentic');
     } else if (webhookSecret && !signature) {
-      // Secret configured but no signature received - testing/sandbox mode
-      console.warn('⚠️ SANDBOX MODE: Webhook received without signature (AutoTrader may not be sending signatures yet)');
-      console.warn('⚠️ Allowing webhook to process for testing - enable signatures in production!');
+      // Secret configured but no signature received
+      if (allowUnsignedWebhooks) {
+        // Testing mode explicitly enabled
+        console.warn('⚠️ TESTING MODE: Webhook received without signature');
+        console.warn('⚠️ ALLOW_UNSIGNED_WEBHOOKS is enabled - this should ONLY be used for testing!');
+        console.warn('⚠️ Set ALLOW_UNSIGNED_WEBHOOKS=false for production!');
+      } else {
+        // PRODUCTION: Reject unsigned webhooks
+        console.error('❌ Webhook signature header missing (AUTOTRADER_WEBHOOK_SECRET is set)');
+        console.error('❌ For testing: set ALLOW_UNSIGNED_WEBHOOKS=true environment variable');
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ 
+            error: 'Webhook signature required',
+            message: 'X-Autotrader-Signature header is missing'
+          }),
+        };
+      }
     } else {
-      // No secret configured - full sandbox mode
-      console.warn('⚠️ WARNING: AUTOTRADER_WEBHOOK_SECRET not set - webhooks are NOT verified!');
-      console.warn('⚠️ This is acceptable for sandbox testing but MUST be configured for production!');
+      // No secret configured at all
+      console.error('❌ AUTOTRADER_WEBHOOK_SECRET environment variable not set!');
+      console.error('❌ Webhook cannot be verified - this is a CRITICAL security issue!');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ 
+          error: 'Server configuration error',
+          message: 'Webhook secret not configured'
+        }),
+      };
     }
     
     // Identify notification type (AutoTrader Go-Live requirement)
