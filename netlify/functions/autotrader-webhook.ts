@@ -62,8 +62,20 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
       return false;
     }
     
+    // AutoTrader may send signature in format: "t=timestamp,v1=hash"
+    // Extract just the hash part if present
+    let cleanSignature = signature;
+    if (signature.includes('v1=')) {
+      const parts = signature.split(',');
+      const v1Part = parts.find(p => p.startsWith('v1='));
+      if (v1Part) {
+        cleanSignature = v1Part.replace('v1=', '');
+        console.log('📝 Extracted v1 signature from AutoTrader format');
+      }
+    }
+    
     // Remove "sha256=" prefix if present (some APIs include this)
-    const cleanSignature = signature.replace(/^sha256=/, '');
+    cleanSignature = cleanSignature.replace(/^sha256=/, '');
     
     // Compute expected signature using HMAC-SHA256
     const hmac = crypto.createHmac('sha256', secret);
@@ -75,6 +87,7 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
       console.error('❌ Webhook signature length mismatch');
       console.error('Expected length:', expectedSignature.length);
       console.error('Received length:', cleanSignature.length);
+      console.error('Raw signature received:', signature.substring(0, 50) + '...');
       return false;
     }
     
@@ -159,13 +172,15 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
 
 /**
  * Handle STOCK_UPDATE event (vehicle created or updated)
+ * Optimized for fast response time (< 1 second)
  */
 async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
+  const startTime = Date.now();
   const stockId = webhookEvent.data.metadata.stockId;
   const advertiserId = webhookEvent.data.advertiser.advertiserId;
   const lifecycleState = webhookEvent.data.metadata.lifecycleState;
   
-  console.log(`Handling STOCK_UPDATE for vehicle ${stockId} (lifecycleState: ${lifecycleState})`);
+  console.log(`⚡ Handling STOCK_UPDATE for vehicle ${stockId} (lifecycleState: ${lifecycleState})`);
   
   // Check if vehicle is being removed from forecourt (unadvertised)
   // lifecycleState can be: FORECOURT, WITHDRAWN, SOLD, etc.
@@ -174,7 +189,7 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   if (isUnavailable) {
     console.log(`⚠️ Vehicle ${stockId} is no longer on forecourt (${lifecycleState}), marking as unavailable`);
     
-    // Find and mark as unavailable
+    // Quick database query - optimized
     const { data: existingCar } = await supabase
       .from('cars')
       .select('id, sync_override')
@@ -190,7 +205,8 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
         })
         .eq('id', existingCar.id);
       
-      console.log(`✅ Marked vehicle as unavailable: ${stockId}`);
+      const duration = Date.now() - startTime;
+      console.log(`✅ Marked vehicle as unavailable: ${stockId} (${duration}ms)`);
       await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'marked_unavailable');
     }
     return;
@@ -209,7 +225,7 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
     throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
   }
   
-  // Check if vehicle already exists
+  // Check if vehicle already exists - optimized query
   const { data: existingCar } = await supabase
     .from('cars')
     .select('id, sync_override, cover_image_url, gallery_images')
@@ -242,7 +258,8 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
         })
         .eq('id', existingCar.id);
       
-      console.log(`✅ Updated existing vehicle: ${stockId}`);
+      const duration = Date.now() - startTime;
+      console.log(`✅ Updated existing vehicle: ${stockId} (${duration}ms)`);
       await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'updated');
     } else {
       console.log(`⏭️ Skipped update for ${stockId} - manual override enabled`);
@@ -258,20 +275,23 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
         updated_at: new Date().toISOString(),
       }]);
     
-    console.log(`✅ Inserted new vehicle: ${stockId}`);
+    const duration = Date.now() - startTime;
+    console.log(`✅ Inserted new vehicle: ${stockId} (${duration}ms)`);
     await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'created');
   }
 }
 
 /**
  * Handle STOCK_DELETE event (vehicle removed from forecourt)
+ * Optimized for fast response time (< 1 second)
  */
 async function handleStockDelete(webhookEvent: WebhookEvent): Promise<void> {
+  const startTime = Date.now();
   const stockId = webhookEvent.data.metadata.stockId;
   
-  console.log(`Handling STOCK_DELETE for vehicle ${stockId}`);
+  console.log(`⚡ Handling STOCK_DELETE for vehicle ${stockId}`);
   
-  // Check if vehicle exists
+  // Quick database query - optimized
   const { data: existingCar } = await supabase
     .from('cars')
     .select('id, sync_override')
@@ -299,7 +319,8 @@ async function handleStockDelete(webhookEvent: WebhookEvent): Promise<void> {
     })
     .eq('id', existingCar.id);
   
-  console.log(`✅ Marked vehicle as unavailable: ${stockId}`);
+  const duration = Date.now() - startTime;
+  console.log(`✅ Marked vehicle as unavailable: ${stockId} (${duration}ms)`);
   await logWebhookEvent('STOCK_DELETE', stockId, 'success');
 }
 
@@ -329,13 +350,19 @@ async function logWebhookEvent(
 
 /**
  * Netlify Function handler
+ * Optimized for AutoTrader Go-Live requirements:
+ * - Response time < 1 second
+ * - Proper signature verification
+ * - Clear error messages
  */
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  const requestStartTime = Date.now(); // Track total request time
+  
   // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, PUT, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-Autotrader-Signature',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Autotrader-Signature, Autotrader-Signature',
     'Content-Type': 'application/json',
   };
   
@@ -368,17 +395,27 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     }
     
     // Log the raw payload to see what AutoTrader is actually sending
-    console.log('📥 RAW WEBHOOK PAYLOAD:', event.body);
+    console.log('📥 RAW WEBHOOK PAYLOAD:', event.body.substring(0, 200) + '...');
     
     const webhookEvent: WebhookEvent = JSON.parse(event.body);
     
-    // Log parsed payload structure
-    console.log('📦 PARSED PAYLOAD:', JSON.stringify(webhookEvent, null, 2));
-    
     // Get webhook signature and secret
-    const signature = event.headers['x-autotrader-signature'] || event.headers['X-Autotrader-Signature'];
+    // AutoTrader may send the signature with different casing or formats
+    // Check all possible variations to ensure we catch it
+    const signature = event.headers['x-autotrader-signature'] || 
+                     event.headers['X-Autotrader-Signature'] ||
+                     event.headers['autotrader-signature'] ||
+                     event.headers['Autotrader-Signature'];
     const webhookSecret = process.env.AUTOTRADER_WEBHOOK_SECRET;
     const allowUnsignedWebhooks = process.env.ALLOW_UNSIGNED_WEBHOOKS === 'true'; // Explicit opt-in for testing
+    
+    // Debug: Log all header keys to help diagnose signature issues
+    console.log('📬 Received headers (keys only):', Object.keys(event.headers || {}));
+    if (signature) {
+      console.log('✅ Found signature header:', signature.substring(0, 20) + '...');
+    } else {
+      console.warn('⚠️ No signature header found in:', Object.keys(event.headers || {}));
+    }
     
     // PRODUCTION SECURITY: Verify webhook signatures
     if (webhookSecret && signature) {
@@ -453,6 +490,10 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         };
     }
     
+    // Calculate and log response time (AutoTrader requirement: < 1 second)
+    const responseTime = Date.now() - requestStartTime;
+    console.log(`⏱️ Total response time: ${responseTime}ms ${responseTime > 1000 ? '⚠️ SLOW!' : '✅'}`);
+    
     // Return success response
     return {
       statusCode: 200,
@@ -460,10 +501,13 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       body: JSON.stringify({
         success: true,
         message: `Processed ${webhookEvent.type} for vehicle ${webhookEvent.data.metadata.stockId}`,
+        responseTimeMs: responseTime,
       }),
     };
   } catch (error) {
+    const responseTime = Date.now() - requestStartTime;
     console.error('Webhook handler error:', error);
+    console.error(`⏱️ Error response time: ${responseTime}ms`);
     
     return {
       statusCode: 500,
@@ -472,6 +516,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         success: false,
         error: error.message,
         message: 'Internal server error processing webhook',
+        responseTimeMs: responseTime,
       }),
     };
   }

@@ -18,10 +18,11 @@
   conditions = {Role = []}
 
 # Scheduled Function: AutoTrader Stock Sync
-# Runs every 30 minutes to sync inventory from AutoTrader
+# AutoTrader Go-Live Requirement: Maximum 3 API polls per day
+# Runs every 8 hours as fallback (webhooks handle real-time updates)
 # Requires Netlify Pro plan or higher
 [functions."sync-stock"]
-  schedule = "*/30 * * * *"  # Every 30 minutes
+  schedule = "0 */8 * * *"  # Every 8 hours (at 00:00, 08:00, 16:00 UTC)
 
 # Function settings
 [functions]
