@@ -242,8 +242,9 @@ export function mapAutoTraderToDatabase(
   const isAdvertised = vehicle.advertiserAdvertStatus === 'PUBLISHED' || 
                        vehicle.autotraderAdvertStatus === 'PUBLISHED';
   
-  // Also check lifecycle state - must be on FORECOURT
-  const isOnForecourt = !vehicle.lifecycleState || vehicle.lifecycleState === 'FORECOURT';
+  // Also check lifecycle state - must be explicitly on FORECOURT
+  // Do NOT default to true if missing - vehicle must be confirmed on forecourt
+  const isOnForecourt = vehicle.lifecycleState === 'FORECOURT';
   
   // Vehicle is available if it's advertised AND on forecourt
   const isAvailable = isAdvertised && isOnForecourt;
