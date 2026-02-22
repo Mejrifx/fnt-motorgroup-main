@@ -163,7 +163,7 @@ async function syncStock(): Promise<SyncResult> {
               road_tax: mappedCar.road_tax,
               last_synced_at: mappedCar.last_synced_at,
               autotrader_data: mappedCar.autotrader_data,
-              is_available: true,
+              is_available: mappedCar.is_available, // Use calculated availability from data mapper
               updated_at: new Date().toISOString(),
             })
             .eq('id', existingCar.id);
