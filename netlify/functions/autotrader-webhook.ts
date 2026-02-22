@@ -52,6 +52,7 @@ interface WebhookEvent {
 /**
  * Verify webhook signature using HMAC-SHA256 (for security)
  * AutoTrader signs webhooks with a shared secret key
+ * Format: t=timestamp,v1=hash where hash = HMAC-SHA256(secret, timestamp.payload)
  * Reference: https://developers.autotrader.co.uk/webhooks
  */
 function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
@@ -62,32 +63,44 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
       return false;
     }
     
-    // AutoTrader may send signature in format: "t=timestamp,v1=hash"
-    // Extract just the hash part if present
-    let cleanSignature = signature;
-    if (signature.includes('v1=')) {
+    // AutoTrader sends signature in format: "t=timestamp,v1=hash"
+    // We need to extract both the timestamp and the hash
+    let timestamp = '';
+    let cleanSignature = '';
+    
+    if (signature.includes('t=') && signature.includes('v1=')) {
       const parts = signature.split(',');
+      const tPart = parts.find(p => p.startsWith('t='));
       const v1Part = parts.find(p => p.startsWith('v1='));
-      if (v1Part) {
+      
+      if (tPart && v1Part) {
+        timestamp = tPart.replace('t=', '');
         cleanSignature = v1Part.replace('v1=', '');
-        console.log('📝 Extracted v1 signature from AutoTrader format');
+        console.log('📝 Extracted timestamp and v1 signature from AutoTrader format');
+        console.log('🕒 Timestamp:', timestamp);
+      } else {
+        console.error('❌ Invalid signature format - missing t= or v1=');
+        return false;
       }
+    } else {
+      // Fallback: if no timestamp, just use the payload
+      cleanSignature = signature.replace(/^sha256=/, '');
     }
     
-    // Remove "sha256=" prefix if present (some APIs include this)
-    cleanSignature = cleanSignature.replace(/^sha256=/, '');
-    
     // Compute expected signature using HMAC-SHA256
+    // AutoTrader (like Stripe) computes: HMAC(secret, timestamp + "." + payload)
     const hmac = crypto.createHmac('sha256', secret);
-    hmac.update(payload, 'utf8');
+    const signedPayload = timestamp ? `${timestamp}.${payload}` : payload;
+    hmac.update(signedPayload, 'utf8');
     const expectedSignature = hmac.digest('hex');
+    
+    console.log('🔐 Signed payload format:', timestamp ? 'timestamp.payload' : 'payload only');
     
     // Verify signature lengths match
     if (cleanSignature.length !== expectedSignature.length) {
       console.error('❌ Webhook signature length mismatch');
       console.error('Expected length:', expectedSignature.length);
       console.error('Received length:', cleanSignature.length);
-      console.error('Raw signature received:', signature.substring(0, 50) + '...');
       return false;
     }
     
