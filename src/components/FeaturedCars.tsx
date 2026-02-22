@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Fuel, Settings, Calendar } from 'lucide-react';
 import { supabase, type Car } from '../lib/supabase';
 
+// AutoTrader CDN URLs contain a {resize} template that must be substituted.
+// e.g. https://m-qa.atcdn.co.uk/a/media/{resize}/abc123.jpg → w800
+const resolveImageUrl = (car: Car): string => {
+  const raw = car.cover_image_path
+    ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
+    : car.cover_image_url || '';
+  return raw.replace('{resize}', 'w800') || 'https://via.placeholder.com/400x250?text=No+Image';
+};
+
 interface FeaturedCarsProps {
   searchFilters?: {
     make: string;
@@ -226,16 +235,9 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={
-                      car.cover_image_path 
-                        ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
-                        : car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'
-                    }
+                    src={resolveImageUrl(car)}
                     alt={`${car.make} ${car.model}`}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
-                    }}
                   />
                   <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">
                     {car.year}

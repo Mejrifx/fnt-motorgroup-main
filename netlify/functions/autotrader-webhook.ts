@@ -149,12 +149,12 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
   
   // Extract first image URL
   const firstImage = media?.images?.[0]?.href || '';
-  const imageUrl = firstImage ? firstImage.replace('{resize}', '800x600') : '';
+  const imageUrl = firstImage ? firstImage.replace('{resize}', 'w800') : '';
   
   // Extract all gallery images
   const galleryImages = (media?.images || [])
     .slice(0, 10) // Limit to 10 images
-    .map((img: any) => img.href?.replace('{resize}', '800x600') || '')
+    .map((img: any) => img.href?.replace('{resize}', 'w800') || '')
     .filter((url: string) => url.length > 0);
   
   // Extract advert statuses and lifecycle state (CRITICAL for availability logic)

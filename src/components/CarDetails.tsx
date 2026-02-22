@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Phone, Mail, MapPin, Calendar, Fuel, Settings, Palette, Car as CarIcon, DoorOpen, Banknote } from 'lucide-react';
 import { supabase, type Car } from '../lib/supabase';
 
+// Replace AutoTrader's {resize} placeholder with actual dimensions
+const resolveUrl = (url: string) => url.replace('{resize}', 'w800');
+
 const CarDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -56,10 +59,8 @@ const CarDetails: React.FC = () => {
   };
 
   const getImageUrl = (path: string): string => {
-    const { data } = supabase.storage
-      .from('car-images')
-      .getPublicUrl(path);
-    return data.publicUrl;
+    const { data } = supabase.storage.from('car-images').getPublicUrl(path);
+    return resolveUrl(data.publicUrl);
   };
 
   const getAllImages = (): string[] => {
@@ -67,27 +68,23 @@ const CarDetails: React.FC = () => {
     
     const images: string[] = [];
     
-    // Add cover image
+    // Cover image: prefer Supabase Storage path, then direct URL
     if (car.cover_image_path) {
       images.push(getImageUrl(car.cover_image_path));
     } else if (car.cover_image_url) {
-      images.push(car.cover_image_url);
+      images.push(resolveUrl(car.cover_image_url));
     }
     
-    // Add gallery images from Supabase Storage (manually uploaded)
+    // Gallery: prefer manually uploaded paths
     if (car.gallery_image_paths && car.gallery_image_paths.length > 0) {
-      car.gallery_image_paths.forEach(path => {
-        images.push(getImageUrl(path));
-      });
+      car.gallery_image_paths.forEach(path => images.push(getImageUrl(path)));
     }
     
-    // Add gallery images from AutoTrader sync (direct URLs)
+    // Gallery: AutoTrader CDN URLs (also resolve {resize})
     if (car.gallery_images && Array.isArray(car.gallery_images) && car.gallery_images.length > 0) {
       car.gallery_images.forEach(url => {
-        // Only add if it's not already in the images array (avoid duplicates)
-        if (!images.includes(url)) {
-          images.push(url);
-        }
+        const resolved = resolveUrl(url);
+        if (!images.includes(resolved)) images.push(resolved);
       });
     }
     

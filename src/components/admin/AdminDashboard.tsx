@@ -746,11 +746,12 @@ const AdminDashboard = () => {
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img 
-                          src={
-                            car.cover_image_path 
+                          src={(() => {
+                            const raw = car.cover_image_path
                               ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
-                              : car.cover_image_url || 'https://via.placeholder.com/60x40'
-                          } 
+                              : car.cover_image_url || '';
+                            return raw.replace('{resize}', 'w800') || 'https://via.placeholder.com/60x40';
+                          })()}
                           alt={`${car.make} ${car.model}`}
                           className="w-12 h-8 sm:w-15 sm:h-10 rounded object-cover"
                         />

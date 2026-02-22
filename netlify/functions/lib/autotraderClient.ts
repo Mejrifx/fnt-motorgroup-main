@@ -528,10 +528,10 @@ class AutoTraderClient {
             })(),
             
             // Images - AutoTrader provides images in media object
-            // CRITICAL: Replace {resize} placeholder with actual dimensions
+            // Replace {resize} placeholder with AutoTrader CDN format (w800 = 800px wide)
             images: (media.images || []).map((img: any) => {
               const url = img.href || img.url || '';
-              return url.replace('{resize}', '800x600');
+              return url.replace('{resize}', 'w800');
             }).filter((url: string) => url.length > 0),
             
             // Keep full AutoTrader data for reference
