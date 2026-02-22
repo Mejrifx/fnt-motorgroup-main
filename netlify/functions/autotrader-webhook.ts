@@ -263,17 +263,22 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   if (existingCar) {
     // Vehicle exists, update it (unless override is set)
     if (!existingCar.sync_override) {
-      // Preserve existing images if webhook images are invalid (QA/sandbox URLs)
+      // Preserve existing images if webhook images are invalid or missing
       const updateData: any = { ...mappedCar };
+      
+      // Check if webhook has no images (common for price-only updates)
+      const hasNoImages = !mappedCar.cover_image_url || 
+                          mappedCar.cover_image_url.includes('pexels.com') || // Default fallback image
+                          mappedCar.gallery_images.length === 0;
       
       // Check if webhook images are from QA/sandbox (m-qa domain)
       const isQaImage = (url: string) => url && url.includes('m-qa.atcdn.co.uk');
       const hasQaImages = isQaImage(mappedCar.cover_image_url) || 
                           mappedCar.gallery_images.some(isQaImage);
       
-      // If webhook has QA images and we have existing good images, keep the existing ones
-      if (hasQaImages && existingCar.cover_image_url) {
-        console.log(`⚠️ Webhook contains QA/sandbox images, preserving existing production images`);
+      // If webhook has no images OR QA images, preserve existing production images
+      if ((hasNoImages || hasQaImages) && existingCar.cover_image_url) {
+        console.log(`🖼️ Preserving existing images - webhook ${hasNoImages ? 'has no images' : 'has QA/sandbox images'}`);
         updateData.cover_image_url = existingCar.cover_image_url;
         updateData.gallery_images = existingCar.gallery_images || [];
       }
