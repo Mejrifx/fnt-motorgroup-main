@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
@@ -29,6 +29,11 @@ const AdminDashboard = () => {
   const [syncSuccess, setSyncSuccess] = useState(false);
   const [syncLogs, setSyncLogs] = useState<any[]>([]);
   const [showSyncLogs, setShowSyncLogs] = useState(false);
+  
+  // Car inventory filtering and sorting
+  const [carFilter, setCarFilter] = useState<'all' | 'available' | 'sold'>('all');
+  const [carSortBy, setCarSortBy] = useState<'date' | 'price' | 'make' | 'year'>('date');
+  const [carSortOrder, setCarSortOrder] = useState<'asc' | 'desc'>('desc');
   
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -246,6 +251,47 @@ const AdminDashboard = () => {
 
   const handleBackToHome = () => {
     navigate('/');
+  };
+
+  // Filter and sort cars
+  const getFilteredAndSortedCars = () => {
+    let filtered = [...cars];
+
+    // Apply filter
+    if (carFilter === 'available') {
+      filtered = filtered.filter(car => car.is_available);
+    } else if (carFilter === 'sold') {
+      filtered = filtered.filter(car => !car.is_available);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      
+      switch (carSortBy) {
+        case 'date':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case 'price':
+          comparison = a.price - b.price;
+          break;
+        case 'make':
+          comparison = a.make.localeCompare(b.make);
+          if (comparison === 0) {
+            comparison = a.model.localeCompare(b.model);
+          }
+          break;
+        case 'year':
+          comparison = a.year - b.year;
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return carSortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return filtered;
   };
 
   // Show loading screen while auth is loading
@@ -575,18 +621,6 @@ const AdminDashboard = () => {
               <span>Cars</span>
             </button>
             <button
-              onClick={() => setActiveTab('reviews')}
-              className={`
-                ${activeTab === 'reviews'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span>Reviews</span>
-            </button>
-            <button
               onClick={() => setActiveTab('invoices')}
               className={`
                 ${activeTab === 'invoices'
@@ -610,6 +644,18 @@ const AdminDashboard = () => {
               <History className="w-5 h-5" />
               <span>Invoice History</span>
             </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`
+                ${activeTab === 'reviews'
+                  ? 'border-fnt-red text-fnt-red'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
+              `}
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span>Reviews</span>
+            </button>
           </nav>
         </div>
 
@@ -628,6 +674,60 @@ const AdminDashboard = () => {
               </button>
             </div>
           </div>
+
+          {/* Filter and Sort Controls */}
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Filter by Status */}
+              <div className="flex items-center space-x-2">
+                <Filter className="w-4 h-4 text-gray-500" />
+                <label className="text-sm font-medium text-gray-700">Filter:</label>
+                <select
+                  value={carFilter}
+                  onChange={(e) => setCarFilter(e.target.value as 'all' | 'available' | 'sold')}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                >
+                  <option value="all">All Cars</option>
+                  <option value="available">Available Only</option>
+                  <option value="sold">Sold Only</option>
+                </select>
+              </div>
+
+              {/* Sort By */}
+              <div className="flex items-center space-x-2">
+                <ArrowUpDown className="w-4 h-4 text-gray-500" />
+                <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                <select
+                  value={carSortBy}
+                  onChange={(e) => setCarSortBy(e.target.value as 'date' | 'price' | 'make' | 'year')}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                >
+                  <option value="date">Date Added</option>
+                  <option value="price">Price</option>
+                  <option value="make">Make & Model</option>
+                  <option value="year">Year</option>
+                </select>
+              </div>
+
+              {/* Sort Order */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setCarSortOrder(carSortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-colors"
+                  title={`Sort ${carSortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
+                >
+                  {carSortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
+                </button>
+              </div>
+
+              {/* Results Count */}
+              <div className="ml-auto flex items-center">
+                <span className="text-sm text-gray-600">
+                  Showing {getFilteredAndSortedCars().length} of {cars.length} cars
+                </span>
+              </div>
+            </div>
+          </div>
           
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -641,7 +741,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {cars.map((car) => (
+                {getFilteredAndSortedCars().map((car) => (
                   <tr key={car.id} className="hover:bg-gray-50">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -713,6 +813,19 @@ const AdminDashboard = () => {
                 className="mt-2 text-fnt-red hover:text-red-600 font-medium"
               >
                 Add your first car
+              </button>
+            </div>
+          )}
+
+          {cars.length > 0 && getFilteredAndSortedCars().length === 0 && (
+            <div className="text-center py-12">
+              <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No cars match the current filter.</p>
+              <button
+                onClick={() => setCarFilter('all')}
+                className="mt-2 text-fnt-red hover:text-red-600 font-medium"
+              >
+                Show all cars
               </button>
             </div>
           )}
