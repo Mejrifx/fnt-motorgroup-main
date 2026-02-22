@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Fuel, Settings, Calendar } from 'lucide-react';
-import { supabase, type Car, getCarImageUrl, handleImageError } from '../lib/supabase';
+import { supabase, type Car } from '../lib/supabase';
 
 interface FeaturedCarsProps {
   searchFilters?: {
@@ -226,10 +226,16 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={getCarImageUrl(car)}
+                    src={
+                      car.cover_image_path 
+                        ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
+                        : car.cover_image_url || 'https://via.placeholder.com/400x250?text=No+Image'
+                    }
                     alt={`${car.make} ${car.model}`}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => handleImageError(e, car)}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
+                    }}
                   />
                   <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">
                     {car.year}

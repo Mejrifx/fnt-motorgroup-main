@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Phone, Mail, MapPin, Calendar, Fuel, Settings, Palette, Car as CarIcon, DoorOpen, Banknote } from 'lucide-react';
-import { supabase, type Car, PLACEHOLDER_IMAGE } from '../lib/supabase';
+import { supabase, type Car } from '../lib/supabase';
 
 const CarDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -173,17 +173,6 @@ const CarDetails: React.FC = () => {
                     alt={`${car.make} ${car.model}`}
                     className="w-full h-96 lg:h-[500px] object-cover cursor-pointer"
                     onClick={() => setShowFullscreenGallery(true)}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      const retryCount = parseInt(target.getAttribute('data-retry') || '0');
-                      if (retryCount >= 2) { target.src = PLACEHOLDER_IMAGE; return; }
-                      target.setAttribute('data-retry', String(retryCount + 1));
-                      if (retryCount === 0 && car.cover_image_url && target.src !== car.cover_image_url) {
-                        target.src = car.cover_image_url;
-                      } else {
-                        target.src = PLACEHOLDER_IMAGE;
-                      }
-                    }}
                   />
                   
                   {images.length > 1 && (
@@ -233,13 +222,6 @@ const CarDetails: React.FC = () => {
                       src={image}
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        if (!target.getAttribute('data-retry')) {
-                          target.setAttribute('data-retry', '1');
-                          target.src = PLACEHOLDER_IMAGE;
-                        }
-                      }}
                     />
                   </button>
                 ))}
@@ -410,13 +392,6 @@ const CarDetails: React.FC = () => {
               src={images[currentImageIndex]}
               alt={`${car.make} ${car.model}`}
               className="max-w-full max-h-full object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                const retryCount = parseInt(target.getAttribute('data-retry') || '0');
-                if (retryCount >= 1) { target.src = PLACEHOLDER_IMAGE; return; }
-                target.setAttribute('data-retry', String(retryCount + 1));
-                target.src = PLACEHOLDER_IMAGE;
-              }}
             />
             
             {images.length > 1 && (

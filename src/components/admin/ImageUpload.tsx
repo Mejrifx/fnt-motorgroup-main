@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, Camera, Image as ImageIcon, AlertCircle } from 'lucide-react';
-import { supabase, PLACEHOLDER_IMAGE } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 interface ImageUploadProps {
   onImageUploaded: (imagePath: string) => void;
@@ -186,11 +186,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               alt="Current car image"
               className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
               onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                if (!target.getAttribute('data-retry')) {
-                  target.setAttribute('data-retry', '1');
-                  target.src = PLACEHOLDER_IMAGE;
-                }
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=Preview+Unavailable';
               }}
             />
             <button
