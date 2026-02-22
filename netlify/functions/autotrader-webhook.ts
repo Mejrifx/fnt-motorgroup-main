@@ -157,6 +157,17 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
     .map((img: any) => img.href?.replace('{resize}', '800x600') || '')
     .filter((url: string) => url.length > 0);
   
+  // Extract advert statuses and lifecycle state (CRITICAL for availability logic)
+  const advertiserAdvertStatus = adverts?.retailAdverts?.advertiserAdvert?.status || 'NOT_PUBLISHED';
+  const autotraderAdvertStatus = adverts?.retailAdverts?.autotraderAdvert?.status || 'NOT_PUBLISHED';
+  const lifecycleState = metadata?.lifecycleState || 'UNKNOWN';
+  
+  console.log('📊 Advert Status Data:', {
+    advertiserStatus: advertiserAdvertStatus,
+    autotraderStatus: autotraderAdvertStatus,
+    lifecycleState: lifecycleState
+  });
+  
   // Transform to API format that the data mapper expects
   return {
     id: metadata.stockId,
@@ -180,6 +191,10 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
     images: galleryImages,
     owners: vehicle.owners,
     attentionGrabber: adverts?.retailAdverts?.attentionGrabber,
+    // CRITICAL: Pass through advert statuses and lifecycle state for availability logic
+    advertiserAdvertStatus: advertiserAdvertStatus,
+    autotraderAdvertStatus: autotraderAdvertStatus,
+    lifecycleState: lifecycleState,
   };
 }
 
