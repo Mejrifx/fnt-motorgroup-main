@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { supabase, type Car, type Review } from '../../lib/supabase';
+import { supabase, type Car, type Review, getCarImageUrl, handleImageError } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
 import EditCarModal from './EditCarModal';
 import AddReviewModal from './AddReviewModal';
@@ -746,22 +746,10 @@ const AdminDashboard = () => {
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img 
-                          src={
-                            car.cover_image_path 
-                              ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
-                              : car.cover_image_url || 'https://via.placeholder.com/60x40?text=No+Image'
-                          } 
+                          src={getCarImageUrl(car)}
                           alt={`${car.make} ${car.model}`}
                           className="w-12 h-8 sm:w-15 sm:h-10 rounded object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            // If constructed URL failed but we have a direct URL, try that
-                            if (car.cover_image_path && car.cover_image_url && target.src !== car.cover_image_url) {
-                              target.src = car.cover_image_url;
-                            } else {
-                              target.src = 'https://via.placeholder.com/60x40?text=No+Image';
-                            }
-                          }}
+                          onError={(e) => handleImageError(e, car)}
                         />
                         <div className="ml-2 sm:ml-4">
                           <div className="text-xs sm:text-sm font-medium text-gray-900">

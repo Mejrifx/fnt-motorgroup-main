@@ -98,10 +98,10 @@ async function syncStock(): Promise<SyncResult> {
       return result;
     }
     
-    // Step 3: Get existing cars from database
+    // Step 3: Get existing cars from database (include images for preservation)
     const { data: existingCars, error: fetchError } = await supabase
       .from('cars')
-      .select('id, autotrader_id, sync_override')
+      .select('id, autotrader_id, sync_override, cover_image_url, cover_image_path, gallery_images, gallery_image_paths')
       .eq('synced_from_autotrader', true);
     
     if (fetchError) {
@@ -141,31 +141,55 @@ async function syncStock(): Promise<SyncResult> {
             continue;
           }
           
+          // Determine image fields — preserve existing images if new ones are defaults or missing
+          const isDefaultImage = (url: string) => !url || url.includes('pexels.com');
+          const hasGoodExistingImages = existingCar.cover_image_url && !isDefaultImage(existingCar.cover_image_url);
+          const newImagesAreDefault = isDefaultImage(mappedCar.cover_image_url) && mappedCar.gallery_images.length === 0;
+          
+          let coverImageUrl = mappedCar.cover_image_url;
+          let galleryImages = mappedCar.gallery_images;
+          
+          if (newImagesAreDefault && hasGoodExistingImages) {
+            console.log(`🖼️ Preserving existing images for ${mappedCar.autotrader_id} — API returned defaults`);
+            coverImageUrl = existingCar.cover_image_url;
+            galleryImages = existingCar.gallery_images || [];
+          }
+          
           // Update existing car
+          const updatePayload: any = {
+            make: mappedCar.make,
+            model: mappedCar.model,
+            year: mappedCar.year,
+            price: mappedCar.price,
+            mileage: mappedCar.mileage,
+            fuel_type: mappedCar.fuel_type,
+            transmission: mappedCar.transmission,
+            category: mappedCar.category,
+            description: mappedCar.description,
+            cover_image_url: coverImageUrl,
+            gallery_images: galleryImages,
+            colour: mappedCar.colour,
+            engine: mappedCar.engine,
+            style: mappedCar.style,
+            doors: mappedCar.doors,
+            road_tax: mappedCar.road_tax,
+            last_synced_at: mappedCar.last_synced_at,
+            autotrader_data: mappedCar.autotrader_data,
+            is_available: mappedCar.is_available,
+            updated_at: new Date().toISOString(),
+          };
+          
+          // Preserve cover_image_path and gallery_image_paths if they exist (for manually uploaded images)
+          if (existingCar.cover_image_path) {
+            updatePayload.cover_image_path = existingCar.cover_image_path;
+          }
+          if (existingCar.gallery_image_paths && existingCar.gallery_image_paths.length > 0) {
+            updatePayload.gallery_image_paths = existingCar.gallery_image_paths;
+          }
+          
           const { error: updateError } = await supabase
             .from('cars')
-            .update({
-              make: mappedCar.make,
-              model: mappedCar.model,
-              year: mappedCar.year,
-              price: mappedCar.price,
-              mileage: mappedCar.mileage,
-              fuel_type: mappedCar.fuel_type,
-              transmission: mappedCar.transmission,
-              category: mappedCar.category,
-              description: mappedCar.description,
-              cover_image_url: mappedCar.cover_image_url,
-              gallery_images: mappedCar.gallery_images,
-              colour: mappedCar.colour,
-              engine: mappedCar.engine,
-              style: mappedCar.style,
-              doors: mappedCar.doors,
-              road_tax: mappedCar.road_tax,
-              last_synced_at: mappedCar.last_synced_at,
-              autotrader_data: mappedCar.autotrader_data,
-              is_available: mappedCar.is_available, // Use calculated availability from data mapper
-              updated_at: new Date().toISOString(),
-            })
+            .update(updatePayload)
             .eq('id', existingCar.id);
           
           if (updateError) {

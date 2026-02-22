@@ -256,7 +256,7 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   // Check if vehicle already exists - optimized query
   const { data: existingCar } = await supabase
     .from('cars')
-    .select('id, sync_override, cover_image_url, gallery_images')
+    .select('id, sync_override, cover_image_url, cover_image_path, gallery_images, gallery_image_paths')
     .eq('autotrader_id', stockId)
     .single();
   
@@ -266,21 +266,40 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
       // Preserve existing images if webhook images are invalid or missing
       const updateData: any = { ...mappedCar };
       
-      // Check if webhook has no images (common for price-only updates)
-      const hasNoImages = !mappedCar.cover_image_url || 
-                          mappedCar.cover_image_url.includes('pexels.com') || // Default fallback image
-                          mappedCar.gallery_images.length === 0;
+      // Check the RAW webhook media to determine if images were actually sent
+      const rawMedia = webhookEvent.data.media;
+      const rawImages = rawMedia?.images || [];
+      const webhookHasRealImages = rawImages.length > 0 && rawImages.some((img: any) => img.href && img.href.length > 0);
       
-      // Check if webhook images are from QA/sandbox (m-qa domain)
+      // Check if mapped images are just defaults (pexels) or from QA/sandbox
+      const isDefaultImage = (url: string) => !url || url.includes('pexels.com');
       const isQaImage = (url: string) => url && url.includes('m-qa.atcdn.co.uk');
-      const hasQaImages = isQaImage(mappedCar.cover_image_url) || 
-                          mappedCar.gallery_images.some(isQaImage);
+      const mappedImageIsDefault = isDefaultImage(mappedCar.cover_image_url);
+      const mappedImageIsQa = isQaImage(mappedCar.cover_image_url) || 
+                               mappedCar.gallery_images.some(isQaImage);
       
-      // If webhook has no images OR QA images, preserve existing production images
-      if ((hasNoImages || hasQaImages) && existingCar.cover_image_url) {
-        console.log(`🖼️ Preserving existing images - webhook ${hasNoImages ? 'has no images' : 'has QA/sandbox images'}`);
+      // Preserve existing images if:
+      // 1. Webhook didn't include real images (price-only update), OR
+      // 2. Mapped images are defaults/QA images
+      // AND we have existing good images to preserve
+      const shouldPreserveImages = (!webhookHasRealImages || mappedImageIsDefault || mappedImageIsQa);
+      
+      if (shouldPreserveImages && existingCar.cover_image_url && !isDefaultImage(existingCar.cover_image_url)) {
+        console.log(`🖼️ Preserving existing images — webhook has ${rawImages.length} raw images, mapped cover is ${mappedImageIsDefault ? 'default' : mappedImageIsQa ? 'QA' : 'real'}`);
         updateData.cover_image_url = existingCar.cover_image_url;
         updateData.gallery_images = existingCar.gallery_images || [];
+        // Also preserve cover_image_path if it exists
+        if (existingCar.cover_image_path) {
+          updateData.cover_image_path = existingCar.cover_image_path;
+        }
+        // Also preserve gallery_image_paths if they exist
+        if (existingCar.gallery_image_paths && existingCar.gallery_image_paths.length > 0) {
+          updateData.gallery_image_paths = existingCar.gallery_image_paths;
+        }
+      } else if (webhookHasRealImages && !mappedImageIsDefault && !mappedImageIsQa) {
+        console.log(`🖼️ Updating images from webhook — ${mappedCar.gallery_images.length} new images`);
+      } else {
+        console.log(`🖼️ No good images to preserve or update — keeping whatever is mapped`);
       }
       
       await supabase

@@ -528,7 +528,11 @@ class AutoTraderClient {
             })(),
             
             // Images - AutoTrader provides images in media object
-            images: media.images?.map((img: any) => img.href || img.url) || [],
+            // CRITICAL: Replace {resize} placeholder with actual dimensions
+            images: (media.images || []).map((img: any) => {
+              const url = img.href || img.url || '';
+              return url.replace('{resize}', '800x600');
+            }).filter((url: string) => url.length > 0),
             
             // Keep full AutoTrader data for reference
             autotraderData: result,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Phone, Mail, MapPin, Calendar, Fuel, Settings, Palette, Car as CarIcon, DoorOpen, Banknote } from 'lucide-react';
-import { supabase, type Car } from '../lib/supabase';
+import { supabase, type Car, PLACEHOLDER_IMAGE } from '../lib/supabase';
 
 const CarDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -175,11 +175,13 @@ const CarDetails: React.FC = () => {
                     onClick={() => setShowFullscreenGallery(true)}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      // Try the direct cover_image_url as fallback
-                      if (car.cover_image_url && target.src !== car.cover_image_url) {
+                      const retryCount = parseInt(target.getAttribute('data-retry') || '0');
+                      if (retryCount >= 2) { target.src = PLACEHOLDER_IMAGE; return; }
+                      target.setAttribute('data-retry', String(retryCount + 1));
+                      if (retryCount === 0 && car.cover_image_url && target.src !== car.cover_image_url) {
                         target.src = car.cover_image_url;
                       } else {
-                        target.src = 'https://via.placeholder.com/800x500?text=Image+Not+Available';
+                        target.src = PLACEHOLDER_IMAGE;
                       }
                     }}
                   />
@@ -232,7 +234,11 @@ const CarDetails: React.FC = () => {
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x80?text=No+Img';
+                        const target = e.target as HTMLImageElement;
+                        if (!target.getAttribute('data-retry')) {
+                          target.setAttribute('data-retry', '1');
+                          target.src = PLACEHOLDER_IMAGE;
+                        }
                       }}
                     />
                   </button>
@@ -406,11 +412,10 @@ const CarDetails: React.FC = () => {
               className="max-w-full max-h-full object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                if (car.cover_image_url && target.src !== car.cover_image_url) {
-                  target.src = car.cover_image_url;
-                } else {
-                  target.src = 'https://via.placeholder.com/800x500?text=Image+Not+Available';
-                }
+                const retryCount = parseInt(target.getAttribute('data-retry') || '0');
+                if (retryCount >= 1) { target.src = PLACEHOLDER_IMAGE; return; }
+                target.setAttribute('data-retry', String(retryCount + 1));
+                target.src = PLACEHOLDER_IMAGE;
               }}
             />
             
