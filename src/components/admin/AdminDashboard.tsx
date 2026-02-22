@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
@@ -561,14 +561,14 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <div className="mb-6 border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('cars')}
               className={`
                 ${activeTab === 'cars'
                   ? 'border-fnt-red text-fnt-red'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
               <Car className="w-5 h-5" />
@@ -580,7 +580,7 @@ const AdminDashboard = () => {
                 ${activeTab === 'reviews'
                   ? 'border-fnt-red text-fnt-red'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
               <MessageSquare className="w-5 h-5" />
@@ -592,7 +592,7 @@ const AdminDashboard = () => {
                 ${activeTab === 'invoices'
                   ? 'border-fnt-red text-fnt-red'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
               <FileText className="w-5 h-5" />
@@ -604,10 +604,10 @@ const AdminDashboard = () => {
                 ${activeTab === 'invoice_history'
                   ? 'border-fnt-red text-fnt-red'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
-              <FileText className="w-5 h-5" />
+              <History className="w-5 h-5" />
               <span>Invoice History</span>
             </button>
           </nav>
