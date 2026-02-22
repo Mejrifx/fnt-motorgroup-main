@@ -234,7 +234,13 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
                     alt={`${car.make} ${car.model}`}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x250?text=No+Image';
+                      const target = e.target as HTMLImageElement;
+                      // If constructed URL failed but we have a direct URL, try that first
+                      if (car.cover_image_path && car.cover_image_url && target.src !== car.cover_image_url) {
+                        target.src = car.cover_image_url;
+                      } else {
+                        target.src = 'https://via.placeholder.com/400x250?text=No+Image';
+                      }
                     }}
                   />
                   <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">

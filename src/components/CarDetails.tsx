@@ -173,6 +173,15 @@ const CarDetails: React.FC = () => {
                     alt={`${car.make} ${car.model}`}
                     className="w-full h-96 lg:h-[500px] object-cover cursor-pointer"
                     onClick={() => setShowFullscreenGallery(true)}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      // Try the direct cover_image_url as fallback
+                      if (car.cover_image_url && target.src !== car.cover_image_url) {
+                        target.src = car.cover_image_url;
+                      } else {
+                        target.src = 'https://via.placeholder.com/800x500?text=Image+Not+Available';
+                      }
+                    }}
                   />
                   
                   {images.length > 1 && (
@@ -222,6 +231,9 @@ const CarDetails: React.FC = () => {
                       src={image}
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x80?text=No+Img';
+                      }}
                     />
                   </button>
                 ))}
@@ -392,6 +404,14 @@ const CarDetails: React.FC = () => {
               src={images[currentImageIndex]}
               alt={`${car.make} ${car.model}`}
               className="max-w-full max-h-full object-contain"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (car.cover_image_url && target.src !== car.cover_image_url) {
+                  target.src = car.cover_image_url;
+                } else {
+                  target.src = 'https://via.placeholder.com/800x500?text=Image+Not+Available';
+                }
+              }}
             />
             
             {images.length > 1 && (

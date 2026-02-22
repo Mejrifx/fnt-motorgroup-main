@@ -46,7 +46,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       .from('car-images')
       .upload(fileName, file, {
         cacheControl: '3600',
-        upsert: false
+        upsert: false,
+        contentType: file.type || 'image/jpeg',
       });
 
     if (error) {
@@ -184,6 +185,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               src={currentImageUrl || (currentImagePath ? getImageUrl(currentImagePath) : '')}
               alt="Current car image"
               className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://via.placeholder.com/400x200?text=Image+Preview+Unavailable';
+              }}
             />
             <button
               onClick={removeImage}

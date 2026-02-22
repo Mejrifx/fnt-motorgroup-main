@@ -749,10 +749,19 @@ const AdminDashboard = () => {
                           src={
                             car.cover_image_path 
                               ? supabase.storage.from('car-images').getPublicUrl(car.cover_image_path).data.publicUrl
-                              : car.cover_image_url || 'https://via.placeholder.com/60x40'
+                              : car.cover_image_url || 'https://via.placeholder.com/60x40?text=No+Image'
                           } 
                           alt={`${car.make} ${car.model}`}
                           className="w-12 h-8 sm:w-15 sm:h-10 rounded object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            // If constructed URL failed but we have a direct URL, try that
+                            if (car.cover_image_path && car.cover_image_url && target.src !== car.cover_image_url) {
+                              target.src = car.cover_image_url;
+                            } else {
+                              target.src = 'https://via.placeholder.com/60x40?text=No+Image';
+                            }
+                          }}
                         />
                         <div className="ml-2 sm:ml-4">
                           <div className="text-xs sm:text-sm font-medium text-gray-900">

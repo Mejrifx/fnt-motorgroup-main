@@ -43,6 +43,10 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
         return;
       }
 
+      // Also generate the public URLs so images work even if accessed via cover_image_url
+      const coverImageUrl = formData.cover_image_path ? getPublicUrl(formData.cover_image_path) : null;
+      const galleryImageUrls = formData.gallery_image_paths.map(path => getPublicUrl(path));
+
       const { data, error } = await supabase
         .from('cars')
         .insert([{
@@ -56,7 +60,9 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
           category: formData.category,
           description: formData.description,
           cover_image_path: formData.cover_image_path || null,
+          cover_image_url: coverImageUrl,
           gallery_image_paths: formData.gallery_image_paths,
+          gallery_images: galleryImageUrls,
           colour: formData.colour || null,
           engine: formData.engine || null,
           style: formData.style || null,
@@ -119,6 +125,11 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
   const colours = [
     'White', 'Black', 'Silver', 'Grey', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Brown', 'Gold', 'Purple'
   ];
+
+  // Helper to get public URL from storage path
+  const getPublicUrl = (path: string): string => {
+    return supabase.storage.from('car-images').getPublicUrl(path).data.publicUrl;
+  };
 
   // Handle cover image upload
   const handleCoverImageUploaded = (imagePath: string) => {

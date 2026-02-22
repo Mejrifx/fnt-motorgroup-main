@@ -34,24 +34,36 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
     setError('');
 
     try {
+      // Generate full public URLs for gallery images if paths exist
+      const galleryImageUrls = formData.gallery_image_paths.length > 0
+        ? formData.gallery_image_paths.map(path => getPublicUrlFromPath(path))
+        : undefined;
+
+      const updateData: any = {
+        make: formData.make,
+        model: formData.model,
+        year: formData.year,
+        price: parseFloat(formData.price),
+        mileage: formData.mileage,
+        fuel_type: formData.fuel_type,
+        transmission: formData.transmission,
+        category: formData.category,
+        description: formData.description,
+        cover_image_url: formData.cover_image_url || null,
+        cover_image_path: formData.cover_image_path || null,
+        gallery_image_paths: formData.gallery_image_paths,
+        is_available: formData.is_available,
+        updated_at: new Date().toISOString()
+      };
+
+      // If we have new gallery image paths, also store the public URLs
+      if (galleryImageUrls) {
+        updateData.gallery_images = galleryImageUrls;
+      }
+
       const { data, error } = await supabase
         .from('cars')
-        .update({
-          make: formData.make,
-          model: formData.model,
-          year: formData.year,
-          price: parseFloat(formData.price),
-          mileage: formData.mileage,
-          fuel_type: formData.fuel_type,
-          transmission: formData.transmission,
-          category: formData.category,
-          description: formData.description,
-          cover_image_url: formData.cover_image_url || null,
-          cover_image_path: formData.cover_image_path || null,
-          gallery_image_paths: formData.gallery_image_paths,
-          is_available: formData.is_available,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', car.id)
         .select()
         .single();
@@ -74,12 +86,17 @@ const EditCarModal: React.FC<EditCarModalProps> = ({ car, onClose, onCarUpdated 
     }));
   };
 
+  // Helper to get public URL from storage path
+  const getPublicUrlFromPath = (path: string): string => {
+    return supabase.storage.from('car-images').getPublicUrl(path).data.publicUrl;
+  };
+
   // Handle cover image upload
   const handleCoverImageUploaded = (imagePath: string) => {
     setFormData(prev => ({
       ...prev,
       cover_image_path: imagePath,
-      cover_image_url: '' // Clear URL if image is uploaded
+      cover_image_url: getPublicUrlFromPath(imagePath), // Also store full public URL
     }));
   };
 
