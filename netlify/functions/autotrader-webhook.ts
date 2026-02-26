@@ -137,9 +137,12 @@ function verifyWebhookSignature(payload: string, signature: string, secret: stri
 function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
   const { vehicle, adverts, metadata, media } = webhookEvent.data;
   
-  // Extract price from nested structure
-  const price = adverts?.retailAdverts?.price?.amountGBP || 
-                adverts?.forecourtPrice?.amountGBP || 
+  // Extract price from nested structure - AutoTrader uses different price fields
+  // in different contexts (priceOnApplication vehicles, sandbox vs production, etc.)
+  const price = adverts?.retailAdverts?.price?.amountGBP ||
+                adverts?.retailAdverts?.totalPrice?.amountGBP ||
+                adverts?.retailAdverts?.suppliedPrice?.amountGBP ||
+                adverts?.forecourtPrice?.amountGBP ||
                 0;
   
   // Extract description
@@ -241,25 +244,39 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   }
   
   // Vehicle is on forecourt, proceed with normal update
-  // Transform webhook data to API format
-  const vehicleData = transformWebhookToApiFormat(webhookEvent);
-  
-  // Map AutoTrader webhook data to our database schema
-  const mappedCar = mapAutoTraderToDatabase(vehicleData, advertiserId);
-  
-  // Validate
-  const validation = validateMappedCar(mappedCar);
-  if (!validation.valid) {
-    throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
-  }
-  
-  // Check if vehicle already exists - optimized query
+  // Fetch existing car FIRST so we can preserve DB data (price, images) if webhook sends partial data
   const { data: existingCar } = await supabase
     .from('cars')
-    .select('id, sync_override, cover_image_url, cover_image_path, gallery_images, gallery_image_paths')
+    .select('id, sync_override, price, cover_image_url, cover_image_path, gallery_images, gallery_image_paths')
     .eq('autotrader_id', stockId)
     .single();
-  
+
+  // Transform webhook data to API format
+  const vehicleData = transformWebhookToApiFormat(webhookEvent);
+
+  // If webhook price is 0 (priceOnApplication or missing field) but DB has a price, preserve it
+  if ((!vehicleData.price || vehicleData.price <= 0) && existingCar?.price > 0) {
+    console.log(`💰 Webhook price is 0 for ${stockId}, preserving existing DB price: £${existingCar.price}`);
+    vehicleData.price = existingCar.price;
+  }
+
+  // Map AutoTrader webhook data to our database schema
+  const mappedCar = mapAutoTraderToDatabase(vehicleData, advertiserId);
+
+  // Validate - but never return a 500 to AutoTrader for data issues on existing vehicles
+  const validation = validateMappedCar(mappedCar);
+  if (!validation.valid) {
+    if (existingCar) {
+      // Existing vehicle: log the warning but don't fail — AutoTrader will keep retrying on 500s
+      console.warn(`⚠️ Validation warning for existing vehicle ${stockId}: ${validation.errors.join(', ')} — continuing with available data`);
+    } else {
+      // New vehicle with bad data: log and skip gracefully rather than returning 500
+      console.warn(`⚠️ Skipping new vehicle ${stockId} — validation failed: ${validation.errors.join(', ')}`);
+      await logWebhookEvent('STOCK_UPDATE', stockId, 'skipped', 'validation_failed');
+      return;
+    }
+  }
+
   if (existingCar) {
     // Vehicle exists, update it (unless override is set)
     if (!existingCar.sync_override) {
