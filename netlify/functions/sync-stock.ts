@@ -135,19 +135,25 @@ async function syncStock(): Promise<SyncResult> {
         // Validate mapped data
         const validation = validateMappedCar(mappedCar);
         if (!validation.valid) {
-          // If vehicle should be unavailable (REJECTED, NOT_PUBLISHED, etc.),
-          // still mark it unavailable in the DB — don't skip it entirely
-          if (!mappedCar.is_available && existingCar && !existingCar.sync_override) {
-            const { error: updateError } = await supabase
-              .from('cars')
-              .update({ is_available: false, updated_at: new Date().toISOString() })
-              .eq('id', existingCar.id);
-            if (!updateError) {
-              result.carsUpdated++;
-              console.log(`Marked unavailable: ${mappedCar.make} ${mappedCar.model} (${mappedCar.autotrader_id})`);
+          if (!mappedCar.is_available) {
+            // Vehicle is unavailable (REJECTED, NOT_PUBLISHED, etc.)
+            if (existingCar && !existingCar.sync_override) {
+              // It exists in our DB — make sure it's marked unavailable
+              const { error: updateError } = await supabase
+                .from('cars')
+                .update({ is_available: false, updated_at: new Date().toISOString() })
+                .eq('id', existingCar.id);
+              if (!updateError) {
+                result.carsUpdated++;
+                console.log(`Marked unavailable: ${mappedCar.make} ${mappedCar.model} (${mappedCar.autotrader_id})`);
+              }
+            } else {
+              // Not in our DB and rejected/unpublished — skip silently, nothing to do
+              console.log(`Skipping rejected/incomplete vehicle not in DB: ${vehicle.vehicleId} (${validation.errors.join(', ')})`);
             }
           } else {
-            console.warn(`Validation failed for vehicle ${vehicle.vehicleId}:`, validation.errors);
+            // Available vehicle with validation errors — this is a real problem worth reporting
+            console.warn(`Validation failed for available vehicle ${vehicle.vehicleId}:`, validation.errors);
             result.errors.push(`Vehicle ${vehicle.vehicleId}: ${validation.errors.join(', ')}`);
           }
           continue;
