@@ -98,10 +98,10 @@ async function syncStock(): Promise<SyncResult> {
       return result;
     }
     
-    // Step 3: Get existing cars from database (include images for preservation)
+    // Step 3: Get existing cars from database (include images and price for preservation)
     const { data: existingCars, error: fetchError } = await supabase
       .from('cars')
-      .select('id, autotrader_id, sync_override, cover_image_url, cover_image_path, gallery_images, gallery_image_paths')
+      .select('id, autotrader_id, sync_override, price, cover_image_url, cover_image_path, gallery_images, gallery_image_paths')
       .eq('synced_from_autotrader', true);
     
     if (fetchError) {
@@ -123,15 +123,35 @@ async function syncStock(): Promise<SyncResult> {
         const mappedCar = mapAutoTraderToDatabase(vehicle, advertiserId);
         autotraderVehicleIds.add(mappedCar.autotrader_id);
         
+        const existingCar = existingCarsMap.get(mappedCar.autotrader_id);
+
+        // If price is 0 but we have an existing price in the DB, preserve it
+        // (REJECTED/NOT_PUBLISHED vehicles often have no price set on AutoTrader's side)
+        if ((!mappedCar.price || mappedCar.price <= 0) && existingCar?.price > 0) {
+          console.log(`💰 Price missing from API for ${mappedCar.autotrader_id}, preserving existing DB price: £${existingCar.price}`);
+          mappedCar.price = existingCar.price;
+        }
+
         // Validate mapped data
         const validation = validateMappedCar(mappedCar);
         if (!validation.valid) {
-          console.warn(`Validation failed for vehicle ${vehicle.vehicleId}:`, validation.errors);
-          result.errors.push(`Vehicle ${vehicle.vehicleId}: ${validation.errors.join(', ')}`);
+          // If vehicle should be unavailable (REJECTED, NOT_PUBLISHED, etc.),
+          // still mark it unavailable in the DB — don't skip it entirely
+          if (!mappedCar.is_available && existingCar && !existingCar.sync_override) {
+            const { error: updateError } = await supabase
+              .from('cars')
+              .update({ is_available: false, updated_at: new Date().toISOString() })
+              .eq('id', existingCar.id);
+            if (!updateError) {
+              result.carsUpdated++;
+              console.log(`Marked unavailable: ${mappedCar.make} ${mappedCar.model} (${mappedCar.autotrader_id})`);
+            }
+          } else {
+            console.warn(`Validation failed for vehicle ${vehicle.vehicleId}:`, validation.errors);
+            result.errors.push(`Vehicle ${vehicle.vehicleId}: ${validation.errors.join(', ')}`);
+          }
           continue;
         }
-        
-        const existingCar = existingCarsMap.get(mappedCar.autotrader_id);
         
         if (existingCar) {
           // Car exists in database
