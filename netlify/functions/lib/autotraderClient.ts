@@ -373,7 +373,11 @@ class AutoTraderClient {
           const media = result.media || {};
           const adverts = result.adverts || {};
           const metadata = result.metadata || {};
-          const pricing = adverts.forecourtPrice || {};
+          // Use retail price (what customers see on AutoTrader) with forecourt price as fallback
+          const retailPricing = adverts.retailAdverts?.price || 
+                                adverts.retailAdverts?.totalPrice || 
+                                adverts.retailAdverts?.suppliedPrice || {};
+          const pricing = Object.keys(retailPricing).length > 0 ? retailPricing : (adverts.forecourtPrice || {});
           
           // Try multiple possible ID fields (AutoTrader uses stockId)
           const vehicleId = metadata.stockId ||           // ← Primary ID from logs!

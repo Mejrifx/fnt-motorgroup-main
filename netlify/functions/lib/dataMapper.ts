@@ -236,18 +236,18 @@ export function mapAutoTraderToDatabase(
   vehicle: VehicleResponse,
   advertiserId: string
 ): MappedCar {
-  // Check if vehicle is actually advertised/published
-  // AutoTrader includes status in: advertiserAdvert (YOUR ad) and autotraderAdvert (AT's ad)
-  // Vehicle must be PUBLISHED to show on website
-  const isAdvertised = vehicle.advertiserAdvertStatus === 'PUBLISHED' || 
-                       vehicle.autotraderAdvertStatus === 'PUBLISHED';
-  
-  // Also check lifecycle state - must be explicitly on FORECOURT
-  // Do NOT default to true if missing - vehicle must be confirmed on forecourt
+  // Check lifecycle state - must be explicitly on FORECOURT (physically in stock)
   const isOnForecourt = vehicle.lifecycleState === 'FORECOURT';
-  
-  // Vehicle is available if it's advertised AND on forecourt
-  const isAvailable = isAdvertised && isOnForecourt;
+
+  // Exclude vehicles AutoTrader has rejected (incomplete listings — no price, missing data, etc.)
+  // REJECTED means the dealer's listing was submitted but failed AutoTrader's checks
+  const isRejected = vehicle.advertiserAdvertStatus === 'REJECTED' ||
+                     vehicle.autotraderAdvertStatus === 'REJECTED';
+
+  // Vehicle is available if it's physically on the forecourt AND not rejected
+  // This includes both paid (PUBLISHED) adverts AND store-page-only (NOT_PUBLISHED) vehicles
+  // so that cars in stock but not paying for AutoTrader advertising still appear on our website
+  const isAvailable = isOnForecourt && !isRejected;
   
   // Log availability decision for debugging
   if (!isAvailable) {
@@ -255,7 +255,7 @@ export function mapAutoTraderToDatabase(
       advertiserStatus: vehicle.advertiserAdvertStatus,
       autotraderStatus: vehicle.autotraderAdvertStatus,
       lifecycleState: vehicle.lifecycleState,
-      isAdvertised,
+      isRejected,
       isOnForecourt,
     });
   }
