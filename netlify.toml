@@ -22,7 +22,7 @@
 # Runs every 8 hours as fallback (webhooks handle real-time updates)
 # Requires Netlify Pro plan or higher
 [functions."sync-stock"]
-  schedule = "0 */8 * * *"  # Every 8 hours (at 00:00, 08:00, 16:00 UTC)
+  schedule = "0 */12 * * *"  # Every 12 hours (at 00:00, 12:00 UTC)
 
 # Function settings
 [functions]
