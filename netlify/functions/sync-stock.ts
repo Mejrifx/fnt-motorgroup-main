@@ -126,19 +126,24 @@ async function syncStock(): Promise<SyncResult> {
         const existingCar = existingCarsMap.get(mappedCar.autotrader_id);
 
         // If price is 0 but we have an existing price in the DB, preserve it
-        // (REJECTED/NOT_PUBLISHED vehicles often have no price set on AutoTrader's side)
         if ((!mappedCar.price || mappedCar.price <= 0) && existingCar?.price > 0) {
           console.log(`💰 Price missing from API for ${mappedCar.autotrader_id}, preserving existing DB price: £${existingCar.price}`);
           mappedCar.price = existingCar.price;
+        }
+
+        // If price is still 0 after DB preservation, hide the vehicle until it's priced
+        // (car is in preparation — on forecourt but not yet priced by the dealer)
+        if (!mappedCar.price || mappedCar.price <= 0) {
+          mappedCar.is_available = false;
+          console.log(`⏳ Vehicle ${mappedCar.autotrader_id} has no price yet — syncing as unavailable until priced`);
         }
 
         // Validate mapped data
         const validation = validateMappedCar(mappedCar);
         if (!validation.valid) {
           if (!mappedCar.is_available) {
-            // Vehicle is unavailable (REJECTED, NOT_PUBLISHED, etc.)
+            // Vehicle is unavailable — still mark it in the DB if it exists
             if (existingCar && !existingCar.sync_override) {
-              // It exists in our DB — make sure it's marked unavailable
               const { error: updateError } = await supabase
                 .from('cars')
                 .update({ is_available: false, updated_at: new Date().toISOString() })
@@ -148,11 +153,11 @@ async function syncStock(): Promise<SyncResult> {
                 console.log(`Marked unavailable: ${mappedCar.make} ${mappedCar.model} (${mappedCar.autotrader_id})`);
               }
             } else {
-              // Not in our DB and rejected/unpublished — skip silently, nothing to do
-              console.log(`Skipping rejected/incomplete vehicle not in DB: ${vehicle.vehicleId} (${validation.errors.join(', ')})`);
+              // Not in DB yet and unavailable — skip silently
+              console.log(`Skipping unavailable vehicle not in DB: ${vehicle.vehicleId} (${validation.errors.join(', ')})`);
             }
           } else {
-            // Available vehicle with validation errors — this is a real problem worth reporting
+            // Genuinely unexpected validation error on an available vehicle
             console.warn(`Validation failed for available vehicle ${vehicle.vehicleId}:`, validation.errors);
             result.errors.push(`Vehicle ${vehicle.vehicleId}: ${validation.errors.join(', ')}`);
           }
