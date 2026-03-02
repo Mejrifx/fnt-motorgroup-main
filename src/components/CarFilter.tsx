@@ -340,12 +340,13 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             <>
               {/* Overlay */}
               <div 
-                className="fixed inset-0 bg-black/40 z-[999998] animate-fade-in"
+                className="fixed inset-0 bg-black/40 animate-fade-in"
+                style={{ zIndex: 9999998 }}
                 onClick={() => setIsMakeOpen(false)}
               />
               
               {/* Bottom Sheet */}
-              <div className="fixed inset-x-0 bottom-0 z-[999999] animate-slide-up">
+              <div className="fixed inset-x-0 bottom-0 animate-slide-up" style={{ zIndex: 9999999 }}>
                 <div className="bg-white rounded-t-[28px] shadow-2xl max-h-[85vh] flex flex-col">
                   {/* Handle */}
                   <div className="flex justify-center pt-3 pb-2">
