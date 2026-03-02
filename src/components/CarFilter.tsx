@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, ChevronDown } from 'lucide-react';
 
 interface CarFilterProps {
@@ -336,7 +337,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           </button>
 
           {/* Bottom Sheet Modal - Portal to body to escape stacking context */}
-          {isMakeOpen && (
+          {isMakeOpen && createPortal(
             <>
               {/* Overlay */}
               <div 
@@ -534,7 +535,8 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                   </div>
                 </div>
               </div>
-            </>
+            </>,
+            document.body
           )}
         </div>
       </div>
