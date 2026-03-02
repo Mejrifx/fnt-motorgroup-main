@@ -28,6 +28,25 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const [isFuelOpen, setIsFuelOpen] = useState(false);
   const priceFromRef = useRef<HTMLInputElement>(null);
 
+  // Lock body scroll when mobile modal is open
+  useEffect(() => {
+    if (isMakeOpen && window.innerWidth < 1024) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isMakeOpen]);
+
   // Set placeholder based on screen size
   useEffect(() => {
     const updatePlaceholder = () => {
