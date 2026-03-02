@@ -377,7 +377,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           {/* Bottom Sheet Modal - Portal to body to escape stacking context */}
           {isMakeOpen && createPortal(
             <>
-              {/* Overlay */}
+              {/* Overlay - Not dismissible */}
               <div 
                 className="fixed inset-0 bg-black/40 animate-fade-in"
                 style={{ 
@@ -388,26 +388,21 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                   bottom: 0,
                   zIndex: 999998
                 }}
-                onClick={() => setIsMakeOpen(false)}
               />
               
-              {/* Bottom Sheet */}
+              {/* Full-Screen Modal */}
               <div 
                 style={{ 
                   position: 'fixed',
+                  top: 0,
                   left: 0,
                   right: 0,
                   bottom: 0,
                   zIndex: 999999
                 }}
-                className="animate-slide-up"
+                className="animate-fade-in"
               >
-                <div className="bg-white rounded-t-[28px] shadow-2xl max-h-[85vh] flex flex-col">
-                  {/* Handle */}
-                  <div className="flex justify-center pt-3 pb-2">
-                    <div className="w-10 h-1 bg-gray-300 rounded-full" />
-                  </div>
-
+                <div className="bg-white h-full flex flex-col">
                   {/* Header */}
                   <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
