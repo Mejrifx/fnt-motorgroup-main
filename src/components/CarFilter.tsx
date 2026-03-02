@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, X } from 'lucide-react';
 
 interface CarFilterProps {
   onFilterChange?: (filters: CarFilters) => void;
@@ -26,6 +26,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const [isMakeOpen, setIsMakeOpen] = useState(false);
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isFuelOpen, setIsFuelOpen] = useState(false);
+  const [showAllMakes, setShowAllMakes] = useState(false);
   const priceFromRef = useRef<HTMLInputElement>(null);
 
   // Lock body scroll when mobile modal is open
@@ -393,14 +394,22 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                   <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold text-gray-900">Filter Cars</h3>
-                      {hasActiveFilters && (
+                      <div className="flex items-center gap-3">
+                        {hasActiveFilters && (
+                          <button
+                            onClick={handleClearFilters}
+                            className="text-sm font-semibold text-fnt-red active:opacity-60 transition-opacity"
+                          >
+                            Clear All
+                          </button>
+                        )}
                         <button
-                          onClick={handleClearFilters}
-                          className="text-sm font-semibold text-fnt-red active:opacity-60 transition-opacity"
+                          onClick={() => setIsMakeOpen(false)}
+                          className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
                         >
-                          Clear All
+                          <X className="w-6 h-6 text-gray-600" />
                         </button>
-                      )}
+                      </div>
                     </div>
                   </div>
 
@@ -420,7 +429,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                         >
                           All Makes
                         </button>
-                        {carMakes.slice(0, 8).map((make) => (
+                        {(showAllMakes ? carMakes : carMakes.slice(0, 8)).map((make) => (
                           <button
                             key={make}
                             onClick={() => handleFilterChange('make', make)}
@@ -434,12 +443,20 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           </button>
                         ))}
                       </div>
-                      {carMakes.length > 8 && (
+                      {!showAllMakes && carMakes.length > 8 && (
                         <button
-                          onClick={() => setIsModelOpen(!isModelOpen)}
+                          onClick={() => setShowAllMakes(true)}
                           className="mt-3 text-sm font-semibold text-fnt-red active:opacity-60"
                         >
                           View All {carMakes.length} Makes
+                        </button>
+                      )}
+                      {showAllMakes && (
+                        <button
+                          onClick={() => setShowAllMakes(false)}
+                          className="mt-3 text-sm font-semibold text-gray-600 active:opacity-60"
+                        >
+                          Show Less
                         </button>
                       )}
                     </div>
