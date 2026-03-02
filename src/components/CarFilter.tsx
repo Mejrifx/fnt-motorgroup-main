@@ -122,8 +122,8 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const hasActiveFilters = filters.make || filters.model || filters.priceFrom || filters.priceTo || filters.fuelType;
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 relative z-[99999999]">
-      <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative z-[99999999]">
+    <div className="w-full max-w-4xl mx-auto px-4 relative">
+      <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative">
         {/* Desktop Layout */}
         <div className="hidden lg:block px-6 py-3">
           <div className="flex items-center justify-center gap-2">
@@ -335,18 +335,34 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isMakeOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          {/* Bottom Sheet Modal */}
+          {/* Bottom Sheet Modal - Portal to body to escape stacking context */}
           {isMakeOpen && (
             <>
               {/* Overlay */}
               <div 
                 className="fixed inset-0 bg-black/40 animate-fade-in"
-                style={{ zIndex: 9999998 }}
+                style={{ 
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 999998
+                }}
                 onClick={() => setIsMakeOpen(false)}
               />
               
               {/* Bottom Sheet */}
-              <div className="fixed inset-x-0 bottom-0 animate-slide-up" style={{ zIndex: 9999999 }}>
+              <div 
+                style={{ 
+                  position: 'fixed',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 999999
+                }}
+                className="animate-slide-up"
+              >
                 <div className="bg-white rounded-t-[28px] shadow-2xl max-h-[85vh] flex flex-col">
                   {/* Handle */}
                   <div className="flex justify-center pt-3 pb-2">
