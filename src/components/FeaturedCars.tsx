@@ -56,7 +56,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
         .from('cars')
         .select('*')
         .eq('is_available', true)
-        .order('created_at', { ascending: false });
+        .order('price', { ascending: false });
 
       if (error) throw error;
       setCars(data || []);
