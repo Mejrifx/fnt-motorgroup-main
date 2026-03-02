@@ -128,9 +128,6 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const handleSearch = () => {
     console.log('Searching with filters:', filters);
     
-  const handleSearch = () => {
-    console.log('Searching with filters:', filters);
-    
     // On mobile, scroll to the actual car grid instead of the inventory section header
     const isMobile = window.innerWidth < 1024;
     const targetElement = isMobile 
