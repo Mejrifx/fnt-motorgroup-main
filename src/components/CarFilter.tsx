@@ -27,6 +27,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const [isMakeOpen, setIsMakeOpen] = useState(false);
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isFuelOpen, setIsFuelOpen] = useState(false);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [showAllMakes, setShowAllMakes] = useState(false);
   const priceFromRef = useRef<HTMLInputElement>(null);
 
@@ -78,7 +79,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
 
   // Lock body scroll when mobile modal is open
   useEffect(() => {
-    if (isMakeOpen && window.innerWidth < 1024) {
+    if (isMobileFilterOpen && window.innerWidth < 1024) {
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
@@ -93,7 +94,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
       document.body.style.position = '';
       document.body.style.width = '';
     };
-  }, [isMakeOpen]);
+  }, [isMobileFilterOpen]);
 
   // Set placeholder based on screen size
   useEffect(() => {
@@ -347,7 +348,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
         <div className="lg:hidden">
           {/* Trigger Button */}
           <button
-            onClick={() => setIsMakeOpen(!isMakeOpen)}
+            onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
             className="w-full px-6 py-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg active:scale-[0.98] transition-transform duration-150 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
@@ -371,11 +372,11 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 )}
               </div>
             </div>
-            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isMakeOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isMobileFilterOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          {/* Bottom Sheet Modal - Portal to body to escape stacking context */}
-          {isMakeOpen && createPortal(
+          {/* Full-Screen Modal - Portal to body to escape stacking context */}
+          {isMobileFilterOpen && createPortal(
             <>
               {/* Overlay - Not dismissible */}
               <div 
@@ -417,7 +418,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           </button>
                         )}
                         <button
-                          onClick={() => setIsMakeOpen(false)}
+                          onClick={() => setIsMobileFilterOpen(false)}
                           className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
                         >
                           <X className="w-6 h-6 text-gray-600" />
@@ -574,7 +575,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     <button
                       onClick={() => {
                         handleSearch();
-                        setIsMakeOpen(false);
+                        setIsMobileFilterOpen(false);
                       }}
                       className="w-full bg-fnt-red text-white px-6 py-4 rounded-2xl text-base font-bold shadow-lg active:scale-[0.98] transition-transform duration-150 flex items-center justify-center gap-2"
                     >
