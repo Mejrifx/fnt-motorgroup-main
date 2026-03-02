@@ -254,14 +254,33 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   // Transform webhook data to API format
   const vehicleData = transformWebhookToApiFormat(webhookEvent);
 
-  // If webhook price is 0 (priceOnApplication or missing field) but DB has a price, preserve it
-  if ((!vehicleData.price || vehicleData.price <= 0) && existingCar?.price > 0) {
-    console.log(`💰 Webhook price is 0 for ${stockId}, preserving existing DB price: £${existingCar.price}`);
-    vehicleData.price = existingCar.price;
+  // Determine if the dealer explicitly changed the price in this webhook
+  // changedFields lists every path that changed — if a price path is present, it was intentional
+  const priceExplicitlyChanged = (webhookEvent.changedFields || []).some((f: any) =>
+    f.path && (
+      f.path.includes('/adverts/retailAdverts/price') ||
+      f.path.includes('/adverts/forecourtPrice')
+    )
+  );
+
+  if (!vehicleData.price || vehicleData.price <= 0) {
+    if (priceExplicitlyChanged) {
+      // Dealer deliberately set price to 0 — hide the car, don't preserve old price
+      console.log(`💰 Price explicitly set to 0 for ${stockId} — marking as unavailable`);
+    } else if (existingCar?.price > 0) {
+      // Price field absent from a partial webhook (e.g. description-only update) — preserve DB price
+      console.log(`💰 Webhook price is 0 for ${stockId} (not in changedFields), preserving existing DB price: £${existingCar.price}`);
+      vehicleData.price = existingCar.price;
+    }
   }
 
   // Map AutoTrader webhook data to our database schema
   const mappedCar = mapAutoTraderToDatabase(vehicleData, advertiserId);
+
+  // If price is still 0 after the preservation check, hide the car regardless of forecourt status
+  if (!mappedCar.price || mappedCar.price <= 0) {
+    mappedCar.is_available = false;
+  }
 
   // Validate - but never return a 500 to AutoTrader for data issues on existing vehicles
   const validation = validateMappedCar(mappedCar);
