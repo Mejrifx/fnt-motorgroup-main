@@ -128,13 +128,21 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const handleSearch = () => {
     console.log('Searching with filters:', filters);
     
-    // Scroll to the inventory section with offset to center the results
-    const inventorySection = document.getElementById('inventory');
-    if (inventorySection) {
-      // Calculate offset to scroll further down and center the results
-      const offset = window.innerHeight * 0.1; // Scroll much further down to center results
-      const elementPosition = inventorySection.offsetTop;
-      const offsetPosition = elementPosition + offset; // ADD offset to go DOWN
+  const handleSearch = () => {
+    console.log('Searching with filters:', filters);
+    
+    // On mobile, scroll to the actual car grid instead of the inventory section header
+    const isMobile = window.innerWidth < 1024;
+    const targetElement = isMobile 
+      ? document.getElementById('car-grid')
+      : document.getElementById('inventory');
+    
+    if (targetElement) {
+      // On mobile, add a small offset to ensure the first car is visible
+      // On desktop, keep existing behavior
+      const offset = isMobile ? -20 : window.innerHeight * 0.1;
+      const elementPosition = targetElement.offsetTop;
+      const offsetPosition = elementPosition + offset;
       
       window.scrollTo({
         top: offsetPosition,
