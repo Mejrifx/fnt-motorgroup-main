@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, ChevronDown, X } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface CarFilterProps {
   onFilterChange?: (filters: CarFilters) => void;
@@ -28,6 +29,52 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const [isFuelOpen, setIsFuelOpen] = useState(false);
   const [showAllMakes, setShowAllMakes] = useState(false);
   const priceFromRef = useRef<HTMLInputElement>(null);
+
+  // Dynamic filter options from actual inventory
+  const [availableMakes, setAvailableMakes] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<{ [key: string]: string[] }>({});
+  const [availableFuelTypes, setAvailableFuelTypes] = useState<string[]>([]);
+
+  // Fetch available filter options from current inventory
+  useEffect(() => {
+    fetchInventoryFilters();
+  }, []);
+
+  const fetchInventoryFilters = async () => {
+    try {
+      const { data: cars, error } = await supabase
+        .from('cars')
+        .select('make, model, fuel_type')
+        .eq('is_available', true);
+
+      if (error) throw error;
+
+      if (cars) {
+        // Extract unique makes (sorted alphabetically)
+        const makes = [...new Set(cars.map(car => car.make).filter(Boolean))].sort();
+        setAvailableMakes(makes);
+
+        // Extract models grouped by make
+        const modelsByMake: { [key: string]: string[] } = {};
+        makes.forEach(make => {
+          const models = [...new Set(
+            cars
+              .filter(car => car.make === make)
+              .map(car => car.model)
+              .filter(Boolean)
+          )].sort();
+          modelsByMake[make] = models;
+        });
+        setAvailableModels(modelsByMake);
+
+        // Extract unique fuel types (sorted)
+        const fuelTypes = [...new Set(cars.map(car => car.fuel_type).filter(Boolean))].sort();
+        setAvailableFuelTypes(fuelTypes);
+      }
+    } catch (error) {
+      console.error('Error fetching inventory filters:', error);
+    }
+  };
 
   // Lock body scroll when mobile modal is open
   useEffect(() => {
@@ -64,35 +111,6 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
     window.addEventListener('resize', updatePlaceholder);
     return () => window.removeEventListener('resize', updatePlaceholder);
   }, []);
-
-  const carMakes = ['Alfa Romeo', 'Audi', 'BMW', 'Citroen', 'Cupra', 'Dacia', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Jaguar', 'Kia', 'Land Rover', 'Mercedes-Benz', 'Mitsubishi', 'Peugeot', 'Range Rover', 'Seat', 'Suzuki', 'Tesla', 'Toyota', 'Vauxhall', 'Volkswagen', 'Volvo'];
-  
-  const carModels: { [key: string]: string[] } = {
-    'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q3', 'Q5', 'Q7', 'Q8', 'TT', 'R8', 'RS3', 'RS4', 'RS5', 'RS6', 'RS7', 'e-tron'],
-    'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series', '8 Series', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'i3', 'i4', 'iX'],
-    'Mercedes-Benz': ['A-Class', 'B-Class', 'C-Class', 'CLA', 'CLS', 'E-Class', 'G-Class', 'GLA', 'GLB', 'GLC', 'GLE', 'GLS', 'S-Class', 'SL', 'SLC', 'AMG GT', 'EQC', 'EQS'],
-    'Land Rover': ['Defender', 'Discovery', 'Discovery Sport', 'Range Rover Evoque', 'Range Rover Velar', 'Range Rover Sport', 'Range Rover'],
-    'Tesla': ['Model S', 'Model 3', 'Model X', 'Model Y'],
-    'Jaguar': ['XE', 'XF', 'XJ', 'F-PACE', 'E-PACE', 'I-PACE', 'F-TYPE'],
-    'Alfa Romeo': ['Giulietta', 'Giulia', 'Stelvio', 'Tonale', '4C', '8C'],
-    'Citroen': ['C1', 'C3', 'C4', 'C5', 'Berlingo', 'C4 Picasso', 'Grand C4 Picasso', 'C4 Cactus', 'C3 Aircross', 'C5 Aircross'],
-    'Cupra': ['Leon', 'Formentor', 'Born', 'Tavascan'],
-    'Dacia': ['Sandero', 'Sandero Stepway', 'Duster', 'Logan', 'Jogger', 'Spring'],
-    'Fiat': ['500', '500L', '500X', 'Panda', 'Punto', 'Tipo', 'Doblo', 'Ducato', 'Talento'],
-    'Ford': ['Fiesta', 'Focus', 'Mondeo', 'Mustang', 'Kuga', 'Edge', 'Explorer', 'Ranger', 'Transit', 'Tourneo'],
-    'Honda': ['Civic', 'Accord', 'CR-V', 'HR-V', 'Jazz', 'Pilot', 'Ridgeline', 'Passport', 'Insight'],
-    'Mitsubishi': ['Outlander', 'Eclipse Cross', 'ASX', 'L200', 'Shogun', 'Mirage', 'Space Star'],
-    'Hyundai': ['i10', 'i20', 'i30', 'i40', 'Tucson', 'Santa Fe', 'Kona', 'IONIQ', 'Nexo'],
-    'Kia': ['Picanto', 'Rio', 'Ceed', 'Optima', 'Sportage', 'Sorento', 'Stonic', 'Niro', 'EV6'],
-    'Peugeot': ['108', '208', '308', '508', '2008', '3008', '5008', 'Partner', 'Expert', 'Boxer'],
-    'Seat': ['Ibiza', 'Leon', 'Toledo', 'Ateca', 'Tarraco', 'Alhambra', 'Arona'],
-    'Suzuki': ['Swift', 'Baleno', 'Celerio', 'Vitara', 'S-Cross', 'Jimny', 'Ignis', 'Across'],
-    'Toyota': ['Aygo', 'Yaris', 'Corolla', 'Camry', 'Prius', 'C-HR', 'RAV4', 'Highlander', 'Land Cruiser', 'Supra', 'Proace'],
-    'Volkswagen': ['Up!', 'Polo', 'Golf', 'Jetta', 'Passat', 'Arteon', 'T-Cross', 'T-Roc', 'Tiguan', 'Touareg', 'ID.3', 'ID.4', 'ID.Buzz'],
-    'Vauxhall': ['Corsa', 'Astra', 'Insignia', 'Mokka', 'Crossland', 'Grandland', 'Combo', 'Movano', 'Vivaro'],
-    'Volvo': ['XC40', 'XC60', 'XC90', 'S60', 'S90', 'V40', 'V60', 'V90', 'C30', 'C70']
-  };
-  const fuelTypes = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 
   const handleFilterChange = (key: keyof CarFilters, value: string) => {
     const newFilters = { ...filters, [key]: value };
@@ -170,7 +188,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     >
                       Any Make
                     </button>
-                    {carMakes.map((make) => (
+                    {availableMakes.map((make) => (
                       <button
                         key={make}
                         onClick={() => {
@@ -211,7 +229,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     >
                       Any Model
                     </button>
-                    {filters.make && carModels[filters.make]?.map((model) => (
+                    {filters.make && availableModels[filters.make]?.map((model) => (
                       <button
                         key={model}
                         onClick={() => {
@@ -285,7 +303,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     >
                       Any Fuel Type
                     </button>
-                    {fuelTypes.map((fuel) => (
+                    {availableFuelTypes.map((fuel) => (
                       <button
                         key={fuel}
                         onClick={() => {
@@ -429,7 +447,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                         >
                           All Makes
                         </button>
-                        {(showAllMakes ? carMakes : carMakes.slice(0, 8)).map((make) => (
+                        {(showAllMakes ? availableMakes : availableMakes.slice(0, 8)).map((make) => (
                           <button
                             key={make}
                             onClick={() => handleFilterChange('make', make)}
@@ -443,12 +461,12 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           </button>
                         ))}
                       </div>
-                      {!showAllMakes && carMakes.length > 8 && (
+                      {!showAllMakes && availableMakes.length > 8 && (
                         <button
                           onClick={() => setShowAllMakes(true)}
                           className="mt-3 text-sm font-semibold text-fnt-red active:opacity-60"
                         >
-                          View All {carMakes.length} Makes
+                          View All {availableMakes.length} Makes
                         </button>
                       )}
                       {showAllMakes && (
@@ -462,7 +480,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     </div>
 
                     {/* Model Selection - Only if make is selected */}
-                    {filters.make && carModels[filters.make] && (
+                    {filters.make && availableModels[filters.make] && (
                       <div>
                         <label className="text-sm font-semibold text-gray-700 mb-3 block">Model</label>
                         <div className="flex flex-wrap gap-2">
@@ -476,7 +494,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           >
                             All Models
                           </button>
-                          {carModels[filters.make].map((model) => (
+                          {availableModels[filters.make].map((model) => (
                             <button
                               key={model}
                               onClick={() => handleFilterChange('model', model)}
@@ -539,7 +557,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                         >
                           All Types
                         </button>
-                        {fuelTypes.map((fuel) => (
+                        {availableFuelTypes.map((fuel) => (
                           <button
                             key={fuel}
                             onClick={() => handleFilterChange('fuelType', fuel)}
