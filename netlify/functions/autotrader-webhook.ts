@@ -262,6 +262,7 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
   );
 
   if (!vehicleData.price || vehicleData.price <= 0) {
+    // Price is 0 or missing in AutoTrader
     if (priceExplicitlyChanged) {
       // Dealer deliberately set price to 0 — do a targeted unavailable update and stop
       console.log(`💰 Price explicitly set to 0 for ${stockId} — marking as unavailable`);
@@ -276,9 +277,19 @@ async function handleStockUpdate(webhookEvent: WebhookEvent): Promise<void> {
       }
       return;
     } else if (existingCar?.price > 0) {
-      // Price field absent from a partial webhook (e.g. description/image update) — preserve DB price
-      console.log(`💰 Webhook price is 0 for ${stockId} (not in changedFields), preserving existing DB price: £${existingCar.price}`);
-      vehicleData.price = existingCar.price;
+      // Price field absent from a partial webhook (e.g. description/image update)
+      // BUT AutoTrader still has price=0, so mark as unavailable
+      console.log(`💰 Webhook price is 0 for ${stockId} (not in changedFields) — marking as unavailable`);
+      if (!existingCar.sync_override) {
+        await supabase
+          .from('cars')
+          .update({ is_available: false, updated_at: new Date().toISOString() })
+          .eq('id', existingCar.id);
+        const duration = Date.now() - startTime;
+        console.log(`✅ Marked vehicle as unavailable (price is 0): ${stockId} (${duration}ms)`);
+        await logWebhookEvent('STOCK_UPDATE', stockId, 'success', 'marked_unavailable_no_price');
+      }
+      return;
     }
   }
 
