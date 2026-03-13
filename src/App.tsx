@@ -29,10 +29,10 @@ const MainSite = () => {
     <div className="min-h-screen">
       <Hero onFilterChange={handleFilterChange} />
       <WhatWouldYouLikeToDo />
+      <Reviews />
       <FeaturedCars searchFilters={searchFilters} />
       <Services />
       <About />
-      <Reviews />
       <Contact />
       <Footer />
     </div>
