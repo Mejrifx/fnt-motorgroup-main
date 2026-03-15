@@ -40,6 +40,18 @@ export interface Car {
   sync_override?: boolean
   last_synced_at?: string | null
   autotrader_data?: any
+  // Stock management fields
+  registration?: string | null
+  mot_expiry?: string | null
+  mot_carry_out?: boolean | null
+  v5_present?: boolean | null
+  num_keys?: number | null
+  service_history?: string | null
+  stock_status?: 'Ready' | 'In Prep' | 'Needs Work' | null
+  work_needed?: string | null
+  priority?: 'None' | 'Normal' | 'High' | null
+  has_video?: boolean | null
+  has_diagnostic_report?: boolean | null
 }
 
 export interface Review {

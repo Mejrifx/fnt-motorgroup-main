@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import AddCarModal from './AddCarModal';
@@ -9,10 +9,11 @@ import AddReviewModal from './AddReviewModal';
 import EditReviewModal from './EditReviewModal';
 import InvoiceManager from './InvoiceManager';
 import InvoiceHistory from './InvoiceHistory';
+import StockManagement from './StockManagement';
 import fntLogo from '../../assets/fnt-logo.png';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'cars' | 'reviews' | 'invoices' | 'invoice_history'>('cars');
+  const [activeTab, setActiveTab] = useState<'cars' | 'stock' | 'reviews' | 'invoices' | 'invoice_history'>('cars');
   const [cars, setCars] = useState<Car[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -621,6 +622,18 @@ const AdminDashboard = () => {
               <span>Cars</span>
             </button>
             <button
+              onClick={() => setActiveTab('stock')}
+              className={`
+                ${activeTab === 'stock'
+                  ? 'border-fnt-red text-fnt-red'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
+              `}
+            >
+              <Wrench className="w-5 h-5" />
+              <span>Stock</span>
+            </button>
+            <button
               onClick={() => setActiveTab('invoices')}
               className={`
                 ${activeTab === 'invoices'
@@ -841,6 +854,11 @@ const AdminDashboard = () => {
         {/* Invoice History Tab */}
         {activeTab === 'invoice_history' && (
           <InvoiceHistory />
+        )}
+
+        {/* Stock Management Tab */}
+        {activeTab === 'stock' && (
+          <StockManagement />
         )}
 
         {/* Reviews Tab */}

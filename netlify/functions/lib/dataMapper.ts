@@ -28,6 +28,7 @@ interface MappedCar {
   style: string | null;
   doors: number | null;
   road_tax: string | null;
+  registration: string | null;
   
   // AutoTrader sync fields
   autotrader_id: string;
@@ -282,6 +283,7 @@ export function mapAutoTraderToDatabase(
     style: vehicle.variant || null,
     doors: vehicle.doors || null,
     road_tax: vehicle.roadTax || null,
+    registration: vehicle.registration || null,
     
     // AutoTrader sync fields
     autotrader_id: vehicle.vehicleId,
