@@ -32,6 +32,7 @@ interface VehicleResponse {
   transmission: string;
   bodyType?: string;
   colour?: string;
+  registration?: string;
   doors?: number;
   engine?: string;
   description?: string;
@@ -435,6 +436,7 @@ class AutoTraderClient {
             transmission,
             bodyType: vehicle.bodyType || '',
             colour: vehicle.colour || 'Black', // Fallback to Black instead of Unknown
+            registration: vehicle.registration || null,
             doors: vehicle.doors || null,
             engine: engineSize ? `${engineSize}L` : null,
             
