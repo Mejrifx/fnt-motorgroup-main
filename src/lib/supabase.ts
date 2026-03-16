@@ -66,4 +66,25 @@ export interface Review {
   updated_at: string
 }
 
+export interface StockItem {
+  id: string
+  car_model: string
+  make: string
+  model: string
+  registration: string | null
+  mot_expiry: string | null
+  mot_carry_out: boolean | null
+  v5_present: boolean | null
+  num_keys: number | null
+  service_history: string | null
+  stock_status: 'Ready' | 'In Prep' | 'Needs Work' | null
+  work_needed: string | null
+  priority: 'None' | 'Normal' | 'High' | null
+  has_video: boolean | null
+  has_diagnostic_report: boolean | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Using Supabase's built-in User type from @supabase/supabase-js

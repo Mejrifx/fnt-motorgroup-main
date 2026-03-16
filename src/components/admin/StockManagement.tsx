@@ -1,260 +1,244 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase, type Car } from '../../lib/supabase';
+import { supabase, type StockItem } from '../../lib/supabase';
 import {
-  Search, X, AlertCircle, CheckCircle, Clock, Key, FileText,
-  Wrench, ChevronDown, RefreshCw, AlertTriangle, Video, Stethoscope,
-  Car as CarIcon, Filter, Save,
+  Search, X, CheckCircle, Clock, Key, FileText,
+  Wrench, ChevronDown, RefreshCw, Filter, Save,
+  Plus, Car as CarIcon, Stethoscope,
 } from 'lucide-react';
 
 type StockStatus = 'Ready' | 'In Prep' | 'Needs Work';
-type Priority = 'None' | 'Normal' | 'High';
-type MOTFilter = 'all' | 'expired' | 'expiring_soon';
+type Priority    = 'None' | 'Normal' | 'High';
+type MOTFilter   = 'all' | 'expired' | 'expiring_soon';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getRegistration(car: Car): string {
-  if (car.registration) return car.registration.toUpperCase();
-  const fromData = car.autotrader_data?.registration;
-  if (fromData) return String(fromData).toUpperCase();
-  return '—';
-}
-
-function getMOTStatus(motExpiry: string | null | undefined): 'expired' | 'expiring_soon' | 'valid' | 'unknown' {
-  if (!motExpiry) return 'unknown';
-  const expiry = new Date(motExpiry);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return 'expired';
+function getMOTStatus(d: string | null | undefined): 'expired' | 'expiring_soon' | 'valid' | 'unknown' {
+  if (!d) return 'unknown';
+  const diff = Math.floor((new Date(d).getTime() - Date.now()) / 86400000);
+  if (diff < 0)   return 'expired';
   if (diff <= 60) return 'expiring_soon';
   return 'valid';
 }
 
-function formatMOTDate(motExpiry: string | null | undefined): string {
-  if (!motExpiry) return '—';
-  return new Date(motExpiry).toLocaleDateString('en-GB', {
-    day: '2-digit', month: 'short', year: 'numeric',
-  });
+function formatMOTDate(d: string | null | undefined) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function motDaysLabel(motExpiry: string | null | undefined): string {
-  if (!motExpiry) return '';
-  const expiry = new Date(motExpiry);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return `${Math.abs(diff)}d ago`;
+function motDaysLabel(d: string | null | undefined) {
+  if (!d) return '';
+  const diff = Math.floor((new Date(d).getTime() - Date.now()) / 86400000);
+  if (diff < 0)  return `${Math.abs(diff)}d overdue`;
   if (diff === 0) return 'Today';
-  return `${diff}d`;
+  return `${diff}d left`;
 }
 
-// ─── Sub-components ────────────────────────────────────────────────────────────
+function formatReg(reg: string | null | undefined) {
+  if (!reg) return '—';
+  const r = reg.replace(/\s/g, '').toUpperCase();
+  // UK format: AB12 CDE
+  if (r.length === 7) return `${r.slice(0, 4)} ${r.slice(4)}`;
+  return r;
+}
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
 
 const StatusBadge: React.FC<{ status: StockStatus | null | undefined }> = ({ status }) => {
-  if (!status) return <span className="text-gray-400 text-xs">—</span>;
-  const styles: Record<StockStatus, string> = {
-    'Ready':      'bg-emerald-100 text-emerald-700 border border-emerald-200',
-    'In Prep':    'bg-amber-100  text-amber-700  border border-amber-200',
-    'Needs Work': 'bg-red-100    text-red-700    border border-red-200',
+  if (!status) return <span className="text-gray-300 text-xs">—</span>;
+  const s: Record<StockStatus, string> = {
+    'Ready':      'bg-emerald-100 text-emerald-700 border-emerald-200',
+    'In Prep':    'bg-amber-100  text-amber-700  border-amber-200',
+    'Needs Work': 'bg-red-100    text-red-700    border-red-200',
   };
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status]}`}>
-      {status}
-    </span>
-  );
+  return <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border ${s[status]}`}>{status}</span>;
 };
 
-const PriorityBadge: React.FC<{ priority: Priority | null | undefined }> = ({ priority }) => {
-  if (!priority || priority === 'None') return <span className="text-gray-400 text-xs">—</span>;
-  const styles: Record<string, string> = {
-    'Normal': 'bg-blue-100  text-blue-700  border border-blue-200',
-    'High':   'bg-red-100   text-red-700   border border-red-200',
-  };
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${styles[priority]}`}>
-      {priority}
-    </span>
-  );
+const PriorityDot: React.FC<{ priority: Priority | null | undefined }> = ({ priority }) => {
+  if (!priority || priority === 'None') return <span className="text-gray-300 text-xs">—</span>;
+  const s = priority === 'High'
+    ? 'bg-red-100 text-red-700 border-red-200'
+    : 'bg-blue-100 text-blue-700 border-blue-200';
+  return <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border ${s}`}>{priority}</span>;
 };
 
 const MOTCell: React.FC<{ motExpiry: string | null | undefined }> = ({ motExpiry }) => {
-  const status = getMOTStatus(motExpiry);
-  const label = motDaysLabel(motExpiry);
-  const colors: Record<string, string> = {
-    expired:      'text-red-600',
-    expiring_soon:'text-amber-600',
-    valid:        'text-emerald-600',
-    unknown:      'text-gray-400',
-  };
+  const s = getMOTStatus(motExpiry);
+  const c = { expired: 'text-red-600', expiring_soon: 'text-amber-600', valid: 'text-emerald-600', unknown: 'text-gray-400' }[s];
   return (
     <div>
-      <div className={`text-sm font-medium ${colors[status]}`}>{formatMOTDate(motExpiry)}</div>
-      {label && (
-        <div className={`text-xs mt-0.5 ${colors[status]} opacity-80`}>{label}</div>
-      )}
+      <div className={`text-sm font-medium ${c}`}>{formatMOTDate(motExpiry)}</div>
+      {motExpiry && <div className={`text-xs ${c} opacity-75`}>{motDaysLabel(motExpiry)}</div>}
     </div>
   );
 };
 
-const ToggleSwitch: React.FC<{
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  label: string;
-}> = ({ checked, onChange, label }) => (
-  <div className="flex items-center justify-between">
-    <span className="text-sm font-medium text-gray-700">{label}</span>
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
-        checked ? 'bg-emerald-500' : 'bg-gray-200'
-      }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
-          checked ? 'translate-x-6' : 'translate-x-1'
-        }`}
-      />
+const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void; label: string }> = ({ checked, onChange, label }) => (
+  <div className="flex items-center justify-between py-1">
+    <span className="text-sm text-gray-700">{label}</span>
+    <button type="button" onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-gray-200'}`}>
+      <span className={`inline-block h-4 w-4 mt-1 transform rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
   </div>
 );
 
+// ─── Empty state for add new car ──────────────────────────────────────────────
+
+const emptyItem = (): Partial<StockItem> => ({
+  car_model: '', make: '', model: '', registration: '',
+  mot_expiry: '', mot_carry_out: false, v5_present: false,
+  num_keys: 2, service_history: '', stock_status: 'Ready',
+  work_needed: '', priority: 'Normal', has_video: false, has_diagnostic_report: false, notes: '',
+});
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 const StockManagement: React.FC = () => {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [editData, setEditData] = useState<Partial<Car>>({});
+  const [items, setItems]               = useState<StockItem[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [saving, setSaving]             = useState(false);
+  const [selected, setSelected]         = useState<StockItem | null>(null);
+  const [isAdding, setIsAdding]         = useState(false);
+  const [editData, setEditData]         = useState<Partial<StockItem>>({});
 
-  // Filters
-  const [search, setSearch] = useState('');
+  const [search, setSearch]             = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | StockStatus>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Priority>('all');
-  const [motFilter, setMotFilter] = useState<'all' | MOTFilter>('all');
+  const [motFilter, setMotFilter]       = useState<'all' | MOTFilter>('all');
 
-  useEffect(() => { fetchCars(); }, []);
+  useEffect(() => { fetchItems(); }, []);
 
-  // Close edit panel on Escape key
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedCar(null); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') closeDrawer(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
   }, []);
 
-  const fetchCars = async () => {
+  const fetchItems = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('cars')
+        .from('stock_inventory')
         .select('*')
         .order('make', { ascending: true });
       if (error) throw error;
-      setCars(data || []);
-    } catch (err) {
-      console.error('Error fetching cars for stock management:', err);
+      setItems(data || []);
+    } catch (e) {
+      console.error('Error fetching stock inventory:', e);
     } finally {
       setLoading(false);
     }
   };
 
-  const openEdit = (car: Car) => {
-    setSelectedCar(car);
-    setEditData({
-      registration:          car.registration ?? '',
-      mot_expiry:            car.mot_expiry    ?? '',
-      mot_carry_out:         car.mot_carry_out ?? false,
-      v5_present:            car.v5_present    ?? false,
-      num_keys:              car.num_keys      ?? 2,
-      service_history:       car.service_history   ?? '',
-      stock_status:          car.stock_status       ?? 'Ready',
-      work_needed:           car.work_needed        ?? '',
-      priority:              car.priority           ?? 'Normal',
-      has_video:             car.has_video          ?? false,
-      has_diagnostic_report: car.has_diagnostic_report ?? false,
-    });
+  const openEdit = (item: StockItem) => {
+    setSelected(item);
+    setIsAdding(false);
+    setEditData({ ...item });
   };
 
-  const saveEdit = async () => {
-    if (!selectedCar) return;
+  const openAdd = () => {
+    setSelected(null);
+    setIsAdding(true);
+    setEditData(emptyItem());
+  };
+
+  const closeDrawer = () => { setSelected(null); setIsAdding(false); };
+
+  const patch = (p: Partial<StockItem>) => setEditData(prev => ({ ...prev, ...p }));
+
+  const save = async () => {
     setSaving(true);
     try {
-      const payload: Partial<Car> = {
+      const payload = {
         ...editData,
-        registration:    editData.registration    || null,
+        car_model:       editData.car_model || `${editData.make} ${editData.model}`.trim(),
+        registration:    editData.registration    ? editData.registration.replace(/\s/g, '').toUpperCase() : null,
         mot_expiry:      editData.mot_expiry      || null,
         service_history: editData.service_history || null,
         work_needed:     editData.work_needed     || null,
+        notes:           editData.notes           || null,
         updated_at:      new Date().toISOString(),
       };
-      const { error } = await supabase
-        .from('cars')
-        .update(payload)
-        .eq('id', selectedCar.id);
-      if (error) throw error;
-      setCars(prev => prev.map(c => c.id === selectedCar.id ? { ...c, ...payload } : c));
-      setSelectedCar(null);
-    } catch (err) {
-      console.error('Error saving stock data:', err);
+
+      if (isAdding) {
+        const { data, error } = await supabase.from('stock_inventory').insert([payload]).select().single();
+        if (error) throw error;
+        setItems(prev => [...prev, data].sort((a, b) => a.make.localeCompare(b.make)));
+      } else if (selected) {
+        const { error } = await supabase.from('stock_inventory').update(payload).eq('id', selected.id);
+        if (error) throw error;
+        setItems(prev => prev.map(i => i.id === selected.id ? { ...i, ...payload } as StockItem : i));
+      }
+      closeDrawer();
+    } catch (e) {
+      console.error('Error saving stock item:', e);
       alert('Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
-  // ─── Computed stats & filtered list ─────────────────────────────────────────
+  const deleteItem = async (id: string) => {
+    if (!confirm('Delete this vehicle from stock inventory?')) return;
+    const { error } = await supabase.from('stock_inventory').delete().eq('id', id);
+    if (error) { alert('Failed to delete.'); return; }
+    setItems(prev => prev.filter(i => i.id !== id));
+    closeDrawer();
+  };
+
+  // ─── Stats & filtered list ─────────────────────────────────────────────────
 
   const stats = useMemo(() => ({
-    total:      cars.length,
-    ready:      cars.filter(c => c.stock_status === 'Ready').length,
-    inPrep:     cars.filter(c => c.stock_status === 'In Prep').length,
-    needsWork:  cars.filter(c => c.stock_status === 'Needs Work').length,
-    motExpired: cars.filter(c => getMOTStatus(c.mot_expiry) === 'expired').length,
-    noV5:       cars.filter(c => c.v5_present === false).length,
-  }), [cars]);
+    total:      items.length,
+    ready:      items.filter(i => i.stock_status === 'Ready').length,
+    inPrep:     items.filter(i => i.stock_status === 'In Prep').length,
+    needsWork:  items.filter(i => i.stock_status === 'Needs Work').length,
+    motExpired: items.filter(i => getMOTStatus(i.mot_expiry) === 'expired').length,
+    noV5:       items.filter(i => i.v5_present === false).length,
+  }), [items]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return cars.filter(car => {
-      const reg = getRegistration(car).toLowerCase();
-      const name = `${car.make} ${car.model}`.toLowerCase();
-      const matchSearch = !q || name.includes(q) || reg.includes(q) || (car.work_needed || '').toLowerCase().includes(q);
-      const matchStatus = statusFilter === 'all' || car.stock_status === statusFilter;
-      const matchPriority = priorityFilter === 'all' || car.priority === priorityFilter;
-      const mot = getMOTStatus(car.mot_expiry);
+    return items.filter(item => {
+      const matchSearch = !q
+        || item.car_model.toLowerCase().includes(q)
+        || item.make.toLowerCase().includes(q)
+        || item.model.toLowerCase().includes(q)
+        || (item.registration || '').toLowerCase().includes(q)
+        || (item.work_needed  || '').toLowerCase().includes(q);
+      const matchStatus   = statusFilter   === 'all' || item.stock_status === statusFilter;
+      const matchPriority = priorityFilter === 'all' || item.priority === priorityFilter;
+      const mot = getMOTStatus(item.mot_expiry);
       const matchMOT = motFilter === 'all'
         || (motFilter === 'expired'       && mot === 'expired')
         || (motFilter === 'expiring_soon' && mot === 'expiring_soon');
       return matchSearch && matchStatus && matchPriority && matchMOT;
     });
-  }, [cars, search, statusFilter, priorityFilter, motFilter]);
+  }, [items, search, statusFilter, priorityFilter, motFilter]);
 
-  const activeFilterCount = [
-    statusFilter !== 'all',
-    priorityFilter !== 'all',
-    motFilter !== 'all',
-  ].filter(Boolean).length;
+  const activeFilters = [statusFilter !== 'all', priorityFilter !== 'all', motFilter !== 'all'].filter(Boolean).length;
+  const drawerOpen = !!selected || isAdding;
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
 
-      {/* Stats Row */}
+      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard label="Total"        value={stats.total}      color="gray"    />
-        <StatCard label="Ready"        value={stats.ready}      color="emerald" />
-        <StatCard label="In Prep"      value={stats.inPrep}     color="amber"   />
-        <StatCard label="Needs Work"   value={stats.needsWork}  color="red"     />
-        <StatCard label="MOT Expired"  value={stats.motExpired} color="red"     icon="alert" />
-        <StatCard label="No V5"        value={stats.noV5}       color="orange"  icon="doc" />
+        {[
+          { label: 'Total',       value: stats.total,      color: 'gray' },
+          { label: 'Ready',       value: stats.ready,      color: 'emerald' },
+          { label: 'In Prep',     value: stats.inPrep,     color: 'amber' },
+          { label: 'Needs Work',  value: stats.needsWork,  color: 'red' },
+          { label: 'MOT Expired', value: stats.motExpired, color: 'red' },
+          { label: 'No V5',       value: stats.noV5,       color: 'orange' },
+        ].map(s => <StatCard key={s.label} {...s} />)}
       </div>
 
       {/* Toolbar */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3">
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -262,50 +246,35 @@ const StockManagement: React.FC = () => {
               placeholder="Search by reg, make, model or work needed…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition"
+              className="w-full pl-9 pr-8 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition"
             />
             {search && (
               <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-                <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                <X className="w-3.5 h-3.5 text-gray-400" />
               </button>
             )}
           </div>
 
-          {/* Filter group */}
           <div className="flex items-center gap-2 flex-wrap">
-            <FilterPill
-              label="Status"
-              value={statusFilter}
-              options={['all', 'Ready', 'In Prep', 'Needs Work']}
-              onChange={v => setStatusFilter(v as any)}
-            />
-            <FilterPill
-              label="Priority"
-              value={priorityFilter}
-              options={['all', 'None', 'Normal', 'High']}
-              onChange={v => setPriorityFilter(v as any)}
-            />
-            <FilterPill
-              label="MOT"
-              value={motFilter}
-              options={['all', 'expired', 'expiring_soon']}
-              labels={{ all: 'All', expired: 'Expired', expiring_soon: 'Expiring Soon' }}
+            <FilterPill label="Status"   value={statusFilter}   options={['all','Ready','In Prep','Needs Work']} onChange={v => setStatusFilter(v as any)} />
+            <FilterPill label="Priority" value={priorityFilter} options={['all','None','Normal','High']}         onChange={v => setPriorityFilter(v as any)} />
+            <FilterPill label="MOT" value={motFilter}
+              options={['all','expired','expiring_soon']}
+              labels={{ all:'All MOT', expired:'Expired', expiring_soon:'Expiring Soon' }}
               onChange={v => setMotFilter(v as any)}
             />
-            {activeFilterCount > 0 && (
-              <button
-                onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); setMotFilter('all'); }}
-                className="flex items-center gap-1 text-xs text-fnt-red font-medium hover:underline"
-              >
+            {activeFilters > 0 && (
+              <button onClick={() => { setStatusFilter('all'); setPriorityFilter('all'); setMotFilter('all'); }}
+                className="flex items-center gap-1 text-xs text-fnt-red font-medium hover:underline">
                 <X className="w-3 h-3" /> Clear
               </button>
             )}
-            <button
-              onClick={fetchCars}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              title="Refresh"
-            >
+            <button onClick={fetchItems} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="Refresh">
               <RefreshCw className="w-4 h-4" />
+            </button>
+            <button onClick={openAdd}
+              className="flex items-center gap-1.5 bg-fnt-red hover:bg-red-600 text-white text-xs font-semibold px-3 py-2 rounded-xl transition">
+              <Plus className="w-3.5 h-3.5" /> Add Vehicle
             </button>
           </div>
         </div>
@@ -315,20 +284,15 @@ const StockManagement: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-24 text-gray-400">
-            <RefreshCw className="w-5 h-5 animate-spin mr-2" />
-            Loading stock…
+            <RefreshCw className="w-5 h-5 animate-spin mr-2" /> Loading stock…
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-gray-400 gap-3">
             <CarIcon className="w-8 h-8" />
-            <p className="text-sm font-medium">No cars match your filters</p>
-            {(search || activeFilterCount > 0) && (
-              <button
-                onClick={() => { setSearch(''); setStatusFilter('all'); setPriorityFilter('all'); setMotFilter('all'); }}
-                className="text-xs text-fnt-red hover:underline"
-              >
-                Clear all filters
-              </button>
+            <p className="text-sm font-medium">No vehicles match your filters</p>
+            {(search || activeFilters > 0) && (
+              <button onClick={() => { setSearch(''); setStatusFilter('all'); setPriorityFilter('all'); setMotFilter('all'); }}
+                className="text-xs text-fnt-red hover:underline">Clear all filters</button>
             )}
           </div>
         ) : (
@@ -336,45 +300,68 @@ const StockManagement: React.FC = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/70">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Vehicle</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Reg</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">MOT</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">V5</th>
-                  <th className="text-center px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Keys</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Status</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider hidden lg:table-cell">Priority</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider hidden xl:table-cell">Work Needed</th>
-                  <th className="px-4 py-3 w-10"></th>
+                  {['Vehicle', 'Reg', 'MOT', 'V5', 'Keys', 'Status', 'Priority', 'Work Needed', ''].map(h => (
+                    <th key={h} className={`px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider ${h === 'V5' || h === 'Keys' || h === '' ? 'text-center' : 'text-left'} ${h === 'Priority' ? 'hidden lg:table-cell' : ''} ${h === 'Work Needed' ? 'hidden xl:table-cell' : ''}`}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.map(car => (
-                  <TableRow
-                    key={car.id}
-                    car={car}
-                    onEdit={() => openEdit(car)}
-                  />
+                {filtered.map(item => (
+                  <tr key={item.id} onClick={() => openEdit(item)}
+                    className="hover:bg-gray-50/80 cursor-pointer transition-colors group">
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-gray-900">{item.car_model}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
+                        {formatReg(item.registration)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3"><MOTCell motExpiry={item.mot_expiry} /></td>
+                    <td className="px-4 py-3 text-center">
+                      {item.v5_present === true
+                        ? <CheckCircle className="w-4 h-4 text-emerald-500 mx-auto" />
+                        : item.v5_present === false
+                          ? <X className="w-4 h-4 text-red-400 mx-auto" />
+                          : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {item.num_keys != null
+                        ? <div className="flex items-center justify-center gap-1"><Key className="w-3 h-3 text-gray-400" /><span className="font-medium text-gray-700">{item.num_keys}</span></div>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3"><StatusBadge status={item.stock_status} /></td>
+                    <td className="px-4 py-3 hidden lg:table-cell"><PriorityDot priority={item.priority} /></td>
+                    <td className="px-4 py-3 hidden xl:table-cell max-w-[200px]">
+                      {item.work_needed
+                        ? <span className="text-xs text-gray-600 line-clamp-2">{item.work_needed}</span>
+                        : <span className="text-xs text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-gray-300 group-hover:text-fnt-red transition-colors text-sm">›</span>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
             <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50">
-              <p className="text-xs text-gray-400">
-                Showing {filtered.length} of {cars.length} vehicles
-              </p>
+              <p className="text-xs text-gray-400">Showing {filtered.length} of {items.length} vehicles</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Edit Drawer */}
-      {selectedCar && (
+      {/* Edit / Add Drawer */}
+      {drawerOpen && (
         <EditDrawer
-          car={selectedCar}
+          item={selected}
+          isAdding={isAdding}
           data={editData}
           saving={saving}
-          onChange={patch => setEditData(prev => ({ ...prev, ...patch }))}
-          onSave={saveEdit}
-          onClose={() => setSelectedCar(null)}
+          onChange={patch}
+          onSave={save}
+          onDelete={selected ? () => deleteItem(selected.id) : undefined}
+          onClose={closeDrawer}
         />
       )}
     </div>
@@ -391,9 +378,7 @@ const colorMap: Record<string, { bg: string; text: string; border: string }> = {
   orange:  { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-l-orange-400' },
 };
 
-const StatCard: React.FC<{
-  label: string; value: number; color: string; icon?: string;
-}> = ({ label, value, color, icon }) => {
+const StatCard: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => {
   const c = colorMap[color] || colorMap.gray;
   return (
     <div className={`${c.bg} rounded-xl border-l-4 ${c.border} px-4 py-3`}>
@@ -406,327 +391,28 @@ const StatCard: React.FC<{
 // ─── FilterPill ───────────────────────────────────────────────────────────────
 
 const FilterPill: React.FC<{
-  label: string;
-  value: string;
-  options: string[];
-  labels?: Record<string, string>;
-  onChange: (v: string) => void;
+  label: string; value: string; options: string[];
+  labels?: Record<string, string>; onChange: (v: string) => void;
 }> = ({ label, value, options, labels, onChange }) => {
-  const display = labels ? (labels[value] || value) : value;
-  const isActive = value !== 'all';
+  const active = value !== 'all';
   return (
     <div className="relative">
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className={`appearance-none pl-3 pr-7 py-2 text-xs font-semibold rounded-xl border transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-fnt-red ${
-          isActive
-            ? 'bg-fnt-red text-white border-fnt-red'
-            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-        }`}
-      >
+      <select value={value} onChange={e => onChange(e.target.value)}
+        className={`appearance-none pl-3 pr-7 py-2 text-xs font-semibold rounded-xl border transition cursor-pointer focus:outline-none ${
+          active ? 'bg-fnt-red text-white border-fnt-red' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+        }`}>
         {options.map(o => (
           <option key={o} value={o}>{labels ? (labels[o] || o) : (o === 'all' ? `All ${label}` : o)}</option>
         ))}
       </select>
-      <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none ${isActive ? 'text-white' : 'text-gray-400'}`} />
+      <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none ${active ? 'text-white' : 'text-gray-400'}`} />
     </div>
   );
 };
 
-// ─── TableRow ─────────────────────────────────────────────────────────────────
+// ─── Section wrapper ──────────────────────────────────────────────────────────
 
-const TableRow: React.FC<{ car: Car; onEdit: () => void }> = ({ car, onEdit }) => {
-  const reg = getRegistration(car);
-  const motStatus = getMOTStatus(car.mot_expiry);
-  return (
-    <tr
-      onClick={onEdit}
-      className="hover:bg-gray-50/80 cursor-pointer transition-colors group"
-    >
-      {/* Vehicle */}
-      <td className="px-4 py-3">
-        <div className="font-semibold text-gray-900">{car.make} {car.model}</div>
-        <div className="text-xs text-gray-400">{car.year}</div>
-      </td>
-      {/* Reg */}
-      <td className="px-4 py-3">
-        <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
-          {reg}
-        </span>
-      </td>
-      {/* MOT */}
-      <td className="px-4 py-3">
-        <MOTCell motExpiry={car.mot_expiry} />
-        {motStatus === 'expired' && (
-          <span className="text-xs text-red-500 font-semibold">EXPIRED</span>
-        )}
-      </td>
-      {/* V5 */}
-      <td className="px-4 py-3 text-center">
-        {car.v5_present === true
-          ? <CheckCircle className="w-4 h-4 text-emerald-500 mx-auto" />
-          : car.v5_present === false
-            ? <X className="w-4 h-4 text-red-400 mx-auto" />
-            : <span className="text-gray-300 text-xs">—</span>
-        }
-      </td>
-      {/* Keys */}
-      <td className="px-4 py-3 text-center">
-        {car.num_keys != null ? (
-          <div className="flex items-center justify-center gap-1">
-            <Key className="w-3 h-3 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700">{car.num_keys}</span>
-          </div>
-        ) : <span className="text-gray-300 text-xs">—</span>}
-      </td>
-      {/* Status */}
-      <td className="px-4 py-3">
-        <StatusBadge status={car.stock_status} />
-      </td>
-      {/* Priority */}
-      <td className="px-4 py-3 hidden lg:table-cell">
-        <PriorityBadge priority={car.priority} />
-      </td>
-      {/* Work Needed */}
-      <td className="px-4 py-3 hidden xl:table-cell max-w-[200px]">
-        {car.work_needed ? (
-          <span className="text-xs text-gray-600 line-clamp-2">{car.work_needed}</span>
-        ) : (
-          <span className="text-xs text-gray-300">—</span>
-        )}
-      </td>
-      {/* Edit arrow */}
-      <td className="px-4 py-3 text-right">
-        <span className="text-gray-300 group-hover:text-fnt-red transition-colors text-sm">›</span>
-      </td>
-    </tr>
-  );
-};
-
-// ─── EditDrawer ───────────────────────────────────────────────────────────────
-
-const EditDrawer: React.FC<{
-  car: Car;
-  data: Partial<Car>;
-  saving: boolean;
-  onChange: (patch: Partial<Car>) => void;
-  onSave: () => void;
-  onClose: () => void;
-}> = ({ car, data, saving, onChange, onSave, onClose }) => {
-  const reg = getRegistration(car);
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-        onClick={onClose}
-      />
-
-      {/* Drawer */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
-
-        {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">{car.make} {car.model}</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
-                {reg}
-              </span>
-              <span className="text-xs text-gray-400">{car.year}</span>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-
-          {/* Registration */}
-          <Section title="Registration" icon={<CarIcon className="w-4 h-4" />}>
-            <input
-              type="text"
-              value={data.registration as string || ''}
-              onChange={e => onChange({ registration: e.target.value.toUpperCase() })}
-              placeholder="e.g. KY68 ZCV"
-              className="field-input font-mono tracking-widest uppercase"
-            />
-          </Section>
-
-          {/* Status & Priority */}
-          <Section title="Status & Priority" icon={<Filter className="w-4 h-4" />}>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="field-label">Stock Status</label>
-                <select
-                  value={data.stock_status as string || ''}
-                  onChange={e => onChange({ stock_status: e.target.value as StockStatus })}
-                  className="field-input"
-                >
-                  <option value="">— Select —</option>
-                  <option value="Ready">Ready</option>
-                  <option value="In Prep">In Prep</option>
-                  <option value="Needs Work">Needs Work</option>
-                </select>
-              </div>
-              <div>
-                <label className="field-label">Priority</label>
-                <select
-                  value={data.priority as string || ''}
-                  onChange={e => onChange({ priority: e.target.value as Priority })}
-                  className="field-input"
-                >
-                  <option value="">— Select —</option>
-                  <option value="None">None</option>
-                  <option value="Normal">Normal</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-            </div>
-          </Section>
-
-          {/* MOT & Compliance */}
-          <Section title="MOT & Compliance" icon={<Clock className="w-4 h-4" />}>
-            <div className="space-y-4">
-              <div>
-                <label className="field-label">MOT Expiry Date</label>
-                <input
-                  type="date"
-                  value={data.mot_expiry as string || ''}
-                  onChange={e => onChange({ mot_expiry: e.target.value })}
-                  className="field-input"
-                />
-                {data.mot_expiry && (
-                  <p className={`text-xs mt-1 font-medium ${
-                    getMOTStatus(data.mot_expiry as string) === 'expired' ? 'text-red-500' :
-                    getMOTStatus(data.mot_expiry as string) === 'expiring_soon' ? 'text-amber-500' :
-                    'text-emerald-600'
-                  }`}>
-                    {getMOTStatus(data.mot_expiry as string) === 'expired'
-                      ? `⚠ Expired ${motDaysLabel(data.mot_expiry as string)}`
-                      : getMOTStatus(data.mot_expiry as string) === 'expiring_soon'
-                        ? `⚡ Expiring in ${motDaysLabel(data.mot_expiry as string)}`
-                        : `✓ Valid — ${motDaysLabel(data.mot_expiry as string)} remaining`
-                    }
-                  </p>
-                )}
-              </div>
-              <ToggleSwitch
-                label="MOT needs to be carried out"
-                checked={!!data.mot_carry_out}
-                onChange={v => onChange({ mot_carry_out: v })}
-              />
-            </div>
-          </Section>
-
-          {/* Documentation */}
-          <Section title="Documentation" icon={<FileText className="w-4 h-4" />}>
-            <div className="space-y-4">
-              <ToggleSwitch
-                label="V5 in possession"
-                checked={!!data.v5_present}
-                onChange={v => onChange({ v5_present: v })}
-              />
-              <div>
-                <label className="field-label">Number of Keys</label>
-                <div className="flex gap-2 mt-1">
-                  {[1, 2].map(n => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => onChange({ num_keys: n })}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-sm font-semibold transition ${
-                        data.num_keys === n
-                          ? 'bg-fnt-black text-white border-fnt-black'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
-                      }`}
-                    >
-                      <Key className="w-3.5 h-3.5" /> {n} {n === 1 ? 'Key' : 'Keys'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="field-label">Service History</label>
-                <input
-                  type="text"
-                  value={data.service_history as string || ''}
-                  onChange={e => onChange({ service_history: e.target.value })}
-                  placeholder="e.g. 5 Services (3 Main Dealer)"
-                  className="field-input"
-                />
-              </div>
-            </div>
-          </Section>
-
-          {/* Work Required */}
-          <Section title="Work Required" icon={<Wrench className="w-4 h-4" />}>
-            <textarea
-              value={data.work_needed as string || ''}
-              onChange={e => onChange({ work_needed: e.target.value })}
-              placeholder="Describe any work that needs to be done…"
-              rows={3}
-              className="field-input resize-none"
-            />
-          </Section>
-
-          {/* Additional */}
-          <Section title="Additional" icon={<Stethoscope className="w-4 h-4" />}>
-            <div className="space-y-4">
-              <ToggleSwitch
-                label="Video available"
-                checked={!!data.has_video}
-                onChange={v => onChange({ has_video: v })}
-              />
-              <ToggleSwitch
-                label="Diagnostic report available"
-                checked={!!data.has_diagnostic_report}
-                onChange={v => onChange({ has_diagnostic_report: v })}
-              />
-            </div>
-          </Section>
-
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onSave}
-            disabled={saving}
-            className="flex-1 py-3 rounded-xl bg-fnt-red text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {saving ? (
-              <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</>
-            ) : (
-              <><Save className="w-4 h-4" /> Save Changes</>
-            )}
-          </button>
-        </div>
-      </div>
-    </>
-  );
-};
-
-// ─── Section ──────────────────────────────────────────────────────────────────
-
-const Section: React.FC<{
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}> = ({ title, icon, children }) => (
+const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
   <div>
     <div className="flex items-center gap-2 mb-3">
       <span className="text-gray-400">{icon}</span>
@@ -735,5 +421,168 @@ const Section: React.FC<{
     {children}
   </div>
 );
+
+// ─── EditDrawer ───────────────────────────────────────────────────────────────
+
+const EditDrawer: React.FC<{
+  item: StockItem | null;
+  isAdding: boolean;
+  data: Partial<StockItem>;
+  saving: boolean;
+  onChange: (p: Partial<StockItem>) => void;
+  onSave: () => void;
+  onDelete?: () => void;
+  onClose: () => void;
+}> = ({ item, isAdding, data, saving, onChange, onSave, onDelete, onClose }) => {
+  const motStatus = getMOTStatus(data.mot_expiry as string);
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+
+        {/* Header */}
+        <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">
+              {isAdding ? 'Add New Vehicle' : (data.car_model || `${data.make} ${data.model}`)}
+            </h2>
+            {!isAdding && data.registration && (
+              <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 text-gray-800 px-2 py-0.5 rounded mt-1 inline-block">
+                {formatReg(data.registration as string)}
+              </span>
+            )}
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+          {/* Vehicle Info */}
+          <Section title="Vehicle" icon={<CarIcon className="w-4 h-4" />}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="field-label">Make</label>
+                <input className="field-input" value={data.make as string || ''} onChange={e => onChange({ make: e.target.value, car_model: `${e.target.value} ${data.model || ''}`.trim() })} placeholder="e.g. Jaguar" />
+              </div>
+              <div>
+                <label className="field-label">Model</label>
+                <input className="field-input" value={data.model as string || ''} onChange={e => onChange({ model: e.target.value, car_model: `${data.make || ''} ${e.target.value}`.trim() })} placeholder="e.g. F-Pace" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className="field-label">Registration Plate</label>
+              <input className="field-input font-mono tracking-widest uppercase" value={data.registration as string || ''} onChange={e => onChange({ registration: e.target.value.toUpperCase() })} placeholder="e.g. KY68 ZCV" />
+            </div>
+          </Section>
+
+          {/* Status & Priority */}
+          <Section title="Status & Priority" icon={<Filter className="w-4 h-4" />}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="field-label">Stock Status</label>
+                <select className="field-input" value={data.stock_status as string || ''} onChange={e => onChange({ stock_status: e.target.value as StockStatus })}>
+                  <option value="">— Select —</option>
+                  <option>Ready</option><option>In Prep</option><option>Needs Work</option>
+                </select>
+              </div>
+              <div>
+                <label className="field-label">Priority</label>
+                <select className="field-input" value={data.priority as string || ''} onChange={e => onChange({ priority: e.target.value as Priority })}>
+                  <option value="">— Select —</option>
+                  <option>None</option><option>Normal</option><option>High</option>
+                </select>
+              </div>
+            </div>
+          </Section>
+
+          {/* MOT */}
+          <Section title="MOT" icon={<Clock className="w-4 h-4" />}>
+            <div>
+              <label className="field-label">MOT Expiry Date</label>
+              <input type="date" className="field-input" value={data.mot_expiry as string || ''} onChange={e => onChange({ mot_expiry: e.target.value })} />
+              {data.mot_expiry && (
+                <p className={`text-xs mt-1 font-medium ${motStatus === 'expired' ? 'text-red-500' : motStatus === 'expiring_soon' ? 'text-amber-500' : 'text-emerald-600'}`}>
+                  {motStatus === 'expired' ? `⚠ Expired — ${motDaysLabel(data.mot_expiry as string)}` :
+                   motStatus === 'expiring_soon' ? `⚡ Expiring soon — ${motDaysLabel(data.mot_expiry as string)}` :
+                   `✓ Valid — ${motDaysLabel(data.mot_expiry as string)}`}
+                </p>
+              )}
+            </div>
+            <div className="mt-3">
+              <Toggle label="MOT needs to be carried out" checked={!!data.mot_carry_out} onChange={v => onChange({ mot_carry_out: v })} />
+            </div>
+          </Section>
+
+          {/* Documentation */}
+          <Section title="Documentation" icon={<FileText className="w-4 h-4" />}>
+            <Toggle label="V5 in possession" checked={!!data.v5_present} onChange={v => onChange({ v5_present: v })} />
+            <div className="mt-3">
+              <label className="field-label">Number of Keys</label>
+              <div className="flex gap-2 mt-1">
+                {[1, 2].map(n => (
+                  <button key={n} type="button" onClick={() => onChange({ num_keys: n })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-sm font-semibold transition ${data.num_keys === n ? 'bg-fnt-black text-white border-fnt-black' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'}`}>
+                    <Key className="w-3.5 h-3.5" /> {n} {n === 1 ? 'Key' : 'Keys'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className="field-label">Service History</label>
+              <input className="field-input" value={data.service_history as string || ''} onChange={e => onChange({ service_history: e.target.value })} placeholder="e.g. 5 Services (3 Main Dealer)" />
+            </div>
+          </Section>
+
+          {/* Work Required */}
+          <Section title="Work Required" icon={<Wrench className="w-4 h-4" />}>
+            <textarea className="field-input resize-none" rows={3} value={data.work_needed as string || ''} onChange={e => onChange({ work_needed: e.target.value })} placeholder="Describe any work that needs to be done…" />
+          </Section>
+
+          {/* Additional */}
+          <Section title="Additional" icon={<Stethoscope className="w-4 h-4" />}>
+            <Toggle label="Video available"              checked={!!data.has_video}             onChange={v => onChange({ has_video: v })} />
+            <Toggle label="Diagnostic report available"  checked={!!data.has_diagnostic_report} onChange={v => onChange({ has_diagnostic_report: v })} />
+            <div className="mt-3">
+              <label className="field-label">Notes</label>
+              <textarea className="field-input resize-none" rows={2} value={data.notes as string || ''} onChange={e => onChange({ notes: e.target.value })} placeholder="Any additional notes…" />
+            </div>
+          </Section>
+
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex gap-3">
+          {onDelete && (
+            <button onClick={onDelete} className="px-4 py-3 rounded-xl border border-red-200 text-red-500 text-sm font-semibold hover:bg-red-50 transition">
+              Delete
+            </button>
+          )}
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
+            Cancel
+          </button>
+          <button onClick={onSave} disabled={saving}
+            className="flex-1 py-3 rounded-xl bg-fnt-red text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-60 flex items-center justify-center gap-2">
+            {saving ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</> : <><Save className="w-4 h-4" /> {isAdding ? 'Add Vehicle' : 'Save Changes'}</>}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// Need Save icon
+function Save(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+      <polyline points="17 21 17 13 7 13 7 21" />
+      <polyline points="7 3 7 8 15 8" />
+    </svg>
+  );
+}
 
 export default StockManagement;
