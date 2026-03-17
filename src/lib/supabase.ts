@@ -49,7 +49,7 @@ export interface Car {
   service_history?: string | null
   stock_status?: 'Ready' | 'In Prep' | 'Needs Work' | null
   work_needed?: string | null
-  priority?: 'None' | 'Normal' | 'High' | null
+  priority?: 'None' | 'Low' | 'High' | null
   has_video?: boolean | null
   has_diagnostic_report?: boolean | null
 }
@@ -79,7 +79,7 @@ export interface StockItem {
   service_history: string | null
   stock_status: 'Ready' | 'In Prep' | 'Needs Work' | null
   work_needed: string | null
-  priority: 'None' | 'Normal' | 'High' | null
+  priority: 'None' | 'Low' | 'High' | null
   has_video: boolean | null
   has_diagnostic_report: boolean | null
   notes: string | null

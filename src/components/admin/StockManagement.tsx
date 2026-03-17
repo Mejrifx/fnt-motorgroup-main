@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 type StockStatus = 'Ready' | 'In Prep' | 'Needs Work';
-type Priority    = 'None' | 'Normal' | 'High';
+type Priority    = 'None' | 'Low' | 'High';
 type MOTFilter   = 'all' | 'expired' | 'expiring_soon';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ const PriorityDot: React.FC<{ priority: Priority | null | undefined }> = ({ prio
   if (!priority || priority === 'None') return <span className="text-gray-300 text-xs">—</span>;
   const s = priority === 'High'
     ? 'bg-red-100 text-red-700 border-red-200'
-    : 'bg-blue-100 text-blue-700 border-blue-200';
+    : 'bg-slate-100 text-slate-700 border-slate-200';
   return <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold border ${s}`}>{priority}</span>;
 };
 
@@ -88,7 +88,7 @@ const emptyItem = (): Partial<StockItem> => ({
   car_model: '', make: '', model: '', registration: '',
   mot_expiry: '', mot_carry_out: false, v5_present: false,
   num_keys: 2, service_history: '', stock_status: 'Ready',
-  work_needed: '', priority: 'Normal', has_video: false, has_diagnostic_report: false, notes: '',
+  work_needed: '', priority: 'Low', has_video: false, has_diagnostic_report: false, notes: '',
 });
 
 // ─── Main Component ────────────────────────────────────────────────────────────
@@ -257,7 +257,7 @@ const StockManagement: React.FC = () => {
 
           <div className="flex items-center gap-2 flex-wrap">
             <FilterPill label="Status"   value={statusFilter}   options={['all','Ready','In Prep','Needs Work']} onChange={v => setStatusFilter(v as any)} />
-            <FilterPill label="Priority" value={priorityFilter} options={['all','None','Normal','High']}         onChange={v => setPriorityFilter(v as any)} />
+            <FilterPill label="Priority" value={priorityFilter} options={['all','None','Low','High']}         onChange={v => setPriorityFilter(v as any)} />
             <FilterPill label="MOT" value={motFilter}
               options={['all','expired','expiring_soon']}
               labels={{ all:'All MOT', expired:'Expired', expiring_soon:'Expiring Soon' }}
@@ -493,7 +493,7 @@ const EditDrawer: React.FC<{
                 <label className="field-label">Priority</label>
                 <select className="field-input" value={data.priority as string || ''} onChange={e => onChange({ priority: e.target.value as Priority })}>
                   <option value="">— Select —</option>
-                  <option>None</option><option>Normal</option><option>High</option>
+                  <option>None</option><option>Low</option><option>High</option>
                 </select>
               </div>
             </div>
