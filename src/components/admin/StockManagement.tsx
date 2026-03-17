@@ -200,6 +200,8 @@ const StockManagement: React.FC = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     const statusOrder: Record<string, number> = { 'Needs Work': 0, 'In Prep': 1, 'Ready': 2 };
+    const priorityOrder: Record<string, number> = { 'High': 0, 'Low': 1, 'None': 2 };
+    const motOrder: Record<string, number> = { expired: 0, expiring_soon: 1, valid: 2, unknown: 3 };
     const list = items.filter(item => {
       const matchSearch = !q
         || item.car_model.toLowerCase().includes(q)
@@ -215,7 +217,17 @@ const StockManagement: React.FC = () => {
         || (motFilter === 'expiring_soon' && mot === 'expiring_soon');
       return matchSearch && matchStatus && matchPriority && matchMOT;
     });
-    return list.sort((a, b) => (statusOrder[a.stock_status ?? ''] ?? 3) - (statusOrder[b.stock_status ?? ''] ?? 3));
+    return list.sort((a, b) => {
+      const statusA = statusOrder[a.stock_status ?? ''] ?? 3;
+      const statusB = statusOrder[b.stock_status ?? ''] ?? 3;
+      if (statusA !== statusB) return statusA - statusB;
+      const priorityA = priorityOrder[a.priority ?? ''] ?? 3;
+      const priorityB = priorityOrder[b.priority ?? ''] ?? 3;
+      if (priorityA !== priorityB) return priorityA - priorityB;
+      const motA = motOrder[getMOTStatus(a.mot_expiry)];
+      const motB = motOrder[getMOTStatus(b.mot_expiry)];
+      return motA - motB;
+    });
   }, [items, search, statusFilter, priorityFilter, motFilter]);
 
   const activeFilters = [statusFilter !== 'all', priorityFilter !== 'all', motFilter !== 'all'].filter(Boolean).length;
