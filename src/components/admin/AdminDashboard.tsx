@@ -499,7 +499,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Filter and Sort Controls */}
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Filter by Status */}
               <div className="flex items-center space-x-2">
