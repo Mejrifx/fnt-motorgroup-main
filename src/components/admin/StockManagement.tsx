@@ -199,7 +199,8 @@ const StockManagement: React.FC = () => {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return items.filter(item => {
+    const statusOrder: Record<string, number> = { 'Needs Work': 0, 'In Prep': 1, 'Ready': 2 };
+    const list = items.filter(item => {
       const matchSearch = !q
         || item.car_model.toLowerCase().includes(q)
         || item.make.toLowerCase().includes(q)
@@ -214,6 +215,7 @@ const StockManagement: React.FC = () => {
         || (motFilter === 'expiring_soon' && mot === 'expiring_soon');
       return matchSearch && matchStatus && matchPriority && matchMOT;
     });
+    return list.sort((a, b) => (statusOrder[a.stock_status ?? ''] ?? 3) - (statusOrder[b.stock_status ?? ''] ?? 3));
   }, [items, search, statusFilter, priorityFilter, motFilter]);
 
   const activeFilters = [statusFilter !== 'all', priorityFilter !== 'all', motFilter !== 'all'].filter(Boolean).length;
