@@ -74,9 +74,9 @@ const MOTCell: React.FC<{ motExpiry: string | null | undefined }> = ({ motExpiry
 
 const Toggle: React.FC<{ checked: boolean; onChange: (v: boolean) => void; label: string }> = ({ checked, onChange, label }) => (
   <div className="flex items-center justify-between py-1">
-    <span className="text-sm text-gray-700">{label}</span>
+    <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
     <button type="button" onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-gray-200'}`}>
+      className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-600'}`}>
       <span className={`inline-block h-4 w-4 mt-1 transform rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
   </div>
@@ -236,7 +236,7 @@ const StockManagement: React.FC = () => {
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 transition-colors duration-200">
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -251,7 +251,7 @@ const StockManagement: React.FC = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 px-4 py-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -260,7 +260,7 @@ const StockManagement: React.FC = () => {
               placeholder="Search by reg, make, model or work needed…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition"
+              className="w-full pl-9 pr-8 py-2 text-sm bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition"
             />
             {search && (
               <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -283,7 +283,7 @@ const StockManagement: React.FC = () => {
                 <X className="w-3 h-3" /> Clear
               </button>
             )}
-            <button onClick={fetchItems} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" title="Refresh">
+            <button onClick={fetchItems} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition" title="Refresh">
               <RefreshCw className="w-4 h-4" />
             </button>
             <button onClick={openAdd}
@@ -295,13 +295,13 @@ const StockManagement: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-24 text-gray-400">
+          <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500">
             <RefreshCw className="w-5 h-5 animate-spin mr-2" /> Loading stock…
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-gray-400 gap-3">
+          <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500 gap-3">
             <CarIcon className="w-8 h-8" />
             <p className="text-sm font-medium">No vehicles match your filters</p>
             {(search || activeFilters > 0) && (
@@ -313,21 +313,21 @@ const StockManagement: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/70">
+                <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-700/70">
                   {['Vehicle', 'Reg', 'MOT', 'V5', 'Keys', 'Status', 'Priority', 'Work Needed', ''].map(h => (
-                    <th key={h} className={`px-4 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider ${h === 'V5' || h === 'Keys' || h === '' ? 'text-center' : 'text-left'} ${h === 'Priority' ? 'hidden lg:table-cell' : ''} ${h === 'Work Needed' ? 'hidden xl:table-cell' : ''}`}>{h}</th>
+                    <th key={h} className={`px-4 py-3 font-semibold text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider ${h === 'V5' || h === 'Keys' || h === '' ? 'text-center' : 'text-left'} ${h === 'Priority' ? 'hidden lg:table-cell' : ''} ${h === 'Work Needed' ? 'hidden xl:table-cell' : ''}`}>{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {filtered.map(item => (
                   <tr key={item.id} onClick={() => openEdit(item)}
-                    className="hover:bg-gray-50/80 cursor-pointer transition-colors group">
+                    className="hover:bg-gray-50/80 dark:hover:bg-gray-700/80 cursor-pointer transition-colors group">
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-gray-900">{item.car_model}</div>
+                      <div className="font-semibold text-gray-900 dark:text-white">{item.car_model}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 text-gray-800 px-2 py-1 rounded-md">
+                      <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-md">
                         {formatReg(item.registration)}
                       </span>
                     </td>
@@ -337,29 +337,29 @@ const StockManagement: React.FC = () => {
                         ? <CheckCircle className="w-4 h-4 text-emerald-500 mx-auto" />
                         : item.v5_present === false
                           ? <X className="w-4 h-4 text-red-400 mx-auto" />
-                          : <span className="text-gray-300">—</span>}
+                          : <span className="text-gray-300 dark:text-gray-600">—</span>}
                     </td>
                     <td className="px-4 py-3 text-center">
                       {item.num_keys != null
-                        ? <div className="flex items-center justify-center gap-1"><Key className="w-3 h-3 text-gray-400" /><span className="font-medium text-gray-700">{item.num_keys}</span></div>
-                        : <span className="text-gray-300">—</span>}
+                        ? <div className="flex items-center justify-center gap-1"><Key className="w-3 h-3 text-gray-400" /><span className="font-medium text-gray-700 dark:text-gray-300">{item.num_keys}</span></div>
+                        : <span className="text-gray-300 dark:text-gray-600">—</span>}
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={item.stock_status} /></td>
                     <td className="px-4 py-3 hidden lg:table-cell"><PriorityDot priority={item.priority} /></td>
                     <td className="px-4 py-3 hidden xl:table-cell max-w-[200px]">
                       {item.work_needed
-                        ? <span className="text-xs text-gray-600 line-clamp-2">{item.work_needed}</span>
-                        : <span className="text-xs text-gray-300">—</span>}
+                        ? <span className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{item.work_needed}</span>
+                        : <span className="text-xs text-gray-300 dark:text-gray-600">—</span>}
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className="text-gray-300 group-hover:text-fnt-red transition-colors text-sm">›</span>
+                      <span className="text-gray-300 dark:text-gray-600 group-hover:text-fnt-red transition-colors text-sm">›</span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50">
-              <p className="text-xs text-gray-400">Showing {filtered.length} of {items.length} vehicles</p>
+            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
+              <p className="text-xs text-gray-400 dark:text-gray-500">Showing {filtered.length} of {items.length} vehicles</p>
             </div>
           </div>
         )}
@@ -385,11 +385,11 @@ const StockManagement: React.FC = () => {
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
 const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-  gray:    { bg: 'bg-gray-50',    text: 'text-gray-700',    border: 'border-l-gray-300' },
-  emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-l-emerald-400' },
-  amber:   { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-l-amber-400' },
-  red:     { bg: 'bg-red-50',     text: 'text-red-700',     border: 'border-l-red-400' },
-  orange:  { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-l-orange-400' },
+  gray:    { bg: 'bg-gray-50 dark:bg-gray-800',    text: 'text-gray-700 dark:text-gray-300',    border: 'border-l-gray-300 dark:border-l-gray-500' },
+  emerald: { bg: 'bg-emerald-50 dark:bg-emerald-950', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-l-emerald-400' },
+  amber:   { bg: 'bg-amber-50 dark:bg-amber-950',   text: 'text-amber-700 dark:text-amber-400',   border: 'border-l-amber-400' },
+  red:     { bg: 'bg-red-50 dark:bg-red-950',     text: 'text-red-700 dark:text-red-400',     border: 'border-l-red-400' },
+  orange:  { bg: 'bg-orange-50 dark:bg-orange-950',  text: 'text-orange-700 dark:text-orange-400',  border: 'border-l-orange-400' },
 };
 
 const StatCard: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => {
@@ -397,7 +397,7 @@ const StatCard: React.FC<{ label: string; value: number; color: string }> = ({ l
   return (
     <div className={`${c.bg} rounded-xl border-l-4 ${c.border} px-4 py-3`}>
       <div className={`text-2xl font-bold ${c.text}`}>{value}</div>
-      <div className="text-xs font-medium text-gray-500 mt-0.5">{label}</div>
+      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">{label}</div>
     </div>
   );
 };
@@ -413,7 +413,7 @@ const FilterPill: React.FC<{
     <div className="relative">
       <select value={value} onChange={e => onChange(e.target.value)}
         className={`appearance-none pl-3 pr-7 py-2 text-xs font-semibold rounded-xl border transition cursor-pointer focus:outline-none ${
-          active ? 'bg-fnt-red text-white border-fnt-red' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+          active ? 'bg-fnt-red text-white border-fnt-red' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
         }`}>
         {options.map(o => (
           <option key={o} value={o}>{labels ? (labels[o] || o) : (o === 'all' ? `All ${label}` : o)}</option>
@@ -429,8 +429,8 @@ const FilterPill: React.FC<{
 const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
   <div>
     <div className="flex items-center gap-2 mb-3">
-      <span className="text-gray-400">{icon}</span>
-      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
+      <span className="text-gray-400 dark:text-gray-500">{icon}</span>
+      <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{title}</h3>
     </div>
     {children}
   </div>
@@ -453,21 +453,21 @@ const EditDrawer: React.FC<{
   return (
     <>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right">
+      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl flex flex-col animate-slide-in-right">
 
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
               {isAdding ? 'Add New Vehicle' : (data.car_model || `${data.make} ${data.model}`)}
             </h2>
             {!isAdding && data.registration && (
-              <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 text-gray-800 px-2 py-0.5 rounded mt-1 inline-block">
+              <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded mt-1 inline-block">
                 {formatReg(data.registration as string)}
               </span>
             )}
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -539,7 +539,7 @@ const EditDrawer: React.FC<{
               <div className="flex gap-2 mt-1">
                 {[1, 2].map(n => (
                   <button key={n} type="button" onClick={() => onChange({ num_keys: n })}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-sm font-semibold transition ${data.num_keys === n ? 'bg-fnt-black text-white border-fnt-black' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'}`}>
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border text-sm font-semibold transition ${data.num_keys === n ? 'bg-fnt-black text-white border-fnt-black' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'}`}>
                     <Key className="w-3.5 h-3.5" /> {n} {n === 1 ? 'Key' : 'Keys'}
                   </button>
                 ))}
@@ -569,13 +569,13 @@ const EditDrawer: React.FC<{
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex gap-3">
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex gap-3">
           {onDelete && (
-            <button onClick={onDelete} className="px-4 py-3 rounded-xl border border-red-200 text-red-500 text-sm font-semibold hover:bg-red-50 transition">
+            <button onClick={onDelete} className="px-4 py-3 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950 transition">
               Delete
             </button>
           )}
-          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
             Cancel
           </button>
           <button onClick={onSave} disabled={saving}

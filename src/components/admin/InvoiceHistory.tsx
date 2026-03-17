@@ -143,16 +143,16 @@ const InvoiceHistory: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 transition-colors duration-200">
       {/* Header */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center">
               <FileText className="w-5 h-5 mr-2" />
               Invoice History
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               View, download, and manage all generated invoices
             </p>
           </div>
@@ -161,7 +161,7 @@ const InvoiceHistory: React.FC = () => {
               loadInvoices();
               loadAllCounts();
             }}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>
@@ -170,7 +170,7 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-gray-200">
+      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700">
         {(['fnt_sale', 'fnt_purchase', 'tnt_service'] as InvoiceType[]).map((type) => (
           <button
             key={type}
@@ -178,11 +178,11 @@ const InvoiceHistory: React.FC = () => {
             className={`px-6 py-3 font-semibold transition-all ${
               activeTab === type
                 ? 'border-b-2 border-fnt-red text-fnt-red'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             {getTabLabel(type)}
-            <span className="ml-2 px-2 py-1 text-xs rounded-full bg-gray-100">
+            <span className="ml-2 px-2 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
               {invoiceCounts[type]}
             </span>
           </button>
@@ -190,7 +190,7 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
         <div className="flex items-center space-x-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -200,7 +200,7 @@ const InvoiceHistory: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search by invoice number, customer name, or vehicle reg..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
             />
           </div>
           <button
@@ -216,7 +216,7 @@ const InvoiceHistory: React.FC = () => {
                 setSearchTerm('');
                 loadInvoices();
               }}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
             >
               Clear
             </button>
@@ -225,48 +225,48 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fnt-red"></div>
-            <span className="ml-3 text-gray-600">Loading invoices...</span>
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading invoices...</span>
           </div>
         ) : invoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <FileText className="w-12 h-12 text-gray-300 mb-3" />
-            <p className="text-gray-600 font-semibold">No invoices found</p>
-            <p className="text-sm text-gray-500">
+            <FileText className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
+            <p className="text-gray-600 dark:text-gray-400 font-semibold">No invoices found</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">
               {searchTerm ? 'Try adjusting your search criteria' : 'Start by creating your first invoice'}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Invoice #
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Vehicle
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Total
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTabColor(invoice.invoice_type)}`}>
@@ -274,30 +274,30 @@ const InvoiceHistory: React.FC = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                       {formatDate(invoice.invoice_date)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{invoice.customer_name}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{invoice.customer_name}</div>
                       {invoice.customer_phone && (
-                        <div className="text-xs text-gray-500">{invoice.customer_phone}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.customer_phone}</div>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       {invoice.vehicle_make || invoice.vehicle_model ? (
                         <div>
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {invoice.vehicle_make} {invoice.vehicle_model}
                           </div>
                           {invoice.vehicle_reg && (
-                            <div className="text-xs text-gray-500">{invoice.vehicle_reg}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.vehicle_reg}</div>
                           )}
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-400">—</span>
+                        <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
                       {formatCurrency(invoice.total_amount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -307,7 +307,7 @@ const InvoiceHistory: React.FC = () => {
                           href={invoice.pdf_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
                           title="Preview invoice"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -317,7 +317,7 @@ const InvoiceHistory: React.FC = () => {
                         <a
                           href={invoice.pdf_url}
                           download={`${invoice.invoice_number}.pdf`}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-lg transition-colors"
                           title="Download invoice"
                         >
                           <Download className="w-4 h-4" />
@@ -326,7 +326,7 @@ const InvoiceHistory: React.FC = () => {
                         {/* Delete */}
                         <button
                           onClick={() => handleDelete(invoice)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
                           title="Delete invoice"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -343,13 +343,13 @@ const InvoiceHistory: React.FC = () => {
 
       {/* Stats Footer */}
       {invoices.length > 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
+          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <div>
-              Showing <span className="font-semibold text-gray-900">{invoices.length}</span> invoice{invoices.length !== 1 ? 's' : ''}
+              Showing <span className="font-semibold text-gray-900 dark:text-white">{invoices.length}</span> invoice{invoices.length !== 1 ? 's' : ''}
             </div>
             <div>
-              Total value: <span className="font-semibold text-gray-900">
+              Total value: <span className="font-semibold text-gray-900 dark:text-white">
                 {formatCurrency(invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0))}
               </span>
             </div>

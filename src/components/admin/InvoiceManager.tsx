@@ -120,16 +120,16 @@ const InvoiceManager = () => {
       )}
 
       {/* Header with SimplePDF Info */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6 mb-6">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl p-6 mb-6">
         <div className="flex flex-col gap-4">
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center">
               Invoice Management
               <span className="ml-3 px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                 ✓ Connected
               </span>
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Create professional invoices using your custom templates. Choose between FNT Motor Group invoices or TNT Services invoices.
             </p>
           </div>
@@ -139,10 +139,10 @@ const InvoiceManager = () => {
       {/* Invoice Type Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Selling Invoice Card */}
-        <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-4 bg-green-100 rounded-lg">
+              <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 <img 
                   src="/FNT Favicon.png" 
                   alt="FNT Motor Group" 
@@ -150,26 +150,26 @@ const InvoiceManager = () => {
                 />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-gray-900">Selling Invoice</h4>
-                <p className="text-sm text-gray-500">For selling vehicles to customers</p>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white">Selling Invoice</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">For selling vehicles to customers</p>
               </div>
             </div>
           </div>
           
           <div className="space-y-2 mb-4">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Customer details</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Vehicle information</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -190,7 +190,7 @@ const InvoiceManager = () => {
               href="/FNT_Sale_Invoice_v28_TNTStyleFields.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
               <span>View Template</span>
@@ -199,10 +199,10 @@ const InvoiceManager = () => {
         </div>
 
         {/* Purchase Invoice Card */}
-        <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-4 bg-blue-100 rounded-lg">
+              <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <img 
                   src="/FNT Favicon.png" 
                   alt="FNT Motor Group" 
@@ -210,26 +210,26 @@ const InvoiceManager = () => {
                 />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-gray-900">Purchase Invoice</h4>
-                <p className="text-sm text-gray-500">For purchasing vehicles from customers</p>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white">Purchase Invoice</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">For purchasing vehicles from customers</p>
               </div>
             </div>
           </div>
           
           <div className="space-y-2 mb-4">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Customer details</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Vehicle information</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -250,7 +250,7 @@ const InvoiceManager = () => {
               href="/FNT Purchase Invoice Template.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
               <span>View Template</span>
@@ -259,10 +259,10 @@ const InvoiceManager = () => {
         </div>
 
         {/* TNT Services Invoice Card */}
-        <div className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-fnt-red transition-all">
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <div className="p-4 bg-purple-100 rounded-lg">
+              <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                 <img 
                   src="/TNT%20Logo.png" 
                   alt="TNT Services" 
@@ -270,26 +270,26 @@ const InvoiceManager = () => {
                 />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-gray-900">TNT Services Invoice</h4>
-                <p className="text-sm text-gray-500">For TNT Services business</p>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white">TNT Services Invoice</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">For TNT Services business</p>
               </div>
             </div>
           </div>
           
           <div className="space-y-2 mb-4">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Customer details</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Service information</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -310,7 +310,7 @@ const InvoiceManager = () => {
               href="/TNT Services Invoice Template.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
               <span>View Template</span>
@@ -320,14 +320,14 @@ const InvoiceManager = () => {
       </div>
 
       {/* Quick Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div className="flex items-start space-x-3">
-          <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
-            <h4 className="text-sm font-semibold text-blue-900 mb-1">Invoice Templates</h4>
-            <p className="text-sm text-blue-700">
+            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">Invoice Templates</h4>
+            <p className="text-sm text-blue-700 dark:text-blue-400">
               <strong>Selling Invoice:</strong> Use when selling vehicles to customers. Includes customer details, sale price, and payment terms.
               <br />
               <strong>Purchase Invoice:</strong> Use when purchasing vehicles from customers. Includes customer details, purchase price, and terms.

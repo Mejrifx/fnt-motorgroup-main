@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import AddCarModal from './AddCarModal';
 import EditCarModal from './EditCarModal';
 import AddReviewModal from './AddReviewModal';
@@ -12,6 +13,7 @@ import InvoiceHistory from './InvoiceHistory';
 import StockManagement from './StockManagement';
 
 const AdminDashboard = () => {
+  const [isDark, toggleDark] = useDarkMode();
   const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews'>('stock');
   const [cars, setCars] = useState<Car[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -319,28 +321,35 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Mobile Header */}
           <div className="flex flex-col space-y-4 py-4 sm:hidden">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <img src="/FNT%20Favicon.png" alt="FNT Motor Group" className="h-12 w-auto" />
-                <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
               </div>
               <div className="flex items-center space-x-2">
                 <button
+                  onClick={toggleDark}
+                  className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+                <button
                   onClick={handleBackToHome}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                   title="Back to Home"
                 >
                   <Home className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden xs:inline">Sign Out</span>
@@ -348,7 +357,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="text-center">
-              <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, {user?.email}</span>
             </div>
           </div>
 
@@ -356,13 +365,20 @@ const AdminDashboard = () => {
           <div className="hidden sm:flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <img src="/FNT%20Favicon.png" alt="FNT Motor Group" className="h-12 w-auto" />
-              <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, {user?.email}</span>
+              <button
+                onClick={toggleDark}
+                className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
               <button
                 onClick={handleBackToHome}
-                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                 title="Back to Home"
               >
                 <Home className="w-4 h-4" />
@@ -370,7 +386,7 @@ const AdminDashboard = () => {
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
@@ -384,14 +400,14 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200">
+        <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('stock')}
               className={`
                 ${activeTab === 'stock'
                   ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
                 whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
@@ -403,7 +419,7 @@ const AdminDashboard = () => {
               className={`
                 ${activeTab === 'invoices'
                   ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
                 whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
@@ -415,7 +431,7 @@ const AdminDashboard = () => {
               className={`
                 ${activeTab === 'invoice_history'
                   ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
                 whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
@@ -427,7 +443,7 @@ const AdminDashboard = () => {
               className={`
                 ${activeTab === 'cars'
                   ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
                 whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
@@ -439,7 +455,7 @@ const AdminDashboard = () => {
               className={`
                 ${activeTab === 'reviews'
                   ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
                 whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
@@ -451,7 +467,7 @@ const AdminDashboard = () => {
               className={`
                 ${activeTab === 'sync'
                   ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
                 whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
               `}
             >
@@ -468,10 +484,10 @@ const AdminDashboard = () => {
 
         {/* Cars Tab */}
         {activeTab === 'cars' && (
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg transition-colors duration-200">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
-              <h2 className="text-lg font-semibold text-gray-900">Car Inventory</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Car Inventory</h2>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
@@ -483,16 +499,16 @@ const AdminDashboard = () => {
           </div>
 
           {/* Filter and Sort Controls */}
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Filter by Status */}
               <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-gray-500" />
-                <label className="text-sm font-medium text-gray-700">Filter:</label>
+                <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter:</label>
                 <select
                   value={carFilter}
                   onChange={(e) => setCarFilter(e.target.value as 'all' | 'available' | 'sold')}
-                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                 >
                   <option value="all">All Cars</option>
                   <option value="available">Available Only</option>
@@ -502,12 +518,12 @@ const AdminDashboard = () => {
 
               {/* Sort By */}
               <div className="flex items-center space-x-2">
-                <ArrowUpDown className="w-4 h-4 text-gray-500" />
-                <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                <ArrowUpDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</label>
                 <select
                   value={carSortBy}
                   onChange={(e) => setCarSortBy(e.target.value as 'date' | 'price' | 'make' | 'year')}
-                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                 >
                   <option value="date">Date Added</option>
                   <option value="price">Price</option>
@@ -520,7 +536,7 @@ const AdminDashboard = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setCarSortOrder(carSortOrder === 'asc' ? 'desc' : 'asc')}
-                  className="px-3 py-1.5 border border-gray-300 rounded-md text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-colors"
+                  className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 dark:text-gray-300 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-colors"
                   title={`Sort ${carSortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
                 >
                   {carSortOrder === 'asc' ? '↑ Asc' : '↓ Desc'}
@@ -529,7 +545,7 @@ const AdminDashboard = () => {
 
               {/* Results Count */}
               <div className="ml-auto flex items-center">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
                   Showing {getFilteredAndSortedCars().length} of {cars.length} cars
                 </span>
               </div>
@@ -537,19 +553,19 @@ const AdminDashboard = () => {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car</th>
-                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mileage</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Car</th>
+                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
+                  <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mileage</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {getFilteredAndSortedCars().map((car) => (
-                  <tr key={car.id} className="hover:bg-gray-50">
+                  <tr key={car.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img 
@@ -563,20 +579,20 @@ const AdminDashboard = () => {
                           className="w-12 h-8 sm:w-15 sm:h-10 rounded object-cover"
                         />
                         <div className="ml-2 sm:ml-4">
-                          <div className="text-xs sm:text-sm font-medium text-gray-900">
+                          <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                             {car.make} {car.model}
                           </div>
-                          <div className="text-xs text-gray-500">{car.year}</div>
-                          <div className="sm:hidden text-xs text-gray-600 font-medium">
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{car.year}</div>
+                          <div className="sm:hidden text-xs text-gray-600 dark:text-gray-300 font-medium">
                             £{car.price.toLocaleString()}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                       £{car.price.toLocaleString()}
                     </td>
-                    <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {formatMileage(car.mileage)}
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
@@ -615,7 +631,7 @@ const AdminDashboard = () => {
           {cars.length === 0 && (
             <div className="text-center py-12">
               <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No cars in inventory yet.</p>
+              <p className="text-gray-500 dark:text-gray-400">No cars in inventory yet.</p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="mt-2 text-fnt-red hover:text-red-600 font-medium"
@@ -628,7 +644,7 @@ const AdminDashboard = () => {
           {cars.length > 0 && getFilteredAndSortedCars().length === 0 && (
             <div className="text-center py-12">
               <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No cars match the current filter.</p>
+              <p className="text-gray-500 dark:text-gray-400">No cars match the current filter.</p>
               <button
                 onClick={() => setCarFilter('all')}
                 className="mt-2 text-fnt-red hover:text-red-600 font-medium"
@@ -654,7 +670,7 @@ const AdminDashboard = () => {
         {activeTab === 'sync' && (
           <div>
             {/* AutoTrader Sync Status Panel */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mb-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 {/* Left: Sync Info */}
                 <div className="flex-1">
@@ -666,16 +682,16 @@ const AdminDashboard = () => {
                         <RefreshCw className={`w-6 h-6 text-blue-600 absolute inset-0 transition-all duration-300 ease-in-out ${isSyncing ? 'animate-spin' : ''}`} />
                       )}
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">AutoTrader Sync Status</h2>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">AutoTrader Sync Status</h2>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Last Sync Time */}
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Last Sync</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Last Sync</p>
                       <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        <p className="text-sm font-medium text-gray-900">
+                        <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
                           {syncStatus?.created_at 
                             ? new Date(syncStatus.created_at).toLocaleString()
                             : 'Never'}
@@ -685,33 +701,33 @@ const AdminDashboard = () => {
                     
                     {/* Sync Status */}
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Status</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Status</p>
                       <div className="flex items-center space-x-2">
                         {syncStatus?.status === 'success' ? (
                           <>
                             <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm font-medium text-green-700">Success</span>
+                            <span className="text-sm font-medium text-green-700 dark:text-green-400">Success</span>
                           </>
                         ) : syncStatus?.status === 'failed' ? (
                           <>
                             <XCircle className="w-4 h-4 text-red-600" />
-                            <span className="text-sm font-medium text-red-700">Failed</span>
+                            <span className="text-sm font-medium text-red-700 dark:text-red-400">Failed</span>
                           </>
                         ) : syncStatus?.status === 'partial' ? (
                           <>
                             <TrendingUp className="w-4 h-4 text-yellow-600" />
-                            <span className="text-sm font-medium text-yellow-700">Partial</span>
+                            <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Partial</span>
                           </>
                         ) : (
-                          <span className="text-sm text-gray-500">No sync yet</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">No sync yet</span>
                         )}
                       </div>
                     </div>
                     
                     {/* AutoTrader vs Manual Cars */}
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">From AutoTrader</p>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">From AutoTrader</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
                         {cars.filter(car => car.synced_from_autotrader).length} / {cars.length} cars
                       </p>
                     </div>
@@ -719,8 +735,8 @@ const AdminDashboard = () => {
                     {/* Last Sync Stats */}
                     {syncStatus && (
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">Last Sync Results</p>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Last Sync Results</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
                           +{syncStatus.cars_added} | ~{syncStatus.cars_updated} | -{syncStatus.cars_marked_unavailable}
                         </p>
                       </div>
@@ -753,7 +769,7 @@ const AdminDashboard = () => {
                   
                   <button
                     onClick={() => setShowSyncLogs(!showSyncLogs)}
-                    className="px-6 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+                    className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors"
                   >
                     {showSyncLogs ? 'Hide' : 'View'} Logs
                   </button>
@@ -762,33 +778,33 @@ const AdminDashboard = () => {
               
               {/* Sync Logs */}
               {showSyncLogs && (
-                <div className="mt-6 pt-6 border-t border-blue-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Sync Logs (Last 20)</h3>
-                  <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Sync Logs (Last 20)</h3>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
                           <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Added</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Removed</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Time</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Added</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Updated</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Removed</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Duration</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                           {syncLogs.length === 0 ? (
                             <tr>
-                              <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                              <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                 No sync logs yet
                               </td>
                             </tr>
                           ) : (
                             syncLogs.map((log) => (
-                              <tr key={log.id} className="hover:bg-gray-50">
-                                <td className="px-4 py-3 text-sm text-gray-900">
+                              <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
                                   {new Date(log.created_at).toLocaleString()}
                                 </td>
                                 <td className="px-4 py-3 text-sm">
@@ -809,10 +825,10 @@ const AdminDashboard = () => {
                                     {log.status}
                                   </span>
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{log.cars_added}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{log.cars_updated}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">{log.cars_marked_unavailable}</td>
-                                <td className="px-4 py-3 text-sm text-gray-900">
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{log.cars_added}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{log.cars_updated}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">{log.cars_marked_unavailable}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
                                   {log.sync_duration_ms ? `${(log.sync_duration_ms / 1000).toFixed(2)}s` : '-'}
                                 </td>
                               </tr>
@@ -828,32 +844,32 @@ const AdminDashboard = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <Car className="w-8 h-8 text-blue-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Cars</p>
-                    <p className="text-2xl font-bold text-gray-900">{cars.length}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Cars</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{cars.length}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <DollarSign className="w-8 h-8 text-green-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Available Cars</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Available Cars</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {cars.filter(car => car.is_available).length}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <Calendar className="w-8 h-8 text-purple-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">This Month</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {cars.filter(car => {
                         const carDate = new Date(car.created_at);
                         const now = new Date();
@@ -863,12 +879,12 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <Fuel className="w-8 h-8 text-red-500" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Avg. Price</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Price</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       £{cars.length > 0 ? Math.round(cars.reduce((sum, car) => sum + car.price, 0) / cars.length).toLocaleString() : 0}
                     </p>
                   </div>
@@ -880,10 +896,10 @@ const AdminDashboard = () => {
 
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg transition-colors duration-200">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
-              <h2 className="text-lg font-semibold text-gray-900">Customer Reviews</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Customer Reviews</h2>
               <button
                 onClick={() => setShowAddReviewModal(true)}
                 className="flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
@@ -895,30 +911,30 @@ const AdminDashboard = () => {
           </div>
           
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
-                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Featured</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+                  <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Review</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rating</th>
+                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Featured</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {reviews.map((review) => (
-                  <tr key={review.id} className="hover:bg-gray-50">
+                  <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{review.customer_name}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{review.customer_name}</div>
                         {review.vehicle_purchased && (
-                          <div className="text-xs text-gray-500">{review.vehicle_purchased}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{review.vehicle_purchased}</div>
                         )}
-                        <div className="text-xs text-gray-400">{review.review_date}</div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500">{review.review_date}</div>
                       </div>
                     </td>
                     <td className="hidden md:table-cell px-6 py-4">
-                      <div className="text-sm text-gray-900 max-w-md truncate">{review.review_text}</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-200 max-w-md truncate">{review.review_text}</div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -964,7 +980,7 @@ const AdminDashboard = () => {
           {reviews.length === 0 && (
             <div className="text-center py-12">
               <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No reviews yet.</p>
+              <p className="text-gray-500 dark:text-gray-400">No reviews yet.</p>
               <button
                 onClick={() => setShowAddReviewModal(true)}
                 className="mt-2 text-fnt-red hover:text-red-600 font-medium"
