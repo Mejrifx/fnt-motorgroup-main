@@ -264,7 +264,7 @@ const InvoiceManager = () => {
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-purple-100 rounded-lg">
                 <img 
-                  src="/TNT Logo.png" 
+                  src="/TNT%20Logo.png" 
                   alt="TNT Services" 
                   className="w-16 h-16 object-contain"
                 />

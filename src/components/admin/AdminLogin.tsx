@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import fntLogo from '../../assets/fnt-logo.png';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -77,7 +76,7 @@ const AdminLogin = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <img 
-            src={fntLogo} 
+            src="/FNT%20Favicon.png" 
             alt="FNT Motor Group" 
             className="h-64 sm:h-80 lg:h-96 w-auto mx-auto mb-6 drop-shadow-2xl"
           />

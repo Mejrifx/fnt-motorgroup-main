@@ -10,7 +10,6 @@ import EditReviewModal from './EditReviewModal';
 import InvoiceManager from './InvoiceManager';
 import InvoiceHistory from './InvoiceHistory';
 import StockManagement from './StockManagement';
-import fntLogo from '../../assets/fnt-logo.png';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews'>('stock');
@@ -328,7 +327,7 @@ const AdminDashboard = () => {
           <div className="flex flex-col space-y-4 py-4 sm:hidden">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <img src={fntLogo} alt="FNT Motor Group" className="h-12 w-auto" />
+                <img src="/FNT%20Favicon.png" alt="FNT Motor Group" className="h-12 w-auto" />
                 <h1 className="text-lg font-bold text-gray-900">Admin Dashboard</h1>
               </div>
               <div className="flex items-center space-x-2">
@@ -356,7 +355,7 @@ const AdminDashboard = () => {
           {/* Desktop Header */}
           <div className="hidden sm:flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <img src={fntLogo} alt="FNT Motor Group" className="h-12 w-auto" />
+              <img src="/FNT%20Favicon.png" alt="FNT Motor Group" className="h-12 w-auto" />
               <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
