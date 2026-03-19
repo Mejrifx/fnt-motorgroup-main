@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw } from 'lucide-react';
-import { getInvoicesByType, searchInvoices, deleteInvoice, type InvoiceType } from '../../lib/invoiceUtils';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X } from 'lucide-react';
+import { getInvoicesByType, deleteInvoice, type InvoiceType } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 import ConfirmDialog from '../ui/ConfirmDialog';
 
@@ -20,12 +20,29 @@ interface Invoice {
   created_at: string;
 }
 
+function invoiceMatchesSearch(inv: Invoice, q: string): boolean {
+  if (!q) return true;
+  const haystack = [
+    inv.invoice_number,
+    inv.customer_name,
+    inv.customer_email,
+    inv.customer_phone,
+    inv.vehicle_reg,
+    inv.vehicle_make,
+    inv.vehicle_model,
+    inv.total_amount != null ? String(inv.total_amount) : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(q);
+}
+
 const InvoiceHistory: React.FC = () => {
   const [activeTab, setActiveTab] = useState<InvoiceType>('fnt_sale');
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; invoice: Invoice | null }>({
     isOpen: false,
     invoice: null
@@ -41,7 +58,7 @@ const InvoiceHistory: React.FC = () => {
   const loadInvoices = async () => {
     setLoading(true);
     const data = await getInvoicesByType(activeTab);
-    setInvoices(data as Invoice[]);
+    setAllInvoices(data as Invoice[]);
     // Update the count for the active tab
     setInvoiceCounts(prev => ({
       ...prev,
@@ -67,18 +84,11 @@ const InvoiceHistory: React.FC = () => {
     setInvoiceCounts(counts);
   };
 
-  // Search invoices
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      loadInvoices();
-      return;
-    }
-
-    setIsSearching(true);
-    const data = await searchInvoices(searchTerm, activeTab);
-    setInvoices(data as Invoice[]);
-    setIsSearching(false);
-  };
+  const filteredInvoices = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return allInvoices;
+    return allInvoices.filter((inv) => invoiceMatchesSearch(inv, q));
+  }, [allInvoices, searchTerm]);
 
   // Delete invoice
   const handleDelete = async (invoice: Invoice) => {
@@ -145,7 +155,7 @@ const InvoiceHistory: React.FC = () => {
   return (
     <div className="space-y-6 transition-colors duration-200">
       {/* Header */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center">
@@ -189,7 +199,7 @@ const InvoiceHistory: React.FC = () => {
         ))}
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar — filters as you type (same pattern as Stock tab) */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
         <div className="flex items-center space-x-3">
           <div className="relative flex-1">
@@ -198,29 +208,20 @@ const InvoiceHistory: React.FC = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Search by invoice number, customer name, or vehicle reg..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+              placeholder="Search by invoice number, customer, phone, email, or vehicle…"
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
-          <button
-            onClick={handleSearch}
-            disabled={isSearching}
-            className="px-6 py-2 bg-fnt-red hover:bg-red-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50"
-          >
-            {isSearching ? 'Searching...' : 'Search'}
-          </button>
-          {searchTerm && (
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                loadInvoices();
-              }}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
-            >
-              Clear
-            </button>
-          )}
         </div>
       </div>
 
@@ -231,12 +232,20 @@ const InvoiceHistory: React.FC = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fnt-red"></div>
             <span className="ml-3 text-gray-600 dark:text-gray-400">Loading invoices...</span>
           </div>
-        ) : invoices.length === 0 ? (
+        ) : allInvoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <FileText className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
             <p className="text-gray-600 dark:text-gray-400 font-semibold">No invoices found</p>
             <p className="text-sm text-gray-500 dark:text-gray-500">
-              {searchTerm ? 'Try adjusting your search criteria' : 'Start by creating your first invoice'}
+              Start by creating your first invoice
+            </p>
+          </div>
+        ) : filteredInvoices.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <FileText className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
+            <p className="text-gray-600 dark:text-gray-400 font-semibold">No invoices match your search</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">
+              Try a different term or clear the search box
             </p>
           </div>
         ) : (
@@ -265,7 +274,7 @@ const InvoiceHistory: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {invoices.map((invoice) => (
+                {filteredInvoices.map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -342,15 +351,21 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Stats Footer */}
-      {invoices.length > 0 && (
+      {allInvoices.length > 0 && (
         <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
-          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-gray-600 dark:text-gray-400">
             <div>
-              Showing <span className="font-semibold text-gray-900 dark:text-white">{invoices.length}</span> invoice{invoices.length !== 1 ? 's' : ''}
+              Showing{' '}
+              <span className="font-semibold text-gray-900 dark:text-white">{filteredInvoices.length}</span>
+              {' '}of{' '}
+              <span className="font-semibold text-gray-900 dark:text-white">{allInvoices.length}</span>
+              {' '}invoice{allInvoices.length !== 1 ? 's' : ''}
+              {searchTerm.trim() ? ' (filtered)' : ''}
             </div>
             <div>
-              Total value: <span className="font-semibold text-gray-900 dark:text-white">
-                {formatCurrency(invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0))}
+              Total value{searchTerm.trim() ? ' (visible)' : ''}:{' '}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {formatCurrency(filteredInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0))}
               </span>
             </div>
           </div>
