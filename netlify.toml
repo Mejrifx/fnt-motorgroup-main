@@ -17,16 +17,16 @@
   force = false
   conditions = {Role = []}
 
-# Scheduled Function: AutoTrader Stock Sync
-# AutoTrader Go-Live Requirement: Maximum 3 API polls per day
-# Runs every 8 hours as fallback (webhooks handle real-time updates)
-# Requires Netlify Pro plan or higher
-[functions."sync-stock"]
-  schedule = "0 */12 * * *"  # Every 12 hours (at 00:00, 12:00 UTC)
-
-# Function settings
+# Function settings (node bundler applies to all functions)
 [functions]
   node_bundler = "esbuild"
+
+# Scheduled Function: AutoTrader Stock Sync
+# Runs once per day at 02:00 UTC as a fallback safety net.
+# Webhooks handle all real-time updates; this is just a daily reconciliation.
+# AutoTrader confirmed: maximum 3 API polls per day — we use 1.
+[functions."sync-stock"]
+  schedule = "0 2 * * *"  # Once per day at 02:00 UTC
 
 # Headers for security
 [[headers]]
