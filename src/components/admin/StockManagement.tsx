@@ -5,6 +5,7 @@ import {
   Wrench, ChevronDown, RefreshCw, Filter, Save,
   Plus, Car as CarIcon, Stethoscope,
 } from 'lucide-react';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 type StockStatus = 'Ready' | 'In Prep' | 'Needs Work';
 type Priority    = 'None' | 'Low' | 'High';
@@ -106,13 +107,26 @@ const StockManagement: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<'all' | Priority>('all');
   const [motFilter, setMotFilter]       = useState<'all' | MOTFilter>('all');
 
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    id: string | null;
+    label: string;
+  }>({ isOpen: false, id: null, label: '' });
+
   useEffect(() => { fetchItems(); }, []);
 
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') closeDrawer(); };
+    const h = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (deleteConfirm.isOpen) {
+        setDeleteConfirm({ isOpen: false, id: null, label: '' });
+        return;
+      }
+      closeDrawer();
+    };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, []);
+  }, [deleteConfirm.isOpen]);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -178,10 +192,24 @@ const StockManagement: React.FC = () => {
     }
   };
 
-  const deleteItem = async (id: string) => {
-    if (!confirm('Delete this vehicle from stock inventory?')) return;
+  const openDeleteConfirm = () => {
+    if (!selected) return;
+    const label =
+      selected.car_model?.trim() ||
+      `${selected.make || ''} ${selected.model || ''}`.trim() ||
+      'this vehicle';
+    setDeleteConfirm({ isOpen: true, id: selected.id, label });
+  };
+
+  const handleConfirmDelete = async () => {
+    const id = deleteConfirm.id;
+    if (!id) return;
     const { error } = await supabase.from('stock_inventory').delete().eq('id', id);
-    if (error) { alert('Failed to delete.'); return; }
+    if (error) {
+      console.error('Delete stock item:', error);
+      alert('Failed to delete. Please try again.');
+      return;
+    }
     setItems(prev => prev.filter(i => i.id !== id));
     closeDrawer();
   };
@@ -374,10 +402,21 @@ const StockManagement: React.FC = () => {
           saving={saving}
           onChange={patch}
           onSave={save}
-          onDelete={selected ? () => deleteItem(selected.id) : undefined}
+          onDelete={selected ? openDeleteConfirm : undefined}
           onClose={closeDrawer}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Remove from stock?"
+        message={`Remove “${deleteConfirm.label}” from stock inventory? This cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, id: null, label: '' })}
+      />
     </div>
   );
 };

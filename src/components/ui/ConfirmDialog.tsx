@@ -28,17 +28,17 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     switch (type) {
       case 'danger':
         return {
-          icon: 'text-red-600 bg-red-100',
+          icon: 'text-red-600 bg-red-100 dark:bg-red-950/80 dark:text-red-400',
           button: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
         };
       case 'warning':
         return {
-          icon: 'text-yellow-600 bg-yellow-100',
+          icon: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-950/80 dark:text-yellow-400',
           button: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
         };
       case 'info':
         return {
-          icon: 'text-blue-600 bg-blue-100',
+          icon: 'text-blue-600 bg-blue-100 dark:bg-blue-950/80 dark:text-blue-400',
           button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
         };
     }
@@ -55,11 +55,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       />
       
       {/* Dialog */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scale-in">
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scale-in border border-gray-100 dark:border-gray-700">
         {/* Close button */}
         <button
           onClick={onCancel}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -72,12 +72,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </div>
 
           {/* Title */}
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
             {title}
           </h3>
 
           {/* Message */}
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             {message}
           </p>
 
@@ -85,7 +85,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div className="flex items-center justify-end space-x-3">
             <button
               onClick={onCancel}
-              className="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
               {cancelText}
             </button>
