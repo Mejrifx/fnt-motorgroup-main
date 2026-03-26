@@ -312,7 +312,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             </div>
             
             {/* Car Filter Section */}
-            <div className="mb-12 relative overflow-visible">
+            <div className="mb-12 relative overflow-visible z-40">
               <CarFilter onFilterChange={handleFilterChange} />
             </div>
             

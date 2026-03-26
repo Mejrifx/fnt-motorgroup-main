@@ -167,7 +167,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
   const hasActiveFilters = filters.make || filters.model || filters.priceFrom || filters.priceTo || filters.fuelType;
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 relative">
+    <div className="w-full max-w-4xl mx-auto px-4 relative z-50">
       <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative">
         {/* Desktop Layout */}
         <div className="hidden lg:block px-6 py-3">
