@@ -9,7 +9,7 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 
 type StockStatus = 'Ready' | 'In Prep' | 'Needs Work';
 type Priority    = 'None' | 'Low' | 'High';
-type MOTFilter   = 'all' | 'expired' | 'expiring_soon';
+type MOTFilter   = 'all' | 'carry_out';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -239,10 +239,12 @@ const StockManagement: React.FC = () => {
         || (item.work_needed  || '').toLowerCase().includes(q);
       const matchStatus   = statusFilter   === 'all' || item.stock_status === statusFilter;
       const matchPriority = priorityFilter === 'all' || item.priority === priorityFilter;
-      const mot = getMOTStatus(item.mot_expiry);
       const matchMOT = motFilter === 'all'
-        || (motFilter === 'expired'       && mot === 'expired')
-        || (motFilter === 'expiring_soon' && mot === 'expiring_soon');
+        || (motFilter === 'carry_out' && (() => {
+          if (!item.mot_expiry) return false;
+          const daysLeft = Math.floor((new Date(item.mot_expiry).getTime() - Date.now()) / 86400000);
+          return daysLeft < 200;
+        })());
       return matchSearch && matchStatus && matchPriority && matchMOT;
     });
     return list.sort((a, b) => {
@@ -301,8 +303,8 @@ const StockManagement: React.FC = () => {
             <FilterPill label="Status"   value={statusFilter}   options={['all','Ready','In Prep','Needs Work']} onChange={v => setStatusFilter(v as any)} />
             <FilterPill label="Priority" value={priorityFilter} options={['all','None','Low','High']}         onChange={v => setPriorityFilter(v as any)} />
             <FilterPill label="MOT" value={motFilter}
-              options={['all','expired','expiring_soon']}
-              labels={{ all:'All MOT', expired:'Expired', expiring_soon:'Expiring Soon' }}
+              options={['all', 'carry_out']}
+              labels={{ all: 'All MOT', carry_out: 'Carry Out' }}
               onChange={v => setMotFilter(v as any)}
             />
             {activeFilters > 0 && (
