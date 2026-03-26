@@ -21,12 +21,20 @@
 [functions]
   node_bundler = "esbuild"
 
-# Scheduled Function: AutoTrader Stock Sync
-# Runs once per day at 02:00 UTC as a fallback safety net.
-# Webhooks handle all real-time updates; this is just a daily reconciliation.
-# AutoTrader confirmed: maximum 3 API polls per day — we use 1.
-[functions."sync-stock"]
-  schedule = "0 2 * * *"  # Once per day at 02:00 UTC
+# ============================================================================
+# SCHEDULED SYNC DISABLED
+# ============================================================================
+# AutoTrader confirmed webhooks are working perfectly with 200 responses.
+# The scheduled sync was causing 2-3 rapid API GET calls due to pagination
+# (page 1, page 2, page 3 for ~200-250 vehicles at 100 per page).
+# Per AutoTrader: max 3 API polls/day total — pagination counts as separate calls.
+# 
+# Solution: Rely 100% on real-time webhooks. No scheduled sync needed.
+# Manual sync is still available via admin dashboard (trigger-sync function).
+# ============================================================================
+#
+# [functions."sync-stock"]
+#   schedule = "0 2 * * *"  # DISABLED - webhooks handle all updates
 
 # Headers for security
 [[headers]]

@@ -2,7 +2,16 @@
  * Stock Sync Function
  * 
  * Syncs vehicle inventory from AutoTrader to Supabase database
- * Triggered every 30 minutes or manually from admin dashboard
+ * 
+ * IMPORTANT: Scheduled execution is DISABLED (see netlify.toml)
+ * - Webhooks handle all real-time updates with 200 response codes
+ * - This function is only called manually via admin dashboard (trigger-sync)
+ * - AutoTrader pagination (100 vehicles/page) counts each page as a separate API call
+ * - With ~200-250 vehicles, one sync = 2-3 API GET calls (violates 3-per-day limit if scheduled)
+ * 
+ * Manual trigger is safe because:
+ * - Admins only trigger when needed (not daily)
+ * - Webhooks keep inventory up-to-date automatically
  */
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
