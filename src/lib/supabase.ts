@@ -87,4 +87,41 @@ export interface StockItem {
   updated_at: string
 }
 
+export interface CommunicationLog {
+  date: string
+  type: string
+  notes: string
+  user?: string
+}
+
+export interface Lead {
+  id: string
+  customer_name: string
+  customer_email: string | null
+  customer_phone: string | null
+  source: string
+  car_id: string | null
+  car_details: string | null
+  status: 'new' | 'contacted' | 'in_progress' | 'qualified' | 'converted' | 'lost'
+  contacted: boolean
+  contact_date: string | null
+  answered: boolean
+  message_left: boolean
+  priority: 'low' | 'medium' | 'high'
+  notes: string | null
+  communication_history: CommunicationLog[]
+  interest_level: 'low' | 'medium' | 'high' | null
+  budget_range: string | null
+  timeframe: string | null
+  follow_up_date: string | null
+  next_action: string | null
+  converted: boolean
+  converted_date: string | null
+  sale_value: number | null
+  created_at: string
+  updated_at: string
+  created_by: string | null
+  assigned_to: string | null
+}
+
 // Using Supabase's built-in User type from @supabase/supabase-js

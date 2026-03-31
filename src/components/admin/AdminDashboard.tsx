@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench, Moon, Sun } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench, Moon, Sun, Users } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -11,10 +11,11 @@ import EditReviewModal from './EditReviewModal';
 import InvoiceManager from './InvoiceManager';
 import InvoiceHistory from './InvoiceHistory';
 import StockManagement from './StockManagement';
+import LeadsManagement from './LeadsManagement';
 
 const AdminDashboard = () => {
   const [isDark, toggleDark] = useDarkMode();
-  const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews'>('stock');
+  const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews' | 'leads'>('stock');
   const [cars, setCars] = useState<Car[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -474,6 +475,18 @@ const AdminDashboard = () => {
               <RefreshCw className="w-5 h-5" />
               <span>Sync</span>
             </button>
+            <button
+              onClick={() => setActiveTab('leads')}
+              className={`
+                ${activeTab === 'leads'
+                  ? 'border-fnt-red text-fnt-red'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
+              `}
+            >
+              <Users className="w-5 h-5" />
+              <span>Leads</span>
+            </button>
           </nav>
         </div>
 
@@ -892,6 +905,11 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Leads Tab */}
+        {activeTab === 'leads' && (
+          <LeadsManagement />
         )}
 
         {/* Reviews Tab */}
