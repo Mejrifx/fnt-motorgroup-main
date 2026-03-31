@@ -107,6 +107,7 @@ export interface Lead {
   contact_date: string | null
   answered: boolean
   message_left: boolean
+  email_sent: boolean
   priority: 'low' | 'medium' | 'high'
   notes: string | null
   communication_history: CommunicationLog[]

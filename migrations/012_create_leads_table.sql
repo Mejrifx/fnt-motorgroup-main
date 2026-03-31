@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS leads (
     contact_date TIMESTAMP WITH TIME ZONE,
     answered BOOLEAN DEFAULT false,
     message_left BOOLEAN DEFAULT false,
+    email_sent BOOLEAN DEFAULT false,
     
     -- Priority
     priority VARCHAR(20) DEFAULT 'medium', -- 'low', 'medium', 'high'

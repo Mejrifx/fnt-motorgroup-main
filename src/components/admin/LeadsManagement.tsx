@@ -40,6 +40,7 @@ const emptyLead = (): Partial<Lead> => ({
   contacted: false,
   answered: false,
   message_left: false,
+  email_sent: false,
   notes: '',
 });
 
@@ -153,6 +154,7 @@ const LeadsManagement: React.FC = () => {
         contacted: editData.contacted || false,
         answered: editData.answered || false,
         message_left: editData.message_left || false,
+        email_sent: editData.email_sent || false,
         notes: editData.notes || null,
         updated_at: new Date().toISOString(),
       };
@@ -407,23 +409,23 @@ const LeadsManagement: React.FC = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          {lead.answered ? (
-                            <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                              <Phone className="w-4 h-4" />
-                              <span>Called</span>
+                          {lead.answered && (
+                            <div className="flex items-center gap-1 text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400 px-2 py-1 rounded">
+                              <Phone className="w-3 h-3" />
                             </div>
-                          ) : lead.message_left ? (
-                            <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                              <MessageSquare className="w-4 h-4" />
-                              <span>Message</span>
+                          )}
+                          {lead.message_left && (
+                            <div className="flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">
+                              <MessageSquare className="w-3 h-3" />
                             </div>
-                          ) : lead.contacted ? (
-                            <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400">
-                              <Mail className="w-4 h-4" />
-                              <span>Email</span>
+                          )}
+                          {lead.email_sent && (
+                            <div className="flex items-center gap-1 text-xs bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400 px-2 py-1 rounded">
+                              <Mail className="w-3 h-3" />
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
+                          )}
+                          {!lead.contacted && (
+                            <span className="text-xs text-gray-400 dark:text-gray-500">Not contacted</span>
                           )}
                         </div>
                       </td>
@@ -662,49 +664,64 @@ const EditDrawer: React.FC<{
           {/* Communication Tracking */}
           <Section title="Communication" icon={<Phone className="w-4 h-4" />}>
             <div className="space-y-3">
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => onChange({ contacted: true, answered: true, message_left: false })}
-                  className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition ${
-                    data.answered
-                      ? 'bg-green-50 dark:bg-green-950 border-green-500 text-green-700 dark:text-green-400'
-                      : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-green-500'
-                  }`}
-                >
-                  <Phone className="w-4 h-4 mx-auto mb-1" />
-                  Called
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChange({ contacted: true, answered: false, message_left: true })}
-                  className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition ${
-                    data.message_left
-                      ? 'bg-blue-50 dark:bg-blue-950 border-blue-500 text-blue-700 dark:text-blue-400'
-                      : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-500'
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4 mx-auto mb-1" />
-                  Text Sent
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChange({ contacted: true, answered: false, message_left: false })}
-                  className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition ${
-                    data.contacted && !data.answered && !data.message_left
-                      ? 'bg-purple-50 dark:bg-purple-950 border-purple-500 text-purple-700 dark:text-purple-400'
-                      : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-purple-500'
-                  }`}
-                >
-                  <Mail className="w-4 h-4 mx-auto mb-1" />
-                  Email Sent
-                </button>
+              <div className="grid grid-cols-1 gap-2">
+                <label className="flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                  data.answered
+                    ? 'border-green-500 bg-green-50 dark:bg-green-950'
+                    : 'border-gray-200 dark:border-gray-600'
+                }">
+                  <input
+                    type="checkbox"
+                    checked={!!data.answered}
+                    onChange={e => onChange({ 
+                      answered: e.target.checked, 
+                      contacted: e.target.checked ? true : (data.message_left || false)
+                    })}
+                    className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+                  />
+                  <Phone className={`w-5 h-5 ${data.answered ? 'text-green-600' : 'text-gray-400'}`} />
+                  <span className={`text-sm font-medium ${data.answered ? 'text-green-700 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                    Called (Customer Answered)
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                  data.message_left
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                    : 'border-gray-200 dark:border-gray-600'
+                }">
+                  <input
+                    type="checkbox"
+                    checked={!!data.message_left}
+                    onChange={e => onChange({ 
+                      message_left: e.target.checked,
+                      contacted: e.target.checked ? true : (data.answered || false)
+                    })}
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  />
+                  <MessageSquare className={`w-5 h-5 ${data.message_left ? 'text-blue-600' : 'text-gray-400'}`} />
+                  <span className={`text-sm font-medium ${data.message_left ? 'text-blue-700 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                    Left a Text/SMS Message
+                  </span>
+                </label>
+
+                <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                  data.email_sent
+                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-950'
+                    : 'border-gray-200 dark:border-gray-600'
+                }`}>
+                  <input
+                    type="checkbox"
+                    checked={!!data.email_sent}
+                    onChange={e => onChange({ email_sent: e.target.checked, contacted: true })}
+                    className="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
+                  />
+                  <Mail className={`w-5 h-5 ${data.email_sent ? 'text-purple-600' : 'text-gray-400'}`} />
+                  <span className={`text-sm font-medium ${data.email_sent ? 'text-purple-700 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                    Sent an Email
+                  </span>
+                </label>
               </div>
-              {data.contacted && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  {data.answered ? 'Customer answered the call' : data.message_left ? 'Left a text message' : 'Sent an email'}
-                </p>
-              )}
             </div>
           </Section>
 
