@@ -156,7 +156,6 @@ function transformWebhookToApiFormat(webhookEvent: WebhookEvent): any {
   
   // Extract all gallery images
   const galleryImages = (media?.images || [])
-    .slice(0, 10) // Limit to 10 images
     .map((img: any) => img.href?.replace('{resize}', 'w800') || '')
     .filter((url: string) => url.length > 0);
   
