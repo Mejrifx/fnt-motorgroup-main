@@ -237,16 +237,13 @@ const CarDetails: React.FC = () => {
               
               {/* Mobile Navigation - Below image */}
               {images.length > 1 && (
-                <div className="md:hidden flex items-center justify-center gap-4 py-4">
+                <div className="md:hidden flex items-center justify-center gap-4 py-3">
                   <button
                     onClick={previousImage}
                     className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
-                  <span className="text-white text-sm font-medium">
-                    Swipe or tap arrows
-                  </span>
                   <button
                     onClick={nextImage}
                     className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
@@ -427,7 +424,7 @@ const CarDetails: React.FC = () => {
 
       {/* Fullscreen Gallery Modal */}
       {showFullscreenGallery && (
-        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center">
           <button
             onClick={() => setShowFullscreenGallery(false)}
             className="absolute top-4 right-4 text-white hover:text-fnt-red transition-colors z-10"
@@ -437,30 +434,60 @@ const CarDetails: React.FC = () => {
             </svg>
           </button>
           
-          <div className="relative w-full h-full flex items-center justify-center p-4">
+          {/* Image Container */}
+          <div className="flex-1 w-full flex items-center justify-center px-4 py-20">
             <img
               src={images[currentImageIndex]}
               alt={`${car.make} ${car.model}`}
               className="max-w-full max-h-full object-contain"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
             />
-            
-            {images.length > 1 && (
-              <>
+          </div>
+          
+          {/* Navigation - Below image on mobile, overlaid on desktop */}
+          {images.length > 1 && (
+            <>
+              {/* Desktop - Overlaid arrows */}
+              <button
+                onClick={previousImage}
+                className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors z-10"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="hidden md:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors z-10"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+              
+              {/* Mobile - Bottom navigation bar */}
+              <div className="md:hidden absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm py-4 px-4 flex items-center justify-center gap-6 border-t border-gray-800">
                 <button
                   onClick={previousImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors"
+                  className="bg-gray-800 text-white p-4 rounded-full hover:bg-gray-700 transition-colors"
                 >
-                  <ChevronLeft className="w-8 h-8" />
+                  <ChevronLeft className="w-6 h-6" />
                 </button>
+                <div className="text-white text-sm font-medium">
+                  {currentImageIndex + 1} / {images.length}
+                </div>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors"
+                  className="bg-gray-800 text-white p-4 rounded-full hover:bg-gray-700 transition-colors"
                 >
-                  <ChevronRight className="w-8 h-8" />
+                  <ChevronRight className="w-6 h-6" />
                 </button>
-              </>
-            )}
-          </div>
+              </div>
+              
+              {/* Desktop - Image counter */}
+              <div className="hidden md:block absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm">
+                {currentImageIndex + 1} / {images.length}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
