@@ -14,6 +14,11 @@ const CarDetails: React.FC = () => {
   const [error, setError] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullscreenGallery, setShowFullscreenGallery] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance (in px) to trigger navigation
+  const minSwipeDistance = 50;
 
   // Helper function to format mileage
   const formatMileage = (mileage: string): string => {
@@ -101,6 +106,29 @@ const CarDetails: React.FC = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      previousImage();
+    }
+  };
+
   const formatPrice = (price: number): string => {
     return `£${price.toLocaleString()}`;
   };
@@ -170,19 +198,23 @@ const CarDetails: React.FC = () => {
                     alt={`${car.make} ${car.model}`}
                     className="w-full h-96 lg:h-[500px] object-cover cursor-pointer"
                     onClick={() => setShowFullscreenGallery(true)}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
                   />
                   
                   {images.length > 1 && (
                     <>
+                      {/* Desktop Navigation - Overlaid on image */}
                       <button
                         onClick={previousImage}
-                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                        className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
                       >
                         <ChevronLeft className="w-6 h-6" />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                        className="hidden md:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
                       >
                         <ChevronRight className="w-6 h-6" />
                       </button>
@@ -200,6 +232,27 @@ const CarDetails: React.FC = () => {
                     <CarIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-400">No images available</p>
                   </div>
+                </div>
+              )}
+              
+              {/* Mobile Navigation - Below image */}
+              {images.length > 1 && (
+                <div className="md:hidden flex items-center justify-center gap-4 py-4">
+                  <button
+                    onClick={previousImage}
+                    className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <span className="text-white text-sm font-medium">
+                    Swipe or tap arrows
+                  </span>
+                  <button
+                    onClick={nextImage}
+                    className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
                 </div>
               )}
             </div>
