@@ -127,21 +127,43 @@ const LeadsManagement: React.FC = () => {
     setSelected(lead);
     setIsAdding(false);
     setEditData({ ...lead });
-    setNewCommLog({ type: 'call', notes: '' });
+    setNewNote('');
   };
 
   const openAdd = () => {
     setSelected(null);
     setIsAdding(true);
     setEditData(emptyLead());
+    setNewNote('');
   };
 
   const closeDrawer = () => { 
     setSelected(null); 
     setIsAdding(false);
+    setNewNote('');
   };
 
   const patch = (p: Partial<Lead>) => setEditData(prev => ({ ...prev, ...p }));
+
+  const addNote = () => {
+    if (!newNote.trim()) return;
+    
+    const noteEntry: NoteEntry = {
+      date: new Date().toISOString(),
+      note: newNote.trim(),
+      user: 'Admin'
+    };
+
+    const history = [...(editData.notes_history || []), noteEntry];
+    patch({ notes_history: history });
+    setNewNote('');
+  };
+
+  const removeNote = (index: number) => {
+    const history = [...(editData.notes_history || [])];
+    history.splice(index, 1);
+    patch({ notes_history: history });
+  };
 
   const save = async () => {
     if (!editData.customer_name?.trim()) {
