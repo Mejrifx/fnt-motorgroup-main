@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase, type Lead, type Car } from '../../lib/supabase';
+import { supabase, type Lead, type Car, type NoteEntry } from '../../lib/supabase';
 import {
   Search, X, Phone, Mail, MessageSquare, 
   User, RefreshCw, Save, Plus, 
@@ -12,6 +12,17 @@ type LeadStatus = 'new' | 'contacted' | 'converted' | 'lost';
 const formatDate = (d: string | null | undefined) => {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const formatDateTime = (d: string | null | undefined) => {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('en-GB', { 
+    day: '2-digit', 
+    month: 'short', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 const StatusBadge: React.FC<{ status: LeadStatus | null | undefined }> = ({ status }) => {
@@ -42,6 +53,7 @@ const emptyLead = (): Partial<Lead> => ({
   message_left: false,
   email_sent: false,
   notes: '',
+  notes_history: [],
 });
 
 const LeadsManagement: React.FC = () => {
@@ -61,6 +73,8 @@ const LeadsManagement: React.FC = () => {
     id: string | null;
     label: string;
   }>({ isOpen: false, id: null, label: '' });
+
+  const [newNote, setNewNote] = useState('');
 
   useEffect(() => { 
     fetchLeads();
@@ -156,6 +170,7 @@ const LeadsManagement: React.FC = () => {
         message_left: editData.message_left || false,
         email_sent: editData.email_sent || false,
         notes: editData.notes || null,
+        notes_history: editData.notes_history || [],
         updated_at: new Date().toISOString(),
       };
 
@@ -462,6 +477,10 @@ const LeadsManagement: React.FC = () => {
           onDelete={selected ? openDeleteConfirm : undefined}
           onClose={closeDrawer}
           getCarDisplay={getCarDisplay}
+          newNote={newNote}
+          setNewNote={setNewNote}
+          addNote={addNote}
+          removeNote={removeNote}
         />
       )}
 
@@ -517,6 +536,10 @@ const EditDrawer: React.FC<{
   onDelete?: () => void;
   onClose: () => void;
   getCarDisplay: (carId: string | null) => string | null;
+  newNote: string;
+  setNewNote: (v: string) => void;
+  addNote: () => void;
+  removeNote: (index: number) => void;
 }> = ({ 
   lead, 
   isAdding, 
@@ -527,7 +550,11 @@ const EditDrawer: React.FC<{
   onSave, 
   onDelete, 
   onClose, 
-  getCarDisplay
+  getCarDisplay,
+  newNote,
+  setNewNote,
+  addNote,
+  removeNote
 }) => {
   return (
     <>
@@ -725,15 +752,87 @@ const EditDrawer: React.FC<{
             </div>
           </Section>
 
-          {/* Notes */}
-          <Section title="Notes" icon={<FileText className="w-4 h-4" />}>
-            <textarea 
-              className="field-input resize-none" 
-              rows={6} 
-              value={data.notes || ''} 
-              onChange={e => onChange({ notes: e.target.value })} 
-              placeholder="What did you discuss? Key points, customer preferences, concerns, next steps..."
-            />
+          {/* Notes Journal */}
+          <Section title="Notes & Activity Log" icon={<FileText className="w-4 h-4" />}>
+            <div className="space-y-3">
+              {/* Add New Note */}
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 space-y-2">
+                <label className="field-label text-xs">Add Note</label>
+                <div className="flex items-start gap-2">
+                  <textarea 
+                    className="field-input resize-none flex-1" 
+                    rows={2}
+                    value={newNote} 
+                    onChange={e => setNewNote(e.target.value)}
+                    placeholder="What happened? What did you discuss? Next steps..."
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && e.metaKey) {
+                        e.preventDefault();
+                        addNote();
+                      }
+                    }}
+                  />
+                  <button 
+                    onClick={addNote}
+                    className="px-3 py-2 bg-fnt-red text-white rounded-lg hover:bg-red-600 transition text-xs font-semibold mt-1"
+                    disabled={!newNote.trim()}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Press Cmd+Enter to add note quickly
+                </p>
+              </div>
+
+              {/* Notes History */}
+              {data.notes_history && data.notes_history.length > 0 && (
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {[...data.notes_history].reverse().map((entry, idx) => {
+                    const actualIndex = data.notes_history!.length - 1 - idx;
+                    return (
+                      <div 
+                        key={idx} 
+                        className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 group hover:border-gray-300 dark:hover:border-gray-500 transition"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                {formatDateTime(entry.date)}
+                              </span>
+                              {entry.user && (
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
+                                  by {entry.user}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{entry.note}</p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeNote(actualIndex);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 transition"
+                            title="Remove note"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {(!data.notes_history || data.notes_history.length === 0) && (
+                <div className="text-center py-8 text-gray-400 dark:text-gray-500">
+                  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs">No notes yet. Add your first entry above.</p>
+                </div>
+              )}
+            </div>
           </Section>
 
         </div>

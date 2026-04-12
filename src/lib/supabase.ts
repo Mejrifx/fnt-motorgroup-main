@@ -87,6 +87,12 @@ export interface StockItem {
   updated_at: string
 }
 
+export interface NoteEntry {
+  date: string
+  note: string
+  user?: string
+}
+
 export interface CommunicationLog {
   date: string
   type: string
@@ -110,6 +116,7 @@ export interface Lead {
   email_sent: boolean
   priority: 'low' | 'medium' | 'high'
   notes: string | null
+  notes_history: NoteEntry[]
   communication_history: CommunicationLog[]
   interest_level: 'low' | 'medium' | 'high' | null
   budget_range: string | null
