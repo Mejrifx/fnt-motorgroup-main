@@ -99,9 +99,10 @@ const LeadsManagement: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('leads')
-        .select('*')
+        .select('*, notes_history')
         .order('created_at', { ascending: false });
       if (error) throw error;
+      console.log('Fetched leads with notes:', data?.map(l => ({ name: l.customer_name, notes_count: l.notes_history?.length || 0 })));
       setLeads(data || []);
     } catch (e) {
       console.error('Error fetching leads:', e);
@@ -196,6 +197,12 @@ const LeadsManagement: React.FC = () => {
         updated_at: new Date().toISOString(),
       };
 
+      console.log('Saving lead with payload:', { 
+        customer_name: payload.customer_name, 
+        notes_history_count: payload.notes_history.length,
+        notes_history: payload.notes_history
+      });
+
       if (isAdding) {
         const insertPayload = {
           ...payload,
@@ -203,10 +210,12 @@ const LeadsManagement: React.FC = () => {
         };
         const { data, error } = await supabase.from('leads').insert([insertPayload]).select().single();
         if (error) throw error;
+        console.log('Insert result:', { id: data.id, notes_history: data.notes_history });
         setLeads(prev => [data, ...prev]);
       } else if (selected) {
-        const { error } = await supabase.from('leads').update(payload).eq('id', selected.id);
+        const { data: updateData, error } = await supabase.from('leads').update(payload).eq('id', selected.id).select();
         if (error) throw error;
+        console.log('Update result:', updateData);
         setLeads(prev => prev.map(l => l.id === selected.id ? { ...l, ...payload } as Lead : l));
       }
       closeDrawer();
