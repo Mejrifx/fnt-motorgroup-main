@@ -1,6 +1,54 @@
 import { supabase } from './supabase';
+import { PDFDocument, PDFName, StandardFonts } from 'pdf-lib';
 
 export type InvoiceType = 'fnt_sale' | 'fnt_purchase' | 'fnt_finance' | 'tnt_service';
+
+/**
+ * Safely flatten PDF form to make it non-editable
+ * Handles PDFs with structural issues that prevent normal flattening
+ */
+export async function safeFlattenPDF(pdfDoc: PDFDocument): Promise<void> {
+  const form = pdfDoc.getForm();
+  
+  try {
+    // Try the standard flatten method first
+    console.log('Attempting to flatten PDF form...');
+    form.flatten();
+    console.log('✅ PDF form flattened successfully using standard method');
+  } catch (error) {
+    console.warn('⚠️ Standard flatten failed, using alternative method...', error);
+    
+    try {
+      // Alternative method: Make form read-only by removing NeedAppearances
+      // and ensuring all fields have proper appearances
+      const acroForm = form.acroForm;
+      if (acroForm) {
+        // Remove NeedAppearances flag (makes fields render their appearances)
+        acroForm.dict.delete(PDFName.of('NeedAppearances'));
+        
+        // Update all field appearances with Helvetica font
+        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        form.updateFieldAppearances(helveticaFont);
+        
+        // Make all fields read-only
+        const fields = form.getFields();
+        fields.forEach(field => {
+          try {
+            field.enableReadOnly();
+          } catch (e) {
+            // Some field types might not support this, skip them
+          }
+        });
+        
+        console.log('✅ PDF form made read-only using alternative method');
+      }
+    } catch (fallbackError) {
+      console.error('❌ Both flatten methods failed:', fallbackError);
+      throw new Error('Failed to secure PDF form. Please contact support.');
+    }
+  }
+}
+
 
 export interface InvoiceData {
   invoice_number: string;
