@@ -3,6 +3,7 @@ import { Plus, FileText, ExternalLink, XCircle } from 'lucide-react';
 import TNTInvoiceForm from './TNTInvoiceForm';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
+import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
 
 // SimplePDF type declaration
 declare global {
@@ -24,6 +25,7 @@ const InvoiceManager = () => {
   const [showTNTForm, setShowTNTForm] = useState(false);
   const [showFNTSaleForm, setShowFNTSaleForm] = useState(false);
   const [showFNTPurchaseForm, setShowFNTPurchaseForm] = useState(false);
+  const [showFNTFinanceForm, setShowFNTFinanceForm] = useState(false);
 
   // Template URLs
   const TEMPLATES = {
@@ -43,15 +45,17 @@ const InvoiceManager = () => {
     }
   };
 
-  const openSimplePDFEditorInline = (type: 'selling' | 'purchase' | 'tnt') => {
+  const openSimplePDFEditorInline = (type: 'selling' | 'purchase' | 'finance' | 'tnt') => {
     if (type === 'tnt') {
       setShowTNTForm(true);
     } else if (type === 'selling') {
       setShowFNTSaleForm(true);
     } else if (type === 'purchase') {
       setShowFNTPurchaseForm(true);
+    } else if (type === 'finance') {
+      setShowFNTFinanceForm(true);
     } else {
-      setCurrentTemplate(type);
+      setCurrentTemplate(type as any);
       setShowSimplePDFEditor(true);
     }
   };
@@ -76,6 +80,11 @@ const InvoiceManager = () => {
       {/* FNT Purchase Invoice Form */}
       {showFNTPurchaseForm && (
         <FNTPurchaseInvoiceForm onClose={() => setShowFNTPurchaseForm(false)} />
+      )}
+
+      {/* FNT Finance Invoice Form */}
+      {showFNTFinanceForm && (
+        <FNTFinanceInvoiceForm onClose={() => setShowFNTFinanceForm(false)} />
       )}
 
       {/* SimplePDF Editor - Full Screen */}
@@ -130,14 +139,14 @@ const InvoiceManager = () => {
               </span>
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Create professional invoices using your custom templates. Choose between FNT Motor Group invoices or TNT Services invoices.
+              Create professional invoices using your custom templates. Choose between FNT Motor Group invoices (customers or finance companies) or TNT Services invoices.
             </p>
           </div>
         </div>
       </div>
 
       {/* Invoice Type Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {/* Selling Invoice Card */}
         <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
@@ -258,6 +267,66 @@ const InvoiceManager = () => {
           </div>
         </div>
 
+        {/* Finance Invoice Card */}
+        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                <img 
+                  src="/FNT Favicon.png" 
+                  alt="FNT Motor Group" 
+                  className="w-16 h-16 object-contain"
+                />
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white">Finance Invoice</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">For billing finance companies</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Finance company details</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Vehicle information</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Settlement amount & terms</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={() => openSimplePDFEditorInline('finance')}
+              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Invoice</span>
+            </button>
+            
+            <a
+              href="/FNT Sales Invoice - FINANCE.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            >
+              <FileText className="w-4 h-4" />
+              <span>View Template</span>
+            </a>
+          </div>
+        </div>
+
         {/* TNT Services Invoice Card */}
         <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
@@ -331,6 +400,8 @@ const InvoiceManager = () => {
               <strong>Selling Invoice:</strong> Use when selling vehicles to customers. Includes customer details, sale price, and payment terms.
               <br />
               <strong>Purchase Invoice:</strong> Use when purchasing vehicles from customers. Includes customer details, purchase price, and terms.
+              <br />
+              <strong>Finance Invoice:</strong> Use when billing finance companies (e.g., Santander, Black Horse). Includes finance company details and settlement amount.
               <br />
               <strong>TNT Services Invoice:</strong> Use for TNT Services business operations. Includes service details and pricing.
             </p>

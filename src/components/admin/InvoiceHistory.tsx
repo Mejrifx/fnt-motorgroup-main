@@ -50,6 +50,7 @@ const InvoiceHistory: React.FC = () => {
   const [invoiceCounts, setInvoiceCounts] = useState<Record<InvoiceType, number>>({
     fnt_sale: 0,
     fnt_purchase: 0,
+    fnt_finance: 0,
     tnt_service: 0
   });
   const { showToast } = useToast();
@@ -69,10 +70,11 @@ const InvoiceHistory: React.FC = () => {
 
   // Load counts for all invoice types
   const loadAllCounts = async () => {
-    const types: InvoiceType[] = ['fnt_sale', 'fnt_purchase', 'tnt_service'];
+    const types: InvoiceType[] = ['fnt_sale', 'fnt_purchase', 'fnt_finance', 'tnt_service'];
     const counts: Record<InvoiceType, number> = {
       fnt_sale: 0,
       fnt_purchase: 0,
+      fnt_finance: 0,
       tnt_service: 0
     };
 
@@ -139,6 +141,7 @@ const InvoiceHistory: React.FC = () => {
     switch (type) {
       case 'fnt_sale': return 'FNT Sales';
       case 'fnt_purchase': return 'FNT Purchases';
+      case 'fnt_finance': return 'FNT Finance';
       case 'tnt_service': return 'TNT Services';
     }
   };
@@ -148,6 +151,7 @@ const InvoiceHistory: React.FC = () => {
     switch (type) {
       case 'fnt_sale': return 'bg-green-100 text-green-800 border-green-300';
       case 'fnt_purchase': return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'fnt_finance': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'tnt_service': return 'bg-purple-100 text-purple-800 border-purple-300';
     }
   };
@@ -181,7 +185,7 @@ const InvoiceHistory: React.FC = () => {
 
       {/* Tabs */}
       <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700">
-        {(['fnt_sale', 'fnt_purchase', 'tnt_service'] as InvoiceType[]).map((type) => (
+        {(['fnt_sale', 'fnt_purchase', 'fnt_finance', 'tnt_service'] as InvoiceType[]).map((type) => (
           <button
             key={type}
             onClick={() => setActiveTab(type)}
