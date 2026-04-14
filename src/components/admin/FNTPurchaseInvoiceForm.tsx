@@ -146,19 +146,23 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
       }
 
       // Load Helvetica font and update field appearances
-      try {
-        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        form.updateFieldAppearances(helveticaFont);
-        console.log('Field appearances updated with Helvetica font');
-      } catch (appearanceErr) {
-        console.warn('Could not update field appearances:', appearanceErr);
-      }
-
-      // Flatten the form to make it non-editable
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      
+      // CRITICAL: Flatten form BEFORE updating appearances
+      // This converts form fields into static content (non-editable)
+      console.log('Flattening form fields...');
       form.flatten();
+      console.log('✅ PDF form flattened successfully - fields are now non-editable');
+      
+      // Update appearances after flattening
+      form.updateFieldAppearances(helveticaFont);
+      console.log('Field appearances updated with Helvetica font');
 
-      // Serialize the PDF
-      const pdfBytes = await pdfDoc.save();
+      // Serialize the PDF with additional security options
+      const pdfBytes = await pdfDoc.save({
+        useObjectStreams: false,
+        addDefaultPage: false,
+      });
 
       // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });

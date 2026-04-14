@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 
@@ -199,18 +199,24 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
         console.error('Error filling form fields:', err);
       }
 
-      // Flatten the form to make it non-editable
-      // Wrap in try-catch in case of PDF reference issues
-      try {
-        form.flatten();
-        console.log('PDF form flattened successfully');
-      } catch (flattenError) {
-        console.warn('Could not flatten PDF form (form will remain editable):', flattenError);
-        // Continue without flattening - the PDF will still work, just remain editable
-      }
+      // Load Helvetica font and flatten the form
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      
+      // CRITICAL: Flatten form BEFORE updating appearances
+      // This converts form fields into static content (non-editable)
+      console.log('Flattening form fields...');
+      form.flatten();
+      console.log('✅ PDF form flattened successfully - fields are now non-editable');
+      
+      // Update appearances after flattening
+      form.updateFieldAppearances(helveticaFont);
+      console.log('Field appearances updated with Helvetica font');
 
-      // Serialize the PDF
-      const pdfBytes = await pdfDoc.save();
+      // Serialize the PDF with additional security options
+      const pdfBytes = await pdfDoc.save({
+        useObjectStreams: false,
+        addDefaultPage: false,
+      });
 
       // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
