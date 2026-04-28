@@ -247,12 +247,19 @@ const LeadsManagement: React.FC = () => {
     closeDrawer();
   };
 
-  const stats = useMemo(() => ({
-    total: leads.length,
-    new: leads.filter(l => l.status === 'new').length,
-    contacted: leads.filter(l => l.contacted).length,
-    converted: leads.filter(l => l.status === 'converted').length,
-  }), [leads]);
+  const stats = useMemo(() => {
+    const total = leads.length;
+    const converted = leads.filter(l => l.status === 'converted').length;
+    const conversionRate = total > 0 ? ((converted / total) * 100).toFixed(1) : '0.0';
+    
+    return {
+      total,
+      new: leads.filter(l => l.status === 'new').length,
+      contacted: leads.filter(l => l.contacted).length,
+      converted,
+      conversionRate,
+    };
+  }, [leads]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -293,8 +300,9 @@ const LeadsManagement: React.FC = () => {
     <div className="space-y-5 transition-colors duration-200">
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
+          { label: 'Conversion Rate', value: `${stats.conversionRate}%`, color: 'orange', isPercentage: true },
           { label: 'Total Leads', value: stats.total, color: 'gray' },
           { label: 'New', value: stats.new, color: 'blue' },
           { label: 'Contacted', value: stats.contacted, color: 'purple' },
@@ -534,12 +542,13 @@ const colorMap: Record<string, { bg: string; text: string; border: string }> = {
   blue:    { bg: 'bg-blue-50 dark:bg-blue-950',     text: 'text-blue-700 dark:text-blue-400',   border: 'border-l-blue-400' },
   purple:  { bg: 'bg-purple-50 dark:bg-purple-950', text: 'text-purple-700 dark:text-purple-400', border: 'border-l-purple-400' },
   green:   { bg: 'bg-green-50 dark:bg-green-950',   text: 'text-green-700 dark:text-green-400', border: 'border-l-green-400' },
+  orange:  { bg: 'bg-orange-50 dark:bg-orange-950', text: 'text-orange-700 dark:text-orange-400', border: 'border-l-orange-400' },
 };
 
-const StatCard: React.FC<{ label: string; value: number; color: string }> = ({ label, value, color }) => {
+const StatCard: React.FC<{ label: string; value: number | string; color: string; isPercentage?: boolean }> = ({ label, value, color, isPercentage }) => {
   const c = colorMap[color] || colorMap.gray;
   return (
-    <div className={`${c.bg} rounded-xl border-l-4 ${c.border} px-4 py-3`}>
+    <div className={`${c.bg} rounded-xl border-l-4 ${c.border} px-4 py-3 ${isPercentage ? 'col-span-2 lg:col-span-1' : ''}`}>
       <div className={`text-2xl font-bold ${c.text}`}>{value}</div>
       <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">{label}</div>
     </div>
