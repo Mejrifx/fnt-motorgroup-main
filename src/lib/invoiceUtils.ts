@@ -1,50 +1,121 @@
 import { supabase } from './supabase';
-import { PDFDocument, PDFName, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFFont, StandardFonts, rgb } from 'pdf-lib';
 
 export type InvoiceType = 'fnt_sale' | 'fnt_purchase' | 'fnt_finance' | 'tnt_service';
 
 /**
- * Safely flatten PDF form to make it non-editable
- * Handles PDFs with structural issues that prevent normal flattening
+ * Completely flatten PDF by removing ALL form fields and converting to static content
+ * This is the most secure approach - no form fields = no editability
  */
-export async function safeFlattenPDF(pdfDoc: PDFDocument): Promise<void> {
+export async function secureFlattenPDF(pdfDoc: PDFDocument): Promise<void> {
   const form = pdfDoc.getForm();
+  const pages = pdfDoc.getPages();
+  
+  console.log('🔒 Starting secure PDF flattening process...');
   
   try {
-    // Try the standard flatten method first
-    console.log('Attempting to flatten PDF form...');
-    form.flatten();
-    console.log('✅ PDF form flattened successfully using standard method');
-  } catch (error) {
-    console.warn('⚠️ Standard flatten failed, using alternative method...', error);
+    // Step 1: Embed font for rendering
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     
-    try {
-      // Alternative method: Make form read-only by removing NeedAppearances
-      // and ensuring all fields have proper appearances
-      const acroForm = form.acroForm;
-      if (acroForm) {
-        // Remove NeedAppearances flag (makes fields render their appearances)
-        acroForm.dict.delete(PDFName.of('NeedAppearances'));
+    // Step 2: Update all field appearances first
+    form.updateFieldAppearances(helveticaFont);
+    console.log('✓ Field appearances updated');
+    
+    // Step 3: Get all form fields and their data
+    const fields = form.getFields();
+    const fieldData: Array<{
+      name: string;
+      value: string;
+      page: number;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }> = [];
+    
+    fields.forEach(field => {
+      try {
+        const fieldName = field.getName();
+        let value = '';
         
-        // Update all field appearances with Helvetica font
-        const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        form.updateFieldAppearances(helveticaFont);
+        // Get field value based on type
+        if (field.constructor.name === 'PDFTextField') {
+          value = (field as any).getText() || '';
+        } else if (field.constructor.name === 'PDFCheckBox') {
+          value = (field as any).isChecked() ? '✓' : '';
+        } else if (field.constructor.name === 'PDFDropdown') {
+          const selected = (field as any).getSelected();
+          value = selected ? selected[0] : '';
+        }
         
-        // Make all fields read-only
-        const fields = form.getFields();
-        fields.forEach(field => {
-          try {
-            field.enableReadOnly();
-          } catch (e) {
-            // Some field types might not support this, skip them
+        // Get field position (if available through widgets)
+        const widgets = (field as any).acroField?.getWidgets();
+        if (widgets && widgets.length > 0) {
+          const widget = widgets[0];
+          const rect = widget.getRectangle();
+          const pageRef = widget.P();
+          
+          if (rect && pageRef) {
+            const pageIndex = pages.findIndex(p => p.ref === pageRef);
+            if (pageIndex >= 0 && value) {
+              fieldData.push({
+                name: fieldName,
+                value: value,
+                page: pageIndex,
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+              });
+            }
           }
-        });
-        
-        console.log('✅ PDF form made read-only using alternative method');
+        }
+      } catch (e) {
+        console.warn('Could not process field:', e);
       }
-    } catch (fallbackError) {
-      console.error('❌ Both flatten methods failed:', fallbackError);
-      throw new Error('Failed to secure PDF form. Please contact support.');
+    });
+    
+    console.log(`✓ Extracted ${fieldData.length} field values`);
+    
+    // Step 4: Draw field values as static text on pages
+    fieldData.forEach(field => {
+      try {
+        const page = pages[field.page];
+        const fontSize = Math.min(field.height * 0.65, 12); // Estimate font size
+        
+        page.drawText(field.value, {
+          x: field.x + 2,
+          y: field.y + (field.height * 0.25),
+          size: fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      } catch (e) {
+        console.warn(`Could not draw field ${field.name}:`, e);
+      }
+    });
+    
+    console.log('✓ Drew static text on pages');
+    
+    // Step 5: REMOVE ALL FORM FIELDS COMPLETELY
+    // This is the critical step - delete the entire AcroForm
+    const catalog = pdfDoc.catalog;
+    catalog.delete(PDFName.of('AcroForm'));
+    
+    console.log('✓ Removed all form fields from PDF');
+    console.log('✅ PDF is now completely static and non-editable');
+    
+  } catch (error) {
+    console.error('❌ Secure flattening failed:', error);
+    
+    // Fallback: Try standard flatten
+    try {
+      console.warn('⚠️ Attempting standard flatten as fallback...');
+      form.flatten();
+      console.log('✓ Standard flatten completed');
+    } catch (flattenError) {
+      console.error('❌ Both flattening methods failed');
+      throw new Error('Failed to secure PDF. Please contact support.');
     }
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, safeFlattenPDF } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, secureFlattenPDF } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 
 interface FNTPurchaseInvoiceFormProps {
@@ -145,8 +145,8 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
         console.error('Error filling form fields:', err);
       }
 
-      // Safely flatten the PDF to make it non-editable
-      await safeFlattenPDF(pdfDoc);
+      // Securely flatten the PDF to make it completely non-editable
+      await secureFlattenPDF(pdfDoc);
 
       // Serialize the PDF with additional security options
       const pdfBytes = await pdfDoc.save({
