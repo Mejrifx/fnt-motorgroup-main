@@ -1,24 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X } from 'lucide-react';
-import { getInvoicesByType, deleteInvoice, type InvoiceType } from '../../lib/invoiceUtils';
+import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit } from 'lucide-react';
+import { getInvoicesByType, deleteInvoice, type InvoiceType, type Invoice } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
+import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
+import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
+import TNTInvoiceForm from './TNTInvoiceForm';
 
-interface Invoice {
-  id: string;
-  invoice_number: string;
-  invoice_type: InvoiceType;
-  invoice_date: string;
-  customer_name: string;
-  customer_email?: string;
-  customer_phone?: string;
-  vehicle_make?: string;
-  vehicle_model?: string;
-  vehicle_reg?: string;
-  total_amount?: number;
-  pdf_url: string;
-  created_at: string;
-}
+// Invoice interface now imported from invoiceUtils
 
 function invoiceMatchesSearch(inv: Invoice, q: string): boolean {
   if (!q) return true;
@@ -53,6 +43,7 @@ const InvoiceHistory: React.FC = () => {
     fnt_finance: 0,
     tnt_service: 0
   });
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const { showToast } = useToast();
 
   // Load invoices for the active tab
@@ -315,12 +306,21 @@ const InvoiceHistory: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                       <div className="flex items-center justify-end space-x-2">
+                        {/* Edit */}
+                        <button
+                          onClick={() => setEditingInvoice(invoice)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
+                          title="Edit invoice"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        
                         {/* Preview */}
                         <a
                           href={invoice.pdf_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
+                          className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 rounded-lg transition-colors"
                           title="Preview invoice"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -387,6 +387,51 @@ const InvoiceHistory: React.FC = () => {
         onConfirm={confirmDelete}
         onCancel={() => setDeleteConfirm({ isOpen: false, invoice: null })}
       />
+
+      {/* Edit Forms */}
+      {editingInvoice && editingInvoice.invoice_type === 'fnt_sale' && (
+        <FNTSaleInvoiceForm 
+          onClose={() => {
+            setEditingInvoice(null);
+            loadInvoices();
+            loadAllCounts();
+          }} 
+          editInvoice={editingInvoice}
+        />
+      )}
+      
+      {editingInvoice && editingInvoice.invoice_type === 'fnt_purchase' && (
+        <FNTPurchaseInvoiceForm 
+          onClose={() => {
+            setEditingInvoice(null);
+            loadInvoices();
+            loadAllCounts();
+          }} 
+          editInvoice={editingInvoice}
+        />
+      )}
+      
+      {editingInvoice && editingInvoice.invoice_type === 'fnt_finance' && (
+        <FNTFinanceInvoiceForm 
+          onClose={() => {
+            setEditingInvoice(null);
+            loadInvoices();
+            loadAllCounts();
+          }} 
+          editInvoice={editingInvoice}
+        />
+      )}
+      
+      {editingInvoice && editingInvoice.invoice_type === 'tnt_service' && (
+        <TNTInvoiceForm 
+          onClose={() => {
+            setEditingInvoice(null);
+            loadInvoices();
+            loadAllCounts();
+          }} 
+          editInvoice={editingInvoice}
+        />
+      )}
     </div>
   );
 };

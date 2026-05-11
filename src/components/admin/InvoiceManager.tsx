@@ -4,6 +4,7 @@ import TNTInvoiceForm from './TNTInvoiceForm';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
+import type { Invoice } from '../../lib/invoiceUtils';
 
 // SimplePDF type declaration
 declare global {
@@ -26,6 +27,7 @@ const InvoiceManager = () => {
   const [showFNTSaleForm, setShowFNTSaleForm] = useState(false);
   const [showFNTPurchaseForm, setShowFNTPurchaseForm] = useState(false);
   const [showFNTFinanceForm, setShowFNTFinanceForm] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
 
   // Template URLs
   const TEMPLATES = {
@@ -65,26 +67,62 @@ const InvoiceManager = () => {
     setCurrentTemplate(null);
   };
 
+  const handleEdit = (invoice: Invoice) => {
+    setEditingInvoice(invoice);
+    // Open the appropriate form based on invoice type
+    switch (invoice.invoice_type) {
+      case 'fnt_sale':
+        setShowFNTSaleForm(true);
+        break;
+      case 'fnt_purchase':
+        setShowFNTPurchaseForm(true);
+        break;
+      case 'fnt_finance':
+        setShowFNTFinanceForm(true);
+        break;
+      case 'tnt_service':
+        setShowTNTForm(true);
+        break;
+    }
+  };
+
+  const handleCloseForm = (formSetter: React.Dispatch<React.SetStateAction<boolean>>) => {
+    formSetter(false);
+    setEditingInvoice(null);
+  };
+
   return (
     <div>
       {/* TNT Invoice Form */}
       {showTNTForm && (
-        <TNTInvoiceForm onClose={() => setShowTNTForm(false)} />
+        <TNTInvoiceForm 
+          onClose={() => handleCloseForm(setShowTNTForm)} 
+          editInvoice={editingInvoice}
+        />
       )}
 
       {/* FNT Sale Invoice Form */}
       {showFNTSaleForm && (
-        <FNTSaleInvoiceForm onClose={() => setShowFNTSaleForm(false)} />
+        <FNTSaleInvoiceForm 
+          onClose={() => handleCloseForm(setShowFNTSaleForm)} 
+          editInvoice={editingInvoice}
+        />
       )}
 
       {/* FNT Purchase Invoice Form */}
       {showFNTPurchaseForm && (
-        <FNTPurchaseInvoiceForm onClose={() => setShowFNTPurchaseForm(false)} />
+        <FNTPurchaseInvoiceForm 
+          onClose={() => handleCloseForm(setShowFNTPurchaseForm)} 
+          editInvoice={editingInvoice}
+        />
       )}
 
       {/* FNT Finance Invoice Form */}
       {showFNTFinanceForm && (
-        <FNTFinanceInvoiceForm onClose={() => setShowFNTFinanceForm(false)} />
+        <FNTFinanceInvoiceForm 
+          onClose={() => handleCloseForm(setShowFNTFinanceForm)} 
+          editInvoice={editingInvoice}
+        />
       )}
 
       {/* SimplePDF Editor - Full Screen */}

@@ -1,47 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, secureFlattenPDF } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, secureFlattenPDF, type Invoice } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 
 interface FNTPurchaseInvoiceFormProps {
   onClose: () => void;
+  editInvoice?: Invoice | null;
 }
 
-const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose }) => {
+const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose, editInvoice }) => {
   const { showToast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState(true);
-  const [formData, setFormData] = useState({
-    // Invoice Details
-    invoiceNumber: '',
-    invoiceDate: new Date().toISOString().split('T')[0],
+  const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState(!editInvoice);
+  const isEditMode = !!editInvoice;
+
+  // Initialize form data from editInvoice if provided
+  const getInitialFormData = () => {
+    if (editInvoice && editInvoice.metadata) {
+      const meta = editInvoice.metadata;
+      return {
+        invoiceNumber: editInvoice.invoice_number,
+        invoiceDate: editInvoice.invoice_date,
+        sellerName: editInvoice.customer_name,
+        sellerPhone: editInvoice.customer_phone || '',
+        sellerEmail: editInvoice.customer_email || '',
+        sellerAddress: meta.seller_address || '',
+        vehMake: editInvoice.vehicle_make || '',
+        vehModel: editInvoice.vehicle_model || '',
+        vehReg: editInvoice.vehicle_reg || '',
+        vehColour: meta.vehicle_colour || '',
+        vehVin: meta.vehicle_vin || '',
+        vehMileage: meta.vehicle_mileage || '',
+        retailPrice: meta.retail_price || '',
+        deliveryCost: meta.delivery_cost || '',
+        warranty: meta.warranty || '',
+        warrantyType: meta.warranty_type || '',
+        depositPaid: meta.deposit_paid || '',
+        totalDue: editInvoice.total_amount?.toString() || '',
+        sellerSignature: meta.seller_signature || ''
+      };
+    }
     
-    // Seller Details (bill_) - The customer selling to us
-    sellerName: '',
-    sellerPhone: '',
-    sellerEmail: '',
-    sellerAddress: '',
-    
-    // Vehicle Details (veh_)
-    vehMake: '',
-    vehModel: '',
-    vehReg: '',
-    vehColour: '',
-    vehVin: '',
-    vehMileage: '',
-    
-    // Financial Details
-    retailPrice: '',
-    deliveryCost: '',
-    warranty: '',
-    warrantyType: '',
-    depositPaid: '',
-    totalDue: '',
-    
-    // Signatures
-    sellerSignature: ''
-  });
+    return {
+      invoiceNumber: '',
+      invoiceDate: new Date().toISOString().split('T')[0],
+      sellerName: '',
+      sellerPhone: '',
+      sellerEmail: '',
+      sellerAddress: '',
+      vehMake: '',
+      vehModel: '',
+      vehReg: '',
+      vehColour: '',
+      vehVin: '',
+      vehMileage: '',
+      retailPrice: '',
+      deliveryCost: '',
+      warranty: '',
+      warrantyType: '',
+      depositPaid: '',
+      totalDue: '',
+      sellerSignature: ''
+    };
+  };
+
+  const [formData, setFormData] = useState(getInitialFormData());
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -66,19 +90,21 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
     }
   };
 
-  // Auto-generate invoice number on mount
+  // Auto-generate invoice number on mount (only if not editing)
   useEffect(() => {
-    const loadInvoiceNumber = async () => {
-      const invoiceNumber = await generateInvoiceNumber('fnt_purchase');
-      setFormData(prev => ({
-        ...prev,
-        invoiceNumber
-      }));
-      setLoadingInvoiceNumber(false);
-    };
+    if (!isEditMode) {
+      const loadInvoiceNumber = async () => {
+        const invoiceNumber = await generateInvoiceNumber('fnt_purchase');
+        setFormData(prev => ({
+          ...prev,
+          invoiceNumber
+        }));
+        setLoadingInvoiceNumber(false);
+      };
 
-    loadInvoiceNumber();
-  }, []);
+      loadInvoiceNumber();
+    }
+  }, [isEditMode]);
 
   const fillPDFForm = async () => {
     setIsGenerating(true);
@@ -195,10 +221,18 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
         }
       };
 
-      const saved = await saveInvoiceToDatabase(invoiceData);
-
-      if (!saved) {
-        alert('Failed to save invoice to database. The PDF was uploaded but the record was not saved.');
+      // Save or update the invoice in database
+      let saved;
+      if (isEditMode && editInvoice) {
+        saved = await updateInvoiceInDatabase(editInvoice.id, invoiceData);
+        if (!saved) {
+          alert('Failed to update invoice in database. The PDF was uploaded but the record was not updated.');
+        }
+      } else {
+        saved = await saveInvoiceToDatabase(invoiceData);
+        if (!saved) {
+          alert('Failed to save invoice to database. The PDF was uploaded but the record was not saved.');
+        }
       }
 
       // Download the PDF
@@ -209,7 +243,10 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
       link.click();
       URL.revokeObjectURL(url);
 
-      showToast(`Invoice ${formData.invoiceNumber} generated and saved successfully!`, 'success');
+      showToast(
+        `Invoice ${formData.invoiceNumber} ${isEditMode ? 'updated' : 'generated and saved'} successfully!`, 
+        'success'
+      );
       setIsGenerating(false);
 
       // Close the form after successful generation
@@ -230,8 +267,12 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
         <div className="flex items-center space-x-3">
           <FileText className="w-6 h-6" />
           <div>
-            <h3 className="text-lg font-bold">FNT Purchase Invoice</h3>
-            <p className="text-sm text-red-100">For purchasing vehicles from customers</p>
+            <h3 className="text-lg font-bold">
+              {isEditMode ? 'Edit FNT Purchase Invoice' : 'FNT Purchase Invoice'}
+            </h3>
+            <p className="text-sm text-red-100">
+              {isEditMode ? `Editing invoice ${formData.invoiceNumber}` : 'For purchasing vehicles from customers'}
+            </p>
           </div>
         </div>
         <button
@@ -610,7 +651,7 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
                   ) : (
                     <>
                       <Download className="w-5 h-5" />
-                      <span>Generate & Download Invoice</span>
+                      <span>{isEditMode ? 'Update & Download Invoice' : 'Generate & Download Invoice'}</span>
                     </>
                   )}
                 </button>

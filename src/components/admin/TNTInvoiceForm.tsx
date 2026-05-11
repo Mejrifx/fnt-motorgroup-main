@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, secureFlattenPDF } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, secureFlattenPDF, type Invoice } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 
 interface LineItem {
@@ -14,6 +14,7 @@ interface LineItem {
 
 interface TNTInvoiceFormProps {
   onClose: () => void;
+  editInvoice?: Invoice | null;
 }
 
 const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {

@@ -136,6 +136,12 @@ export interface InvoiceData {
   metadata?: any;
 }
 
+export interface Invoice extends InvoiceData {
+  id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Generate the next invoice number for a given type
  */
@@ -241,6 +247,31 @@ export async function saveInvoiceToDatabase(invoiceData: InvoiceData): Promise<b
     return true;
   } catch (error) {
     console.error('Error saving invoice:', error);
+    return false;
+  }
+}
+
+/**
+ * Update existing invoice in database
+ */
+export async function updateInvoiceInDatabase(
+  invoiceId: string, 
+  invoiceData: Partial<InvoiceData>
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('invoices')
+      .update(invoiceData)
+      .eq('id', invoiceId);
+
+    if (error) {
+      console.error('Error updating invoice in database:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating invoice:', error);
     return false;
   }
 }
