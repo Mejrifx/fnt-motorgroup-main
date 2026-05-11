@@ -17,30 +17,62 @@ interface TNTInvoiceFormProps {
   editInvoice?: Invoice | null;
 }
 
-const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
+const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice }) => {
   const { showToast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState(true);
-  const [formData, setFormData] = useState({
-    invoiceNumber: '',
-    invoiceDate: new Date().toISOString().split('T')[0],
-    vehicleReg: '',
-    mileage: '',
-    customerName: '',
-    customerPhone: '',
-    customerEmail: '',
-    subtotal: '',
-    discount: '',
-    grandTotal: ''
-  });
+  const [loadingInvoiceNumber, setLoadingInvoiceNumber] = useState(!editInvoice);
+  const isEditMode = !!editInvoice;
 
-  const [lineItems, setLineItems] = useState<LineItem[]>([
-    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
-    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
-    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
-    { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
-    { description: '', qty: '', labour: '', parts: '', lineTotal: '' }
-  ]);
+  // Initialize form data from editInvoice if provided
+  const getInitialFormData = () => {
+    if (editInvoice && editInvoice.metadata) {
+      const meta = editInvoice.metadata;
+      return {
+        invoiceNumber: editInvoice.invoice_number,
+        invoiceDate: editInvoice.invoice_date,
+        vehicleReg: editInvoice.vehicle_reg || '',
+        mileage: meta.mileage || '',
+        customerName: editInvoice.customer_name,
+        customerPhone: editInvoice.customer_phone || '',
+        customerEmail: editInvoice.customer_email || '',
+        subtotal: meta.subtotal || '',
+        discount: meta.discount || '',
+        grandTotal: editInvoice.total_amount?.toString() || '',
+        paymentMethod: meta.payment_method || ''
+      };
+    }
+    
+    return {
+      invoiceNumber: '',
+      invoiceDate: new Date().toISOString().split('T')[0],
+      vehicleReg: '',
+      mileage: '',
+      customerName: '',
+      customerPhone: '',
+      customerEmail: '',
+      subtotal: '',
+      discount: '',
+      grandTotal: '',
+      paymentMethod: ''
+    };
+  };
+
+  const getInitialLineItems = (): LineItem[] => {
+    if (editInvoice && editInvoice.metadata && editInvoice.metadata.line_items) {
+      return editInvoice.metadata.line_items;
+    }
+    
+    return [
+      { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+      { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+      { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+      { description: '', qty: '', labour: '', parts: '', lineTotal: '' },
+      { description: '', qty: '', labour: '', parts: '', lineTotal: '' }
+    ];
+  };
+
+  const [formData, setFormData] = useState(getInitialFormData());
+  const [lineItems, setLineItems] = useState<LineItem[]>(getInitialLineItems());
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -90,19 +122,21 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
     calculateTotals(lineItems, value);
   };
 
-  // Auto-generate invoice number on mount
+  // Auto-generate invoice number on mount (only if not editing)
   useEffect(() => {
-    const loadInvoiceNumber = async () => {
-      const invoiceNumber = await generateInvoiceNumber('tnt_service');
-      setFormData(prev => ({
-        ...prev,
-        invoiceNumber
-      }));
-      setLoadingInvoiceNumber(false);
-    };
+    if (!isEditMode) {
+      const loadInvoiceNumber = async () => {
+        const invoiceNumber = await generateInvoiceNumber('tnt_service');
+        setFormData(prev => ({
+          ...prev,
+          invoiceNumber
+        }));
+        setLoadingInvoiceNumber(false);
+      };
 
-    loadInvoiceNumber();
-  }, []);
+      loadInvoiceNumber();
+    }
+  }, [isEditMode]);
 
   const fillPDFForm = async () => {
     setIsGenerating(true);
@@ -239,14 +273,23 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
           line_items: lineItems.filter(item => item.description || item.qty || item.labour || item.parts),
           subtotal: formData.subtotal,
           discount: formData.discount,
-          grand_total: formData.grandTotal
+          grand_total: formData.grandTotal,
+          payment_method: formData.paymentMethod
         }
       };
 
-      const saved = await saveInvoiceToDatabase(invoiceData);
-
-      if (!saved) {
-        alert('Failed to save invoice to database. The PDF was uploaded but the record was not saved.');
+      // Save or update the invoice in database
+      let saved;
+      if (isEditMode && editInvoice) {
+        saved = await updateInvoiceInDatabase(editInvoice.id, invoiceData);
+        if (!saved) {
+          alert('Failed to update invoice in database. The PDF was uploaded but the record was not updated.');
+        }
+      } else {
+        saved = await saveInvoiceToDatabase(invoiceData);
+        if (!saved) {
+          alert('Failed to save invoice to database. The PDF was uploaded but the record was not saved.');
+        }
       }
 
       // Download the PDF
@@ -257,7 +300,10 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
       link.click();
       URL.revokeObjectURL(url);
 
-      showToast(`Invoice ${formData.invoiceNumber} generated and saved successfully!`, 'success');
+      showToast(
+        `Invoice ${formData.invoiceNumber} ${isEditMode ? 'updated' : 'generated and saved'} successfully!`, 
+        'success'
+      );
       setIsGenerating(false);
 
       // Close the form after successful generation
@@ -278,8 +324,12 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
         <div className="flex items-center space-x-3">
           <FileText className="w-6 h-6" />
           <div>
-            <h3 className="text-lg font-bold">TNT Services Invoice</h3>
-            <p className="text-sm text-red-100">Fill in the details and generate your invoice</p>
+            <h3 className="text-lg font-bold">
+              {isEditMode ? 'Edit TNT Services Invoice' : 'TNT Services Invoice'}
+            </h3>
+            <p className="text-sm text-red-100">
+              {isEditMode ? `Editing invoice ${formData.invoiceNumber}` : 'Fill in the details and generate your invoice'}
+            </p>
           </div>
         </div>
         <button
@@ -355,6 +405,23 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="50000"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Payment Method <span className="text-xs text-gray-500">(Internal Only)</span>
+                  </label>
+                  <select
+                    name="paymentMethod"
+                    value={formData.paymentMethod}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                  >
+                    <option value="">Select</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Internal tracking only</p>
                 </div>
               </div>
             </div>
@@ -555,7 +622,7 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose }) => {
                   ) : (
                     <>
                       <Download className="w-5 h-5" />
-                      <span>Generate & Download Invoice</span>
+                      <span>{isEditMode ? 'Update & Download Invoice' : 'Generate & Download Invoice'}</span>
                     </>
                   )}
                 </button>

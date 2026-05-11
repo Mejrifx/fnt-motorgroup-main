@@ -45,7 +45,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
         warrantyType: meta.warranty_type || '',
         depositPaid: meta.deposit_paid || '',
         totalDue: editInvoice.total_amount?.toString() || '',
-        buyerSignature: meta.buyer_signature || ''
+        buyerSignature: meta.buyer_signature || '',
+        paymentMethod: meta.payment_method || ''
       };
     }
     
@@ -75,7 +76,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
       warrantyType: '',
       depositPaid: '',
       totalDue: '',
-      buyerSignature: ''
+      buyerSignature: '',
+      paymentMethod: ''
     };
   };
 
@@ -264,7 +266,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
           warranty_type: formData.warrantyType,
           deposit_paid: formData.depositPaid,
           px_price: formData.pxPrice,
-          buyer_signature: formData.buyerSignature
+          buyer_signature: formData.buyerSignature,
+          payment_method: formData.paymentMethod
         }
       };
 
@@ -367,6 +370,23 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     required
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Payment Method <span className="text-xs text-gray-500">(Internal Only)</span>
+                  </label>
+                  <select
+                    name="paymentMethod"
+                    value={formData.paymentMethod}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                  >
+                    <option value="">Select Payment Method</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">For internal tracking only (not shown on invoice)</p>
                 </div>
               </div>
             </div>
