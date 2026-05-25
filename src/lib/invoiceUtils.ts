@@ -9,114 +9,31 @@ export type InvoiceType = 'fnt_sale' | 'fnt_purchase' | 'fnt_finance' | 'tnt_ser
  */
 export async function secureFlattenPDF(pdfDoc: PDFDocument): Promise<void> {
   const form = pdfDoc.getForm();
-  const pages = pdfDoc.getPages();
   
   console.log('🔒 Starting secure PDF flattening process...');
   
   try {
-    // Step 1: Embed font for rendering
+    // Step 1: Embed font for rendering field appearances
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     
-    // Step 2: Update all field appearances first
+    // Step 2: Update all field appearances with the font
+    // This is CRITICAL - it ensures all field values are rendered visually
     form.updateFieldAppearances(helveticaFont);
     console.log('✓ Field appearances updated');
     
-    // Step 3: Get all form fields and their data
-    const fields = form.getFields();
-    const fieldData: Array<{
-      name: string;
-      value: string;
-      page: number;
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    }> = [];
+    // Step 3: Use the built-in flatten() method
+    // This is more reliable than manual extraction because it:
+    // - Converts field appearances to actual page content
+    // - Preserves all visual elements
+    // - Handles edge cases properly
+    form.flatten();
     
-    fields.forEach(field => {
-      try {
-        const fieldName = field.getName();
-        let value = '';
-        
-        // Get field value based on type
-        if (field.constructor.name === 'PDFTextField') {
-          value = (field as any).getText() || '';
-        } else if (field.constructor.name === 'PDFCheckBox') {
-          value = (field as any).isChecked() ? '✓' : '';
-        } else if (field.constructor.name === 'PDFDropdown') {
-          const selected = (field as any).getSelected();
-          value = selected ? selected[0] : '';
-        }
-        
-        // Get field position (if available through widgets)
-        const widgets = (field as any).acroField?.getWidgets();
-        if (widgets && widgets.length > 0) {
-          const widget = widgets[0];
-          const rect = widget.getRectangle();
-          const pageRef = widget.P();
-          
-          if (rect && pageRef) {
-            const pageIndex = pages.findIndex(p => p.ref === pageRef);
-            if (pageIndex >= 0 && value) {
-              fieldData.push({
-                name: fieldName,
-                value: value,
-                page: pageIndex,
-                x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height,
-              });
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('Could not process field:', e);
-      }
-    });
-    
-    console.log(`✓ Extracted ${fieldData.length} field values`);
-    
-    // Step 4: Draw field values as static text on pages
-    fieldData.forEach(field => {
-      try {
-        const page = pages[field.page];
-        const fontSize = Math.min(field.height * 0.65, 12); // Estimate font size
-        
-        page.drawText(field.value, {
-          x: field.x + 2,
-          y: field.y + (field.height * 0.25),
-          size: fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      } catch (e) {
-        console.warn(`Could not draw field ${field.name}:`, e);
-      }
-    });
-    
-    console.log('✓ Drew static text on pages');
-    
-    // Step 5: REMOVE ALL FORM FIELDS COMPLETELY
-    // This is the critical step - delete the entire AcroForm
-    const catalog = pdfDoc.catalog;
-    catalog.delete(PDFName.of('AcroForm'));
-    
-    console.log('✓ Removed all form fields from PDF');
-    console.log('✅ PDF is now completely static and non-editable');
+    console.log('✓ Form fields flattened to static content');
+    console.log('✅ PDF is now non-editable and will print correctly');
     
   } catch (error) {
-    console.error('❌ Secure flattening failed:', error);
-    
-    // Fallback: Try standard flatten
-    try {
-      console.warn('⚠️ Attempting standard flatten as fallback...');
-      form.flatten();
-      console.log('✓ Standard flatten completed');
-    } catch (flattenError) {
-      console.error('❌ Both flattening methods failed');
-      throw new Error('Failed to secure PDF. Please contact support.');
-    }
+    console.error('❌ PDF flattening failed:', error);
+    throw new Error('Failed to flatten PDF. Please try again or contact support.');
   }
 }
 
