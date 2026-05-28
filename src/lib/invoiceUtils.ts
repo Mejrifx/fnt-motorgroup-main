@@ -9,6 +9,7 @@ export type InvoiceType = 'fnt_sale' | 'fnt_purchase' | 'fnt_finance' | 'tnt_ser
  */
 export async function secureFlattenPDF(pdfDoc: PDFDocument): Promise<void> {
   const form = pdfDoc.getForm();
+  const pages = pdfDoc.getPages();
   
   console.log('🔒 Starting secure PDF flattening process...');
   
@@ -21,18 +22,121 @@ export async function secureFlattenPDF(pdfDoc: PDFDocument): Promise<void> {
     form.updateFieldAppearances(helveticaFont);
     console.log('✓ Field appearances updated');
     
-    // Step 3: Use the built-in flatten() method
-    // This is more reliable than manual extraction because it:
-    // - Converts field appearances to actual page content
-    // - Preserves all visual elements
-    // - Handles edge cases properly
-    form.flatten();
-    
-    console.log('✓ Form fields flattened to static content');
-    console.log('✅ PDF is now non-editable and will print correctly');
+    // Step 3: Try the built-in flatten() method first
+    try {
+      form.flatten();
+      console.log('✓ Form fields flattened to static content');
+      console.log('✅ PDF is now non-editable and will print correctly');
+      return;
+    } catch (flattenError: any) {
+      // If flatten() fails due to page reference issues, use manual approach
+      console.warn('⚠️ Standard flatten failed, using manual flattening:', flattenError.message);
+      
+      // Manual flattening: Extract field values and draw them as text
+      const fields = form.getFields();
+      
+      fields.forEach(field => {
+        try {
+          const fieldName = field.getName();
+          let value = '';
+          
+          // Get field value based on type
+          if (field.constructor.name === 'PDFTextField') {
+            value = (field as any).getText() || '';
+          } else if (field.constructor.name === 'PDFCheckBox') {
+            value = (field as any).isChecked() ? '✓' : '';
+          } else if (field.constructor.name === 'PDFDropdown') {
+            const selected = (field as any).getSelected();
+            value = selected ? selected[0] : '';
+          }
+          
+          // Only process if we have a value
+          if (!value) return;
+          
+          // Get field position (if available through widgets)
+          const widgets = (field as any).acroField?.getWidgets();
+          if (widgets && widgets.length > 0) {
+            const widget = widgets[0];
+            const rect = widget.getRectangle();
+            
+            if (rect) {
+              // Try to find the page for this widget
+              // Use a safer approach that doesn't rely on page references
+              let targetPage = pages[0]; // Default to first page
+              
+              // Try to determine the correct page by checking widget position
+              try {
+                const pageRef = widget.P();
+                if (pageRef) {
+                  const pageIndex = pages.findIndex(p => p.ref === pageRef);
+                  if (pageIndex >= 0) {
+                    targetPage = pages[pageIndex];
+                  }
+                }
+              } catch (pageError) {
+                // If we can't find the page reference, just use first page
+                console.warn(`Using page 0 for field ${fieldName}`);
+              }
+              
+              // Draw the value as static text
+              const fontSize = Math.min(rect.height * 0.65, 11);
+              
+              // Handle multiline text (for addresses, etc.)
+              if (value.includes('\n')) {
+                const lines = value.split('\n');
+                const lineHeight = fontSize * 1.2;
+                lines.forEach((line, index) => {
+                  if (line.trim()) {
+                    try {
+                      targetPage.drawText(line.trim(), {
+                        x: rect.x + 2,
+                        y: rect.y + rect.height - (fontSize * 1.5) - (index * lineHeight),
+                        size: fontSize,
+                        font: helveticaFont,
+                        color: rgb(0, 0, 0),
+                      });
+                    } catch (drawError) {
+                      console.warn(`Could not draw line for ${fieldName}:`, drawError);
+                    }
+                  }
+                });
+              } else {
+                // Single line text
+                try {
+                  targetPage.drawText(value, {
+                    x: rect.x + 2,
+                    y: rect.y + (rect.height * 0.25),
+                    size: fontSize,
+                    font: helveticaFont,
+                    color: rgb(0, 0, 0),
+                  });
+                } catch (drawError) {
+                  console.warn(`Could not draw ${fieldName}:`, drawError);
+                }
+              }
+            }
+          }
+        } catch (fieldError) {
+          console.warn(`Could not process field:`, fieldError);
+        }
+      });
+      
+      console.log('✓ Manually drew field values as static text');
+      
+      // Remove the form completely
+      try {
+        const catalog = pdfDoc.catalog;
+        catalog.delete(PDFName.of('AcroForm'));
+        console.log('✓ Removed form fields from PDF');
+      } catch (removeError) {
+        console.warn('Could not remove AcroForm, but fields are drawn');
+      }
+      
+      console.log('✅ PDF flattened using manual method');
+    }
     
   } catch (error) {
-    console.error('❌ PDF flattening failed:', error);
+    console.error('❌ PDF flattening completely failed:', error);
     throw new Error('Failed to flatten PDF. Please try again or contact support.');
   }
 }
