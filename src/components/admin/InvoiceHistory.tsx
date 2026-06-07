@@ -93,6 +93,17 @@ const InvoiceHistory: React.FC = () => {
   const invoicesWithMonthHeaders = useMemo(() => {
     if (filteredInvoices.length === 0) return [];
     
+    // First, count invoices per month
+    const monthCounts: { [key: string]: number } = {};
+    filteredInvoices.forEach((invoice) => {
+      const invoiceDate = new Date(invoice.invoice_date);
+      const monthYear = invoiceDate.toLocaleDateString('en-GB', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      monthCounts[monthYear] = (monthCounts[monthYear] || 0) + 1;
+    });
+    
     const grouped: Array<{ type: 'header' | 'invoice'; data: any }> = [];
     let lastMonth = '';
     
@@ -103,14 +114,15 @@ const InvoiceHistory: React.FC = () => {
         year: 'numeric' 
       });
       
-      // If this is a new month, add a header
+      // If this is a new month, add a header with count
       if (monthYear !== lastMonth) {
         grouped.push({
           type: 'header',
           data: {
             monthYear,
             month: invoiceDate.toLocaleDateString('en-GB', { month: 'long' }),
-            year: invoiceDate.getFullYear()
+            year: invoiceDate.getFullYear(),
+            count: monthCounts[monthYear]
           }
         });
         lastMonth = monthYear;
@@ -320,12 +332,17 @@ const InvoiceHistory: React.FC = () => {
                         <td colSpan={6} className="px-6 py-3">
                           <div className="flex items-center space-x-3">
                             <div className="flex-shrink-0 w-1 h-6 bg-fnt-red rounded-full"></div>
-                            <div className="flex items-baseline space-x-2">
-                              <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                                {item.data.month}
-                              </h4>
-                              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                {item.data.year}
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-baseline space-x-2">
+                                <h4 className="text-base font-bold text-gray-900 dark:text-white">
+                                  {item.data.month}
+                                </h4>
+                                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                  {item.data.year}
+                                </span>
+                              </div>
+                              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-fnt-red text-white">
+                                {item.data.count}
                               </span>
                             </div>
                           </div>
