@@ -83,6 +83,43 @@ const InvoiceHistory: React.FC = () => {
     return allInvoices.filter((inv) => invoiceMatchesSearch(inv, q));
   }, [allInvoices, searchTerm]);
 
+  // Group invoices by month for visual separators
+  const invoicesWithMonthHeaders = useMemo(() => {
+    if (filteredInvoices.length === 0) return [];
+    
+    const grouped: Array<{ type: 'header' | 'invoice'; data: any }> = [];
+    let lastMonth = '';
+    
+    filteredInvoices.forEach((invoice) => {
+      const invoiceDate = new Date(invoice.invoice_date);
+      const monthYear = invoiceDate.toLocaleDateString('en-GB', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      
+      // If this is a new month, add a header
+      if (monthYear !== lastMonth) {
+        grouped.push({
+          type: 'header',
+          data: {
+            monthYear,
+            month: invoiceDate.toLocaleDateString('en-GB', { month: 'long' }),
+            year: invoiceDate.getFullYear()
+          }
+        });
+        lastMonth = monthYear;
+      }
+      
+      // Add the invoice
+      grouped.push({
+        type: 'invoice',
+        data: invoice
+      });
+    });
+    
+    return grouped;
+  }, [filteredInvoices]);
+
   // Delete invoice
   const handleDelete = async (invoice: Invoice) => {
     setDeleteConfirm({ isOpen: true, invoice });
@@ -269,85 +306,110 @@ const InvoiceHistory: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTabColor(invoice.invoice_type)}`}>
-                          {invoice.invoice_number}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                      {formatDate(invoice.invoice_date)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{invoice.customer_name}</div>
-                      {invoice.customer_phone && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.customer_phone}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {invoice.vehicle_make || invoice.vehicle_model ? (
-                        <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {invoice.vehicle_make} {invoice.vehicle_model}
+                {invoicesWithMonthHeaders.map((item, index) => {
+                  if (item.type === 'header') {
+                    // Month separator row
+                    return (
+                      <tr key={`month-${item.data.monthYear}`} className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-t-2 border-b-2 border-gray-300 dark:border-gray-600">
+                        <td colSpan={6} className="px-6 py-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex-shrink-0 w-1 h-6 bg-fnt-red rounded-full"></div>
+                            <div className="flex items-baseline space-x-2">
+                              <h4 className="text-base font-bold text-gray-900 dark:text-white">
+                                {item.data.month}
+                              </h4>
+                              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                {item.data.year}
+                              </span>
+                            </div>
                           </div>
-                          {invoice.vehicle_reg && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.vehicle_reg}</div>
-                          )}
+                        </td>
+                      </tr>
+                    );
+                  }
+                  
+                  // Regular invoice row
+                  const invoice = item.data;
+                  return (
+                    <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTabColor(invoice.invoice_type)}`}>
+                            {invoice.invoice_number}
+                          </span>
                         </div>
-                      ) : (
-                        <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
-                      {formatCurrency(invoice.total_amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                      <div className="flex items-center justify-end space-x-2">
-                        {/* Edit */}
-                        <button
-                          onClick={() => setEditingInvoice(invoice)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
-                          title="Edit invoice"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        
-                        {/* Preview */}
-                        <a
-                          href={invoice.pdf_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 rounded-lg transition-colors"
-                          title="Preview invoice"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                        
-                        {/* Download */}
-                        <a
-                          href={invoice.pdf_url}
-                          download={`${invoice.invoice_number}.pdf`}
-                          className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-lg transition-colors"
-                          title="Download invoice"
-                        >
-                          <Download className="w-4 h-4" />
-                        </a>
-                        
-                        {/* Delete */}
-                        <button
-                          onClick={() => handleDelete(invoice)}
-                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
-                          title="Delete invoice"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                        {formatDate(invoice.invoice_date)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{invoice.customer_name}</div>
+                        {invoice.customer_phone && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.customer_phone}</div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {invoice.vehicle_make || invoice.vehicle_model ? (
+                          <div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {invoice.vehicle_make} {invoice.vehicle_model}
+                            </div>
+                            {invoice.vehicle_reg && (
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.vehicle_reg}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(invoice.total_amount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <div className="flex items-center justify-end space-x-2">
+                          {/* Edit */}
+                          <button
+                            onClick={() => setEditingInvoice(invoice)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
+                            title="Edit invoice"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          
+                          {/* Preview */}
+                          <a
+                            href={invoice.pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 rounded-lg transition-colors"
+                            title="Preview invoice"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                          
+                          {/* Download */}
+                          <a
+                            href={invoice.pdf_url}
+                            download={`${invoice.invoice_number}.pdf`}
+                            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-lg transition-colors"
+                            title="Download invoice"
+                          >
+                            <Download className="w-4 h-4" />
+                          </a>
+                          
+                          {/* Delete */}
+                          <button
+                            onClick={() => handleDelete(invoice)}
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
+                            title="Delete invoice"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
