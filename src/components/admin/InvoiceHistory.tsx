@@ -79,8 +79,14 @@ const InvoiceHistory: React.FC = () => {
 
   const filteredInvoices = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    if (!q) return allInvoices;
-    return allInvoices.filter((inv) => invoiceMatchesSearch(inv, q));
+    let invoices = q ? allInvoices.filter((inv) => invoiceMatchesSearch(inv, q)) : allInvoices;
+    
+    // CRITICAL: Sort by date descending (newest first) before grouping
+    return invoices.sort((a, b) => {
+      const dateA = new Date(a.invoice_date).getTime();
+      const dateB = new Date(b.invoice_date).getTime();
+      return dateB - dateA; // Descending order (newest first)
+    });
   }, [allInvoices, searchTerm]);
 
   // Group invoices by month for visual separators
