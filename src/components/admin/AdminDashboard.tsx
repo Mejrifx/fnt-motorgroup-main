@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench, Moon, Sun, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench, Moon, Sun, Users, ParkingSquare } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, type Car, type Review } from '../../lib/supabase';
 import { useDarkMode } from '../../hooks/useDarkMode';
@@ -12,10 +12,11 @@ import InvoiceManager from './InvoiceManager';
 import InvoiceHistory from './InvoiceHistory';
 import StockManagement from './StockManagement';
 import LeadsManagement from './LeadsManagement';
+import ShowroomManager from './ShowroomManager';
 
 const AdminDashboard = () => {
   const [isDark, toggleDark] = useDarkMode();
-  const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews' | 'leads'>('stock');
+  const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews' | 'leads' | 'showroom'>('stock');
   const [cars, setCars] = useState<Car[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -487,6 +488,18 @@ const AdminDashboard = () => {
               <Users className="w-5 h-5" />
               <span>Leads</span>
             </button>
+            <button
+              onClick={() => setActiveTab('showroom')}
+              className={`
+                ${activeTab === 'showroom'
+                  ? 'border-fnt-red text-fnt-red'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
+                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
+              `}
+            >
+              <ParkingSquare className="w-5 h-5" />
+              <span>Showroom</span>
+            </button>
           </nav>
         </div>
 
@@ -910,6 +923,11 @@ const AdminDashboard = () => {
         {/* Leads Tab */}
         {activeTab === 'leads' && (
           <LeadsManagement />
+        )}
+
+        {/* Showroom Tab */}
+        {activeTab === 'showroom' && (
+          <ShowroomManager />
         )}
 
         {/* Reviews Tab */}

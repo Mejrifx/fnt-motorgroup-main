@@ -132,4 +132,25 @@ export interface Lead {
   assigned_to: string | null
 }
 
+export interface ShowroomRow {
+  id: string;
+  name: string;
+  display_order: number;
+  description: string;
+  created_at: string;
+}
+
+export interface ShowroomCar {
+  id: string;
+  registration: string;
+  make: string;
+  model: string;
+  color: string;
+  notes: string;
+  row_id: string | null;
+  position_in_row: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // Using Supabase's built-in User type from @supabase/supabase-js
