@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Edit, Trash2, Key, ChevronLeft, ChevronRight, X,
   Car, AlertTriangle, CheckCircle, Copy, MapPin, Info,
-  ArrowLeft, ArrowRight, MoveHorizontal, RefreshCw
+  ArrowLeft, ArrowRight, MoveHorizontal, RefreshCw, Search
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, type Car as StockCar } from '../../lib/supabase';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -549,12 +549,13 @@ interface CarModalProps {
   initial?: ShowroomCar | null;
   rows: ShowroomRow[];
   allCars: ShowroomCar[];
+  stockCars: StockCar[];
   onSave: (data: Partial<ShowroomCar>) => void;
   onClose: () => void;
   saving: boolean;
 }
 
-const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onClose, saving }) => {
+const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, onSave, onClose, saving }) => {
   const [registration, setRegistration] = useState(initial?.registration ?? '');
   const [make, setMake] = useState(initial?.make ?? '');
   const [model, setModel] = useState(initial?.model ?? '');
@@ -562,12 +563,41 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onC
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [rowId, setRowId] = useState<string>(initial?.row_id ?? '');
   const [position, setPosition] = useState<string>(initial?.position_in_row?.toString() ?? '');
+  const [stockSearch, setStockSearch] = useState('');
+  const [showStockPicker, setShowStockPicker] = useState(!initial);
+
+  // Filter stock cars by search query — reg, make, or model
+  const filteredStock = stockCars.filter(c => {
+    if (!stockSearch.trim()) return true;
+    const q = stockSearch.toLowerCase();
+    return (
+      (c.registration ?? '').toLowerCase().includes(q) ||
+      c.make.toLowerCase().includes(q) ||
+      c.model.toLowerCase().includes(q)
+    );
+  });
+
+  const applyStockCar = (car: StockCar) => {
+    setRegistration((car.registration ?? '').toUpperCase());
+    setMake(car.make);
+    setModel(car.model);
+    setColor(car.colour ?? '');
+    setShowStockPicker(false);
+    setStockSearch('');
+  };
+
+  const clearStockSelection = () => {
+    setRegistration('');
+    setMake('');
+    setModel('');
+    setColor('');
+    setShowStockPicker(true);
+  };
 
   // When row changes, default to adding at the end
   const handleRowChange = (newRowId: string) => {
     setRowId(newRowId);
     if (newRowId && !initial) {
-      // Default position = end of that row
       const rowCars = allCars.filter(c => c.row_id === newRowId && c.id !== initial?.id);
       const maxPos = rowCars.length > 0 ? Math.max(...rowCars.map(c => c.position_in_row)) : 0;
       setPosition((maxPos + 1).toString());
@@ -577,7 +607,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onC
   };
 
   const carsInSelectedRow = rowId ? allCars.filter(c => c.row_id === rowId && c.id !== initial?.id) : [];
-  const maxPositionInRow = carsInSelectedRow.length + 1;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -588,8 +617,92 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onC
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
+
         <div className="p-5 space-y-4">
-          {/* Registration — most important */}
+
+          {/* ── Stock Picker (add mode only) ── */}
+          {!initial && (
+            <div>
+              {showStockPicker ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Select from Stock
+                    <span className="ml-1 text-xs text-gray-400 font-normal">— or scroll down to enter manually</span>
+                  </label>
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={stockSearch}
+                      onChange={e => setStockSearch(e.target.value)}
+                      placeholder="Search by reg, make or model…"
+                      className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Stock list */}
+                  <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden max-h-52 overflow-y-auto">
+                    {filteredStock.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                        {stockSearch ? 'No cars match your search' : 'No stock cars found'}
+                      </div>
+                    ) : (
+                      filteredStock.map(car => (
+                        <button
+                          key={car.id}
+                          type="button"
+                          onClick={() => applyStockCar(car)}
+                          className="w-full flex items-center justify-between px-4 py-3 hover:bg-fnt-red/5 dark:hover:bg-fnt-red/10 border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-left transition-colors group"
+                        >
+                          <div className="min-w-0">
+                            <span className="block font-mono font-bold text-sm text-gray-900 dark:text-white tracking-widest group-hover:text-fnt-red transition-colors">
+                              {car.registration ?? '—'}
+                            </span>
+                            <span className="block text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {car.year} {car.make} {car.model}{car.colour ? ` · ${car.colour}` : ''}
+                            </span>
+                          </div>
+                          <span className={`flex-shrink-0 ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${car.is_available ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
+                            {car.is_available ? 'Available' : 'Sold'}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Divider with manual option */}
+                  <div className="relative mt-4 mb-1">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200 dark:border-gray-600" />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="px-2 bg-white dark:bg-gray-800 text-xs text-gray-400 dark:text-gray-500">or enter manually below</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Selected car confirmation banner */
+                <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+                      Selected from stock: <span className="font-mono font-bold tracking-widest">{registration}</span>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearStockSelection}
+                    className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 underline flex-shrink-0 ml-2"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Manual fields ── */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Registration Plate <span className="text-fnt-red">*</span>
@@ -600,11 +713,10 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onC
               onChange={e => setRegistration(toUpper(e.target.value))}
               placeholder="AB12 XYZ"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-fnt-red tracking-widest"
-              autoFocus
+              autoFocus={!!initial}
             />
           </div>
 
-          {/* Make + Model on one line */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Make</label>
@@ -656,7 +768,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onC
             </select>
           </div>
 
-          {/* Position — only shown when a lane is selected */}
           {rowId && (
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -668,22 +779,25 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, onSave, onC
                 value={position}
                 onChange={e => setPosition(e.target.value)}
                 min={1}
-                max={maxPositionInRow}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
               />
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                {carsInSelectedRow.length === 0 ? 'This lane is empty — will be position 1' : `Lane has ${carsInSelectedRow.length} car(s). Leave blank to add at the back.`}
+                {carsInSelectedRow.length === 0
+                  ? 'This lane is empty — will be position 1'
+                  : `Lane has ${carsInSelectedRow.length} car(s). Leave blank to add at the back.`}
               </p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes <span className="text-gray-400 font-normal">(optional)</span></label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Notes <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
             <input
               type="text"
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              placeholder="e.g. No start, flat tyre..."
+              placeholder="e.g. No start, flat tyre…"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
             />
           </div>
@@ -725,6 +839,7 @@ const ShowroomManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [migrationNeeded, setMigrationNeeded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [stockCars, setStockCars] = useState<StockCar[]>([]);
 
   // Modal state
   const [showAddRowModal, setShowAddRowModal] = useState(false);
@@ -738,9 +853,10 @@ const ShowroomManager: React.FC = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [rowsRes, carsRes] = await Promise.all([
+      const [rowsRes, carsRes, stockRes] = await Promise.all([
         supabase.from('showroom_rows').select('*').order('display_order', { ascending: true }),
         supabase.from('showroom_cars').select('*').order('position_in_row', { ascending: true }),
+        supabase.from('cars').select('id,make,model,year,registration,colour,is_available').order('make', { ascending: true }),
       ]);
 
       const tablesMissing =
@@ -757,6 +873,9 @@ const ShowroomManager: React.FC = () => {
 
       setRows(rowsRes.data ?? []);
       setCars(carsRes.data ?? []);
+      // Stock cars: sort available first, then by make
+      const stock = (stockRes.data ?? []) as StockCar[];
+      setStockCars([...stock.filter(c => c.is_available), ...stock.filter(c => !c.is_available)]);
       setMigrationNeeded(false);
     } catch (err: any) {
       const isMissing = err?.code === '42P01' || err?.message?.includes('does not exist');
@@ -1095,6 +1214,7 @@ const ShowroomManager: React.FC = () => {
           initial={editingCar}
           rows={rows}
           allCars={cars}
+          stockCars={stockCars}
           onSave={handleSaveCar}
           onClose={() => { setShowAddCarModal(false); setEditingCar(null); }}
           saving={saving}
