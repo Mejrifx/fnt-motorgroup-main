@@ -69,7 +69,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           {/* Mobile Phone Button - Top Left */}
           <a 
             href="tel:07735770031"
-            className="p-3 text-white hover:text-fnt-red transition-all duration-300 bg-white/10 backdrop-blur-xl rounded-full shadow-lg"
+            className="p-3 text-white hover:text-fnt-red transition-all duration-300 btn-glass rounded-full"
           >
             <Phone className="w-6 h-6" />
           </a>
@@ -84,7 +84,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           {/* Mobile Hamburger Menu - Top Right */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-3 text-white hover:text-fnt-red transition-all duration-300 bg-white/10 backdrop-blur-xl rounded-full shadow-lg"
+            className="p-3 text-white hover:text-fnt-red transition-all duration-300 btn-glass rounded-full"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -92,9 +92,9 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
 
         {/* Mobile Navigation Menu - Full Screen */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 bg-white z-[99999] flex flex-col">
+          <div className="fixed inset-0 z-[99999] flex flex-col animate-fade-in" style={{ background: 'rgba(11, 12, 15, 0.88)', backdropFilter: 'blur(32px) saturate(150%)', WebkitBackdropFilter: 'blur(32px) saturate(150%)' }}>
             {/* Header with close button */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center p-6 border-b border-white/10">
               <img 
                 src={fntLogo} 
                 alt="FNT Motor Group" 
@@ -102,78 +102,44 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
               />
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-3 text-fnt-black hover:text-fnt-red transition-all duration-300"
+                className="p-3 text-white hover:text-fnt-red btn-glass rounded-full transition-all duration-300"
               >
-                <X className="w-8 h-8" />
+                <X className="w-7 h-7" />
               </button>
             </div>
             
             {/* Navigation Links */}
-            <nav className="flex-1 flex flex-col justify-center px-8 space-y-6">
-              <button
-                onClick={() => {
-                  document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
-              >
-                Home
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById('inventory')?.scrollIntoView({ behavior: 'smooth' });
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
-              >
-                Showroom
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
-              >
-                Sell Your Car
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
-              >
-                Reviews
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
-              >
-                About Us
-              </button>
-              <button
-                onClick={() => {
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  setIsMobileMenuOpen(false);
-                }}
-                className="text-2xl font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-gray-100"
-              >
-                Contact
-              </button>
+            <nav className="flex-1 flex flex-col justify-center px-8 space-y-2">
+              {[
+                { label: 'Home', target: 'home' },
+                { label: 'Showroom', target: 'inventory' },
+                { label: 'Sell Your Car', target: 'services' },
+                { label: 'Reviews', target: 'reviews' },
+                { label: 'About Us', target: 'about' },
+                { label: 'Contact', target: 'contact' },
+              ].map((item) => (
+                <button
+                  key={item.target}
+                  onClick={() => {
+                    document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' });
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="text-2xl font-bold text-white hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-white/10"
+                  style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}
+                >
+                  {item.label}
+                </button>
+              ))}
             </nav>
             
             {/* Footer with contact info */}
-            <div className="p-8 border-t border-gray-200 bg-gray-50">
+            <div className="p-8 border-t border-white/10">
               <div className="text-center space-y-3">
-                <p className="text-lg font-semibold text-fnt-black">FNT Motor Group</p>
-                <p className="text-gray-600">Unit 1, Clayton Court, 5 Welcomb Street<br />Manchester M11 2NB</p>
+                <p className="text-lg font-semibold text-white">FNT Motor Group</p>
+                <p className="text-gray-400">Unit 1, Clayton Court, 5 Welcomb Street<br />Manchester M11 2NB</p>
                 <a 
                   href="tel:07735770031"
-                  className="block text-lg font-bold text-fnt-red hover:text-red-600 transition-colors duration-300"
+                  className="block text-lg font-bold text-fnt-red hover:text-red-400 transition-colors duration-300"
                 >
                   07735770031
                 </a>
@@ -204,7 +170,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
+            className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"
           >
             <MapPin className="w-4 h-4" />
             <span>Manchester M11 2NB</span>
@@ -218,7 +184,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
         >
           <a 
             href="tel:07735770031"
-            className="bg-white/90 backdrop-blur-xl shadow-lg border border-gray-200/50 rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-fnt-black hover:text-fnt-red transition-all duration-300"
+            className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"
           >
             <Phone className="w-4 h-4" />
             <span>07735770031</span>
@@ -227,59 +193,35 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
 
         <div className="flex justify-center">
           <div 
-            className="bg-white backdrop-blur-xl shadow-2xl border border-gray-200/50 rounded-full overflow-hidden"
+            className="glass rounded-full overflow-hidden"
             style={{ pointerEvents: 'auto' }}
           >
-            <div className="flex items-center justify-center px-4 py-2">
+            <div className="flex items-center justify-center px-3 py-2">
               {/* Desktop Navigation */}
-              <nav className="flex items-center">
-                <button
-                  onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
-                >
-                  Home
-                </button>
-                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
-                <button
-                  onClick={() => document.getElementById('inventory')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
-                >
-                  Showroom
-                </button>
-                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
-                <button
-                  onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
-                >
-                  Sell Your Car
-                </button>
-                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
-                <button
-                  onClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
-                >
-                  Reviews
-                </button>
-                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
-                <button
-                  onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
-                >
-                  About Us
-                </button>
-                <div className="h-4 w-px bg-fnt-red mx-1.5"></div>
-                <button
-                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-3 py-1.5 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300"
-                >
-                  Contact
-                </button>
+              <nav className="flex items-center gap-0.5">
+                {[
+                  { label: 'Home', target: 'home' },
+                  { label: 'Showroom', target: 'inventory' },
+                  { label: 'Sell Your Car', target: 'services' },
+                  { label: 'Reviews', target: 'reviews' },
+                  { label: 'About Us', target: 'about' },
+                  { label: 'Contact', target: 'contact' },
+                ].map((item) => (
+                  <button
+                    key={item.target}
+                    onClick={() => document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' })}
+                    className="px-4 py-1.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </nav>
             </div>
           </div>
         </div>
       </div>
       <div className="absolute inset-0 bg-gradient-to-r from-fnt-black/80 via-fnt-black/60 to-transparent"></div>
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[#0b0c0f]"></div>
       
       <div className="relative z-10 text-center max-w-6xl mx-auto px-4 overflow-visible">
         <div className="animate-fade-in-up overflow-visible">
@@ -319,11 +261,11 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center items-center px-4 pb-8">
             <button
               onClick={scrollToInventory}
-                className="bg-fnt-red text-white px-6 sm:px-6 md:px-10 py-3 sm:py-3 md:py-5 rounded-xl font-bold text-sm sm:text-lg md:text-xl hover:bg-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center w-full sm:w-auto"
+                className="btn-glass-red text-white px-6 sm:px-6 md:px-10 py-3 sm:py-3 md:py-5 rounded-2xl font-bold text-sm sm:text-lg md:text-xl flex items-center justify-center w-full sm:w-auto"
             >
               Explore Collection
             </button>
-              <button className="border-2 border-white text-white bg-white/10 backdrop-blur-xl hover:bg-white hover:text-fnt-black px-6 sm:px-6 md:px-10 py-3 sm:py-3 md:py-5 rounded-xl font-bold text-sm sm:text-lg md:text-xl transition-all duration-300 w-full sm:w-auto shadow-lg">
+              <button className="btn-glass text-white px-6 sm:px-6 md:px-10 py-3 sm:py-3 md:py-5 rounded-2xl font-bold text-sm sm:text-lg md:text-xl w-full sm:w-auto">
               Schedule Test Drive
             </button>
             </div>

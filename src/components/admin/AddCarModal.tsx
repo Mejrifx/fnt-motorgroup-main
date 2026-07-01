@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { X, Upload, Car } from 'lucide-react';
-import { supabase, type Car } from '../../lib/supabase';
+import { supabase, type Car as CarRecord } from '../../lib/supabase';
 import ImageUpload from './ImageUpload';
 
 interface AddCarModalProps {
   onClose: () => void;
-  onCarAdded: (car: Car) => void;
+  onCarAdded: (car: CarRecord) => void;
 }
 
 const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
@@ -156,7 +156,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-2">
@@ -435,7 +435,7 @@ const AddCarModal: React.FC<AddCarModalProps> = ({ onClose, onCarAdded }) => {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-fnt-red text-white rounded-md hover:bg-red-600 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 btn-glass-red text-white rounded-lg disabled:opacity-50 transition-colors"
             >
               {loading ? 'Adding...' : 'Add Car'}
             </button>

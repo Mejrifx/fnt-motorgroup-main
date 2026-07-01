@@ -11,12 +11,12 @@ const PrivacyPolicy: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen glass-scene">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center space-x-2 bg-white/90 backdrop-blur-xl text-fnt-black hover:text-fnt-red transition-colors duration-300 px-4 py-2 rounded-lg shadow-lg border border-gray-200/50"
+          className="btn-glass flex items-center space-x-2 text-white hover:text-fnt-red px-4 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
@@ -24,13 +24,13 @@ const PrivacyPolicy: React.FC = () => {
       </div>
 
       {/* Header */}
-      <section className="bg-white border-b border-gray-200 py-16">
+      <section className="border-b border-white/10 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Privacy Notice
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-400">
               Last updated: {new Date().toLocaleDateString('en-GB', { 
                 day: 'numeric',
                 month: 'long', 
@@ -47,9 +47,9 @@ const PrivacyPolicy: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             
             {/* Introduction */}
-            <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Who are we? Data Controller and contact details</h2>
-              <div className="text-gray-700 leading-relaxed space-y-4">
+            <div className="glass rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">Who are we? Data Controller and contact details</h2>
+              <div className="text-gray-300 leading-relaxed space-y-4">
                 <p>
                   For the purposes of this Notice, the data controller is FNT Motor Group (trading as FNT Motor Group) 
                   and whose registered office address is at Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB.
@@ -63,11 +63,11 @@ const PrivacyPolicy: React.FC = () => {
                   This Privacy Notice applies to all visitors to and users of our website at www.fntmotorgroup.com, 
                   anyone contacting us by phone, SMS, email, in letters and other correspondence, in person and via social media.
                 </p>
-                <div className="bg-gray-50 border-l-4 border-fnt-red p-4 mt-4">
-                  <p className="font-semibold text-gray-900 mb-2">Contact our Data Protection team:</p>
-                  <p className="text-gray-700">Email: fntgroupltd@gmail.com</p>
-                  <p className="text-gray-700">Phone: 07735770031</p>
-                  <p className="text-gray-700">Address: Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB</p>
+                <div className="glass-subtle border-l-4 !border-l-fnt-red p-4 mt-4">
+                  <p className="font-semibold text-white mb-2">Contact our Data Protection team:</p>
+                  <p className="text-gray-300">Email: fntgroupltd@gmail.com</p>
+                  <p className="text-gray-300">Phone: 07735770031</p>
+                  <p className="text-gray-300">Address: Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB</p>
                 </div>
               </div>
             </div>
@@ -81,13 +81,13 @@ const PrivacyPolicy: React.FC = () => {
                   legalBasis="Contract, Legitimate Interest"
                   defaultOpen={true}
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Information we collect:</h4>
+                  <h4 className="font-semibold text-white mb-3">Information we collect:</h4>
                   <p>
                     When you create an account or use our website, we collect your <strong>email address</strong>, 
                     chosen <strong>password</strong>, and (if you provide it) your <strong>full name</strong> and <strong>telephone number</strong>.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">How we use this information:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">How we use this information:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>To create and manage your account</li>
                     <li>To send you service communications about your account</li>
@@ -104,13 +104,13 @@ const PrivacyPolicy: React.FC = () => {
                   title="Vehicle Enquiries and Sales" 
                   legalBasis="Contract, Legitimate Interest, Legal Obligation"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Information we collect:</h4>
+                  <h4 className="font-semibold text-white mb-3">Information we collect:</h4>
                   <p>
                     When you enquire about or purchase a vehicle, we collect your <strong>name</strong>, <strong>email address</strong>, 
                     <strong>telephone number</strong>, <strong>address</strong>, and details of the vehicle you're interested in.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">How we use this information:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">How we use this information:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>To respond to your enquiries about vehicles</li>
                     <li>To arrange test drives and vehicle viewings</li>
@@ -124,13 +124,13 @@ const PrivacyPolicy: React.FC = () => {
                   title="Part Exchange and Vehicle Valuations" 
                   legalBasis="Contract, Legitimate Interest"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Information we collect:</h4>
+                  <h4 className="font-semibold text-white mb-3">Information we collect:</h4>
                   <p>
                     When you request a part-exchange valuation, we collect your <strong>vehicle registration number (VRM)</strong>, 
                     <strong>mileage</strong>, <strong>condition details</strong>, and <strong>service history</strong>.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">How we use this information:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">How we use this information:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>To provide an accurate valuation of your vehicle</li>
                     <li>To check for outstanding finance on the vehicle</li>
@@ -138,8 +138,8 @@ const PrivacyPolicy: React.FC = () => {
                     <li>To process part-exchange transactions</li>
                   </ul>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
-                    <p className="text-gray-800">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-4">
+                    <p className="text-gray-200">
                       <strong>Important:</strong> We may share your VRM with finance providers to identify vehicles 
                       with existing finance agreements and prevent fraudulent sales.
                     </p>
@@ -150,14 +150,14 @@ const PrivacyPolicy: React.FC = () => {
                   title="Finance Applications" 
                   legalBasis="Contract, Legitimate Interest"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Information we collect:</h4>
+                  <h4 className="font-semibold text-white mb-3">Information we collect:</h4>
                   <p>
                     When you apply for finance, we collect <strong>personal information</strong> (name, address, date of birth), 
                     <strong>employment details</strong>, <strong>income information</strong>, and <strong>credit history data</strong> 
                     (via third-party credit reference agencies).
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">How we use this information:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">How we use this information:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>To submit your finance application to our approved lenders</li>
                     <li>To assess your creditworthiness and affordability</li>
@@ -165,8 +165,8 @@ const PrivacyPolicy: React.FC = () => {
                     <li>To comply with regulatory requirements (FCA regulations)</li>
                   </ul>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
-                    <p className="text-gray-800">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-4">
+                    <p className="text-gray-200">
                       <strong>Third-party processors:</strong> Finance applications are processed by our approved finance partners. 
                       They have their own privacy policies, which you should review when applying for finance.
                     </p>
@@ -177,7 +177,7 @@ const PrivacyPolicy: React.FC = () => {
                   title="Marketing Communications" 
                   legalBasis="Consent, Legitimate Interest"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">How we use your information for marketing:</h4>
+                  <h4 className="font-semibold text-white mb-3">How we use your information for marketing:</h4>
                   <p>
                     With your consent, we may send you marketing communications about:
                   </p>
@@ -188,7 +188,7 @@ const PrivacyPolicy: React.FC = () => {
                     <li>Service reminders and MOT notifications</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Your right to opt-out:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Your right to opt-out:</h4>
                   <p>
                     You can opt-out of marketing communications at any time by:
                   </p>
@@ -207,7 +207,7 @@ const PrivacyPolicy: React.FC = () => {
                   title="Cookies and Website Analytics" 
                   legalBasis="Consent, Legitimate Interest"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Information collected automatically:</h4>
+                  <h4 className="font-semibold text-white mb-3">Information collected automatically:</h4>
                   <p>
                     When you visit our website, we automatically collect:
                   </p>
@@ -217,7 +217,7 @@ const PrivacyPolicy: React.FC = () => {
                     <li><strong>Cookies:</strong> Small text files stored on your device (see our Cookie Policy for details)</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">How we use this information:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">How we use this information:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>To improve website functionality and user experience</li>
                     <li>To analyze traffic and understand how visitors use our site</li>
@@ -226,7 +226,7 @@ const PrivacyPolicy: React.FC = () => {
                   </ul>
                   
                   <p className="mt-4">
-                    For full details on cookies, please see our <button onClick={() => navigate('/cookie-policy')} className="text-fnt-red underline hover:text-red-600">Cookie Policy</button>.
+                    For full details on cookies, please see our <button onClick={() => navigate('/cookie-policy')} className="text-fnt-red underline hover:text-red-400">Cookie Policy</button>.
                   </p>
                 </AccordionItem>
 
@@ -234,63 +234,63 @@ const PrivacyPolicy: React.FC = () => {
                   title="Disclosure of Your Information - Who We Share Data With" 
                   legalBasis="Contract, Legitimate Interest, Legal Obligation"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">We may share your personal data with:</h4>
+                  <h4 className="font-semibold text-white mb-3">We may share your personal data with:</h4>
                   
                   <div className="space-y-4 mt-4">
                     <div>
-                      <h5 className="font-semibold text-gray-800">Finance Providers</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">Finance Providers</h5>
+                      <p className="text-gray-300">
                         To process finance applications and credit checks. Finance providers have their own privacy policies.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">Warranty Providers</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">Warranty Providers</h5>
+                      <p className="text-gray-300">
                         To arrange vehicle warranties and breakdown cover.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">DVLA and Government Agencies</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">DVLA and Government Agencies</h5>
+                      <p className="text-gray-300">
                         To register vehicle ownership, conduct VRM lookups, and comply with legal obligations.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">Payment Processors</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">Payment Processors</h5>
+                      <p className="text-gray-300">
                         To process deposits, payments, and refunds securely.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">AutoTrader and Advertising Platforms</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">AutoTrader and Advertising Platforms</h5>
+                      <p className="text-gray-300">
                         To list vehicles for sale and manage our online presence. Our vehicles are advertised on AutoTrader, 
                         and we synchronize stock data with their platform in accordance with their privacy policy.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">Service Providers</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">Service Providers</h5>
+                      <p className="text-gray-300">
                         Website hosting (Netlify), database services (Supabase), email services, and analytics tools.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">Legal Authorities</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">Legal Authorities</h5>
+                      <p className="text-gray-300">
                         When required by law, to prevent fraud, or to protect our rights and the rights of consumers 
                         under the Consumer Protection from Unfair Trading Regulations 2008 and Consumer Rights Act 2015.
                       </p>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-6">
-                    <p className="text-gray-800">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-6">
+                    <p className="text-gray-200">
                       <strong>Important:</strong> We do not sell your personal data to third parties.
                     </p>
                   </div>
@@ -304,14 +304,14 @@ const PrivacyPolicy: React.FC = () => {
                     FNT Motor Group takes all reasonable steps to ensure that your data is treated securely and in accordance with this Notice.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Data storage locations:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Data storage locations:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>All information you provide is stored securely within the UK or European Economic Area (EEA)</li>
                     <li>Some service providers (e.g., payment processors) may transfer data outside the UK/EEA with appropriate safeguards</li>
                     <li>Where data is transferred internationally, we ensure equivalent protection through contractual protections or adequacy decisions</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Security measures:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Security measures:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>SSL/TLS encryption for data transmission</li>
                     <li>Secure, encrypted database storage</li>
@@ -329,7 +329,7 @@ const PrivacyPolicy: React.FC = () => {
                     or as required by law.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Retention periods:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Retention periods:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>Account data:</strong> Retained while your account is active, plus 3 years after closure</li>
                     <li><strong>Purchase records:</strong> 6 years (for accounting and tax purposes, as required by HMRC)</li>
@@ -354,63 +354,63 @@ const PrivacyPolicy: React.FC = () => {
                   
                   <div className="space-y-4 mt-4">
                     <div>
-                      <h5 className="font-semibold text-gray-800">1. Right of Access</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">1. Right of Access</h5>
+                      <p className="text-gray-300">
                         You can request a copy of the personal data we hold about you (commonly known as a "Subject Access Request" or SAR).
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">2. Right to Rectification</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">2. Right to Rectification</h5>
+                      <p className="text-gray-300">
                         You can correct inaccurate or incomplete data we hold about you.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">3. Right to Erasure (Right to be Forgotten)</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">3. Right to Erasure (Right to be Forgotten)</h5>
+                      <p className="text-gray-300">
                         In certain circumstances, you can request deletion of your data (e.g., if data is no longer necessary, 
                         or if you withdraw consent where consent was the basis for processing).
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">4. Right to Restrict Processing</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">4. Right to Restrict Processing</h5>
+                      <p className="text-gray-300">
                         You can ask us to limit how we use your data (e.g., while we verify data accuracy).
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">5. Right to Data Portability</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">5. Right to Data Portability</h5>
+                      <p className="text-gray-300">
                         You can receive your data in a structured, commonly used, machine-readable format and transfer it to another data controller.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">6. Right to Object</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">6. Right to Object</h5>
+                      <p className="text-gray-300">
                         You can object to processing based on legitimate interests, direct marketing, or automated decision-making/profiling.
                       </p>
                     </div>
                     
                     <div>
-                      <h5 className="font-semibold text-gray-800">7. Right to Withdraw Consent</h5>
-                      <p className="text-gray-700">
+                      <h5 className="font-semibold text-gray-200">7. Right to Withdraw Consent</h5>
+                      <p className="text-gray-300">
                         Where processing is based on consent (e.g., marketing emails), you can withdraw consent at any time.
                       </p>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-6">
-                    <p className="text-gray-800 mb-2">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-6">
+                    <p className="text-gray-200 mb-2">
                       <strong>To exercise any of these rights, please contact us:</strong>
                     </p>
-                    <p className="text-gray-800">Email: fntgroupltd@gmail.com</p>
-                    <p className="text-gray-800">Phone: 07735770031</p>
-                    <p className="text-gray-800 mt-3">
+                    <p className="text-gray-200">Email: fntgroupltd@gmail.com</p>
+                    <p className="text-gray-200">Phone: 07735770031</p>
+                    <p className="text-gray-200 mt-3">
                       We will respond to your request within 30 days. Some rights may not apply in certain circumstances 
                       (e.g., we cannot erase data if we have a legal obligation to retain it).
                     </p>
@@ -426,17 +426,17 @@ const PrivacyPolicy: React.FC = () => {
                     please contact us first at fntgroupltd@gmail.com or by phone at 07735770031.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Right to lodge a complaint with the ICO:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Right to lodge a complaint with the ICO:</h4>
                   <p>
                     You have the right to lodge a complaint with the UK supervisory authority, 
                     the <strong>Information Commissioner's Office (ICO)</strong>:
                   </p>
                   
-                  <div className="bg-gray-100 p-4 rounded mt-4">
-                    <p className="font-semibold text-gray-900">Information Commissioner's Office (ICO)</p>
-                    <p className="text-gray-700 mt-2">Website: <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-fnt-red underline hover:text-red-600">www.ico.org.uk</a></p>
-                    <p className="text-gray-700">Helpline: 0303 123 1113</p>
-                    <p className="text-gray-700">Address: Wycliffe House, Water Lane, Wilmslow, Cheshire, SK9 5AF</p>
+                  <div className="glass-subtle p-4 rounded-xl mt-4">
+                    <p className="font-semibold text-white">Information Commissioner's Office (ICO)</p>
+                    <p className="text-gray-300 mt-2">Website: <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-fnt-red underline hover:text-red-400">www.ico.org.uk</a></p>
+                    <p className="text-gray-300">Helpline: 0303 123 1113</p>
+                    <p className="text-gray-300">Address: Wycliffe House, Water Lane, Wilmslow, Cheshire, SK9 5AF</p>
                   </div>
                 </AccordionItem>
 
@@ -459,8 +459,8 @@ const PrivacyPolicy: React.FC = () => {
                     Please review their privacy policies separately before providing any personal data.
                   </p>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
-                    <p className="text-gray-800">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-4">
+                    <p className="text-gray-200">
                       <strong>Important:</strong> When you click on third-party links or use social media features (e.g., "Share" buttons), 
                       those third parties may collect data about you in accordance with their privacy policies.
                     </p>
@@ -491,8 +491,8 @@ const PrivacyPolicy: React.FC = () => {
             </div>
 
             {/* Footer Note */}
-            <div className="mt-12 bg-gray-100 border-l-4 border-gray-400 p-6">
-              <p className="text-gray-800">
+            <div className="mt-12 glass-subtle border-l-4 border-white/30 p-6">
+              <p className="text-gray-200">
                 <strong>Data Protection Legislation:</strong> This Notice complies with the UK General Data Protection Regulation (UK GDPR), 
                 the Data Protection Act 2018, and the Privacy and Electronic Communications Regulations 2003 (PECR).
               </p>

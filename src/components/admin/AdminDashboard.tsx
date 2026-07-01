@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, LogOut, Car, DollarSign, Calendar, Fuel, Star, MessageSquare, Home, RefreshCw, CheckCircle, XCircle, Clock, TrendingUp, Check, FileText, History, Filter, ArrowUpDown, Wrench, Moon, Sun, Users, ParkingSquare } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { supabase, type Car, type Review } from '../../lib/supabase';
+import { supabase, type Car as CarRecord, type Review } from '../../lib/supabase';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import AddCarModal from './AddCarModal';
 import EditCarModal from './EditCarModal';
@@ -17,12 +17,12 @@ import ShowroomManager from './ShowroomManager';
 const AdminDashboard = () => {
   const [isDark, toggleDark] = useDarkMode();
   const [activeTab, setActiveTab] = useState<'stock' | 'invoices' | 'invoice_history' | 'cars' | 'sync' | 'reviews' | 'leads' | 'showroom'>('stock');
-  const [cars, setCars] = useState<Car[]>([]);
+  const [cars, setCars] = useState<CarRecord[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [selectedCar, setSelectedCar] = useState<CarRecord | null>(null);
   const [showAddReviewModal, setShowAddReviewModal] = useState(false);
   const [showEditReviewModal, setShowEditReviewModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
@@ -220,7 +220,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditCar = (car: Car) => {
+  const handleEditCar = (car: CarRecord) => {
     setSelectedCar(car);
     setShowEditModal(true);
   };
@@ -301,10 +301,10 @@ const AdminDashboard = () => {
   // Show loading screen while auth is loading
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen admin-scene flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking authentication...</p>
+          <p className="text-gray-600 dark:text-gray-300">Checking authentication...</p>
         </div>
       </div>
     );
@@ -313,19 +313,19 @@ const AdminDashboard = () => {
   // Show loading screen while fetching data
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen admin-scene flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <div className="min-h-screen admin-scene transition-colors duration-200">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+      <header className="admin-glass-header sticky top-0 z-40 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Mobile Header */}
           <div className="flex flex-col space-y-4 py-4 sm:hidden">
@@ -337,21 +337,21 @@ const AdminDashboard = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={toggleDark}
-                  className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
                   title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
                   {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={handleBackToHome}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
                   title="Back to Home"
                 >
                   <Home className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden xs:inline">Sign Out</span>
@@ -373,14 +373,14 @@ const AdminDashboard = () => {
               <span className="text-sm text-gray-600 dark:text-gray-400">Welcome, {user?.email}</span>
               <button
                 onClick={toggleDark}
-                className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="flex items-center justify-center w-9 h-9 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
                 title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
               <button
                 onClick={handleBackToHome}
-                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
                 title="Back to Home"
               >
                 <Home className="w-4 h-4" />
@@ -388,7 +388,7 @@ const AdminDashboard = () => {
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
@@ -402,104 +402,30 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
-            <button
-              onClick={() => setActiveTab('stock')}
-              className={`
-                ${activeTab === 'stock'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <Wrench className="w-5 h-5" />
-              <span>Stock</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('invoices')}
-              className={`
-                ${activeTab === 'invoices'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <FileText className="w-5 h-5" />
-              <span>Invoices</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('invoice_history')}
-              className={`
-                ${activeTab === 'invoice_history'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <History className="w-5 h-5" />
-              <span>Invoice History</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('cars')}
-              className={`
-                ${activeTab === 'cars'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <Car className="w-5 h-5" />
-              <span>Cars</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`
-                ${activeTab === 'reviews'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span>Reviews</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('sync')}
-              className={`
-                ${activeTab === 'sync'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <RefreshCw className="w-5 h-5" />
-              <span>Sync</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('leads')}
-              className={`
-                ${activeTab === 'leads'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <Users className="w-5 h-5" />
-              <span>Leads</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('showroom')}
-              className={`
-                ${activeTab === 'showroom'
-                  ? 'border-fnt-red text-fnt-red'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'}
-                whitespace-nowrap py-4 px-2 sm:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 flex-shrink-0
-              `}
-            >
-              <ParkingSquare className="w-5 h-5" />
-              <span>Showroom</span>
-            </button>
+        <div className="mb-8">
+          <nav className="admin-glass-card !rounded-full flex gap-1 overflow-x-auto scrollbar-hide p-1.5">
+            {([
+              { id: 'stock', label: 'Stock', icon: Wrench },
+              { id: 'invoices', label: 'Invoices', icon: FileText },
+              { id: 'invoice_history', label: 'Invoice History', icon: History },
+              { id: 'cars', label: 'Cars', icon: Car },
+              { id: 'reviews', label: 'Reviews', icon: MessageSquare },
+              { id: 'sync', label: 'Sync', icon: RefreshCw },
+              { id: 'leads', label: 'Leads', icon: Users },
+              { id: 'showroom', label: 'Showroom', icon: ParkingSquare },
+            ] as const).map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`admin-tab ${activeTab === tab.id ? 'admin-tab-active' : ''}`}
+                >
+                  <TabIcon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
@@ -510,13 +436,13 @@ const AdminDashboard = () => {
 
         {/* Cars Tab */}
         {activeTab === 'cars' && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg transition-colors duration-200">
+        <div className="admin-glass-card overflow-hidden transition-colors duration-200">
           <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Car Inventory</h2>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+                className="flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2 rounded-xl"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New Car</span>
@@ -525,7 +451,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Filter and Sort Controls */}
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+          <div className="px-4 sm:px-6 py-4 border-b border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-white/5">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Filter by Status */}
               <div className="flex items-center space-x-2">
@@ -580,7 +506,7 @@ const AdminDashboard = () => {
           
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-black/[0.03] dark:bg-white/5">
                 <tr>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Car</th>
                   <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price</th>
@@ -589,9 +515,9 @@ const AdminDashboard = () => {
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-black/5 dark:divide-white/10">
                 {getFilteredAndSortedCars().map((car) => (
-                  <tr key={car.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <tr key={car.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img 
@@ -696,7 +622,7 @@ const AdminDashboard = () => {
         {activeTab === 'sync' && (
           <div>
             {/* AutoTrader Sync Status Panel */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mb-8">
+            <div className="admin-glass-card p-6 mb-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 {/* Left: Sync Info */}
                 <div className="flex-1">
@@ -705,7 +631,7 @@ const AdminDashboard = () => {
                       {syncSuccess ? (
                         <Check className="w-6 h-6 text-green-600 absolute inset-0 transition-all duration-500 ease-in-out animate-in fade-in zoom-in" />
                       ) : (
-                        <RefreshCw className={`w-6 h-6 text-blue-600 absolute inset-0 transition-all duration-300 ease-in-out ${isSyncing ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`w-6 h-6 text-fnt-red absolute inset-0 transition-all duration-300 ease-in-out ${isSyncing ? 'animate-spin' : ''}`} />
                       )}
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">AutoTrader Sync Status</h2>
@@ -775,11 +701,11 @@ const AdminDashboard = () => {
                   <button
                     onClick={handleManualSync}
                     disabled={isSyncing || syncSuccess}
-                    className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                    className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all ${
                       isSyncing || syncSuccess
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                    } ${syncSuccess ? '!bg-green-600' : ''}`}
+                        ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed text-white'
+                        : 'btn-glass-red text-white'
+                    } ${syncSuccess ? '!bg-emerald-600' : ''}`}
                   >
                     <div className="relative w-5 h-5">
                       {syncSuccess ? (
@@ -795,7 +721,7 @@ const AdminDashboard = () => {
                   
                   <button
                     onClick={() => setShowSyncLogs(!showSyncLogs)}
-                    className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors"
+                    className="px-6 py-3 admin-glass-card !rounded-xl text-gray-700 dark:text-gray-200 font-semibold hover:text-fnt-red transition-colors"
                   >
                     {showSyncLogs ? 'Hide' : 'View'} Logs
                   </button>
@@ -804,12 +730,12 @@ const AdminDashboard = () => {
               
               {/* Sync Logs */}
               {showSyncLogs && (
-                <div className="mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
+                <div className="mt-6 pt-6 border-t border-black/10 dark:border-white/10">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Sync Logs (Last 20)</h3>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                  <div className="admin-glass-card overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead className="bg-gray-50 dark:bg-gray-700">
+                        <thead className="bg-black/[0.03] dark:bg-white/5">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Time</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
@@ -820,7 +746,7 @@ const AdminDashboard = () => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Duration</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody className="divide-y divide-black/5 dark:divide-white/10">
                           {syncLogs.length === 0 ? (
                             <tr>
                               <td colSpan={7} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
@@ -829,7 +755,7 @@ const AdminDashboard = () => {
                             </tr>
                           ) : (
                             syncLogs.map((log) => (
-                              <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                              <tr key={log.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
                                 <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-200">
                                   {new Date(log.created_at).toLocaleString()}
                                 </td>
@@ -870,7 +796,7 @@ const AdminDashboard = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="admin-glass-card p-6">
                 <div className="flex items-center">
                   <Car className="w-8 h-8 text-blue-500" />
                   <div className="ml-4">
@@ -879,7 +805,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="admin-glass-card p-6">
                 <div className="flex items-center">
                   <DollarSign className="w-8 h-8 text-green-500" />
                   <div className="ml-4">
@@ -890,7 +816,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="admin-glass-card p-6">
                 <div className="flex items-center">
                   <Calendar className="w-8 h-8 text-purple-500" />
                   <div className="ml-4">
@@ -905,7 +831,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div className="admin-glass-card p-6">
                 <div className="flex items-center">
                   <Fuel className="w-8 h-8 text-red-500" />
                   <div className="ml-4">
@@ -932,13 +858,13 @@ const AdminDashboard = () => {
 
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg transition-colors duration-200">
+        <div className="admin-glass-card overflow-hidden transition-colors duration-200">
           <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Customer Reviews</h2>
               <button
                 onClick={() => setShowAddReviewModal(true)}
-                className="flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+                className="flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2 rounded-xl"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add New Review</span>
@@ -948,7 +874,7 @@ const AdminDashboard = () => {
           
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-black/[0.03] dark:bg-white/5">
                 <tr>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
                   <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Review</th>
@@ -957,9 +883,9 @@ const AdminDashboard = () => {
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-black/5 dark:divide-white/10">
                 {reviews.map((review) => (
-                  <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <tr key={review.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{review.customer_name}</div>

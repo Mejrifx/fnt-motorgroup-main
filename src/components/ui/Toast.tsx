@@ -22,34 +22,34 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-5 h-5 text-emerald-400" />;
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-5 h-5 text-red-400" />;
       case 'warning':
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle className="w-5 h-5 text-amber-400" />;
     }
   };
 
   const getStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-white border-l-4 border-green-500 shadow-lg';
+        return 'border-l-4 border-emerald-400';
       case 'error':
-        return 'bg-white border-l-4 border-red-500 shadow-lg';
+        return 'border-l-4 border-red-500';
       case 'warning':
-        return 'bg-white border-l-4 border-yellow-500 shadow-lg';
+        return 'border-l-4 border-amber-400';
     }
   };
 
   return (
-    <div className={`flex items-center justify-between p-4 rounded-lg ${getStyles()} min-w-[320px] max-w-md animate-slide-in`}>
+    <div className={`glass-menu flex items-center justify-between p-4 rounded-xl ${getStyles()} min-w-[320px] max-w-md animate-slide-in`}>
       <div className="flex items-center space-x-3">
         {getIcon()}
-        <p className="text-sm font-medium text-gray-900">{message}</p>
+        <p className="text-sm font-medium text-white">{message}</p>
       </div>
       <button
         onClick={onClose}
-        className="ml-4 text-gray-400 hover:text-gray-600 transition-colors"
+        className="ml-4 text-white/50 hover:text-white transition-colors"
       >
         <X className="w-4 h-4" />
       </button>

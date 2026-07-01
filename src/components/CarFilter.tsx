@@ -168,7 +168,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 relative z-50">
-      <div className="bg-white/90 lg:bg-white backdrop-blur-xl shadow-2xl border border-white/30 rounded-2xl lg:rounded-full overflow-visible relative">
+      <div className="glass rounded-2xl lg:rounded-full overflow-visible relative">
         {/* Desktop Layout */}
         <div className="hidden lg:block px-6 py-3">
           <div className="flex items-center justify-center gap-2">
@@ -176,21 +176,21 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             <div className="relative">
               <button
                 onClick={() => setIsMakeOpen(!isMakeOpen)}
-                className="px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
+                className="px-3 py-2 text-sm font-semibold text-white hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
               >
                 <span>{filters.make || 'Any Make'}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isMakeOpen && (
-                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 glass-menu rounded-2xl max-h-80 overflow-y-auto min-w-48">
                   <div className="py-2">
                     <button
                       onClick={() => {
                         handleFilterChange('make', '');
                         setIsMakeOpen(false);
                       }}
-                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-white hover:bg-white/10 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
                     >
                       Any Make
                     </button>
@@ -201,7 +201,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           handleFilterChange('make', make);
                           setIsMakeOpen(false);
                         }}
-                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-white hover:bg-white/10 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
                       >
                         {make}
                       </button>
@@ -211,27 +211,27 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
               )}
             </div>
 
-            <div className="h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-white/15 mx-2"></div>
 
             {/* Model Filter */}
             <div className="relative">
               <button
                 onClick={() => setIsModelOpen(!isModelOpen)}
-                className="px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
+                className="px-3 py-2 text-sm font-semibold text-white hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
               >
                 <span>{filters.model || 'Any Model'}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isModelOpen && (
-                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 glass-menu rounded-2xl max-h-80 overflow-y-auto min-w-48">
                   <div className="py-2">
                     <button
                       onClick={() => {
                         handleFilterChange('model', '');
                         setIsModelOpen(false);
                       }}
-                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-white hover:bg-white/10 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
                     >
                       Any Model
                     </button>
@@ -242,13 +242,13 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           handleFilterChange('model', model);
                           setIsModelOpen(false);
                         }}
-                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-white hover:bg-white/10 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
                       >
                         {model}
                       </button>
                     ))}
                     {!filters.make && (
-                      <div className="px-6 py-3 text-sm text-gray-500 text-center">
+                      <div className="px-6 py-3 text-sm text-gray-400 text-center">
                         Select a make first
                       </div>
                     )}
@@ -257,55 +257,55 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
               )}
             </div>
 
-            <div className="h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-white/15 mx-2"></div>
 
             {/* Price Range */}
             <div className="flex items-center gap-2">
               <div className="relative">
-                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white/50 text-sm">£</span>
                 <input
                   ref={priceFromRef}
                   type="text"
                   placeholder="Min"
                   value={filters.priceFrom}
                   onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-                  className="w-20 pl-6 pr-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                  className="glass-input w-20 pl-6 pr-2 py-2 text-sm text-center rounded-lg"
                 />
               </div>
-              <span className="text-gray-500 text-sm">to</span>
+              <span className="text-white/50 text-sm">to</span>
               <div className="relative">
-                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">£</span>
+                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white/50 text-sm">£</span>
                 <input
                   type="text"
                   placeholder="Max"
                   value={filters.priceTo}
                   onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-                  className="w-20 pl-6 pr-2 py-2 text-sm text-center border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-fnt-red focus:border-transparent transition-all duration-300"
+                  className="glass-input w-20 pl-6 pr-2 py-2 text-sm text-center rounded-lg"
                 />
               </div>
             </div>
 
-            <div className="h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-white/15 mx-2"></div>
 
             {/* Fuel Type */}
             <div className="relative">
               <button
                 onClick={() => setIsFuelOpen(!isFuelOpen)}
-                className="px-3 py-2 text-sm font-bold text-fnt-black hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
+                className="px-3 py-2 text-sm font-semibold text-white hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
               >
                 <span>{filters.fuelType || 'Any Fuel Type'}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isFuelOpen && (
-                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-80 overflow-y-auto min-w-48">
+                <div className="absolute z-[99999999] top-full left-1/2 transform -translate-x-1/2 mt-2 glass-menu rounded-2xl max-h-80 overflow-y-auto min-w-48">
                   <div className="py-2">
                     <button
                       onClick={() => {
                         handleFilterChange('fuelType', '');
                         setIsFuelOpen(false);
                       }}
-                      className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
+                      className="w-full px-6 py-3 text-left text-sm font-medium text-white hover:bg-white/10 hover:text-fnt-red transition-colors duration-200 rounded-t-2xl"
                     >
                       Any Fuel Type
                     </button>
@@ -316,7 +316,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                           handleFilterChange('fuelType', fuel);
                           setIsFuelOpen(false);
                         }}
-                        className="w-full px-6 py-3 text-left text-sm font-medium text-fnt-black hover:bg-fnt-red/5 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
+                        className="w-full px-6 py-3 text-left text-sm font-medium text-white hover:bg-white/10 hover:text-fnt-red transition-colors duration-200 last:rounded-b-2xl"
                       >
                         {fuel}
                       </button>
@@ -326,12 +326,12 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
               )}
             </div>
 
-            <div className="h-6 w-px bg-fnt-red mx-2"></div>
+            <div className="h-6 w-px bg-white/15 mx-2"></div>
 
             {/* Search Button */}
             <button
               onClick={handleSearch}
-              className="bg-fnt-black text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-800 transition-all duration-300 flex items-center gap-2"
+              className="btn-glass-red text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2"
             >
               <Search className="h-4 w-4" />
               Search
@@ -341,7 +341,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
-                className="text-gray-500 hover:text-fnt-red text-sm font-medium transition-colors duration-300 underline flex-shrink-0 ml-2"
+                className="text-white/60 hover:text-fnt-red text-sm font-medium transition-colors duration-300 underline flex-shrink-0 ml-2"
               >
                 Clear
               </button>
@@ -354,12 +354,12 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
           {/* Trigger Button */}
           <button
             onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-            className="w-full px-6 py-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg active:scale-[0.98] transition-transform duration-150 flex items-center justify-between"
+            className="w-full px-6 py-4 rounded-2xl active:scale-[0.98] transition-transform duration-150 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-gray-400" />
+              <Search className="w-5 h-5 text-white/50" />
               <div className="text-left">
-                <div className="text-sm font-semibold text-gray-900">
+                <div className="text-sm font-semibold text-white">
                   {filters.make || filters.model || filters.fuelType ? (
                     <span className="text-fnt-red">
                       {[filters.make, filters.model, filters.fuelType].filter(Boolean).join(' • ')}
@@ -369,7 +369,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                   )}
                 </div>
                 {(filters.priceFrom || filters.priceTo) && (
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-xs text-white/50 mt-0.5">
                     {filters.priceFrom && `£${filters.priceFrom}`}
                     {filters.priceFrom && filters.priceTo && ' - '}
                     {filters.priceTo && `£${filters.priceTo}`}
@@ -377,7 +377,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 )}
               </div>
             </div>
-            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isMobileFilterOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-5 h-5 text-white/50 transition-transform duration-300 ${isMobileFilterOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Full-Screen Modal - Portal to body to escape stacking context */}
@@ -408,11 +408,11 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 }}
                 className="animate-fade-in"
               >
-                <div className="bg-white h-full flex flex-col">
+                <div className="h-full flex flex-col" style={{ background: 'rgba(11, 12, 15, 0.92)', backdropFilter: 'blur(32px) saturate(150%)', WebkitBackdropFilter: 'blur(32px) saturate(150%)' }}>
                   {/* Header */}
-                  <div className="px-6 py-4 border-b border-gray-100">
+                  <div className="px-6 py-4 border-b border-white/10">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-xl font-bold text-gray-900">Filter Cars</h3>
+                      <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>Filter Cars</h3>
                       <div className="flex items-center gap-3">
                         {hasActiveFilters && (
                           <button
@@ -424,9 +424,9 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                         )}
                         <button
                           onClick={() => setIsMobileFilterOpen(false)}
-                          className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+                          className="p-2 btn-glass rounded-full transition-colors active:scale-95"
                         >
-                          <X className="w-6 h-6 text-gray-600" />
+                          <X className="w-6 h-6 text-white" />
                         </button>
                       </div>
                     </div>
@@ -436,14 +436,14 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                   <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
                     {/* Make Selection */}
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-3 block">Make</label>
+                      <label className="text-sm font-semibold text-white/70 mb-3 block">Make</label>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleFilterChange('make', '')}
                           className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
                             !filters.make
-                              ? 'bg-fnt-black text-white shadow-md scale-[1.02]'
-                              : 'bg-gray-100 text-gray-700 active:scale-[0.98]'
+                              ? 'btn-glass-red text-white scale-[1.02]'
+                              : 'glass-chip text-white/80 active:scale-[0.98]'
                           }`}
                         >
                           All Makes
@@ -454,8 +454,8 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                             onClick={() => handleFilterChange('make', make)}
                             className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
                               filters.make === make
-                                ? 'bg-fnt-black text-white shadow-md scale-[1.02]'
-                                : 'bg-gray-100 text-gray-700 active:scale-[0.98]'
+                                ? 'btn-glass-red text-white scale-[1.02]'
+                                : 'glass-chip text-white/80 active:scale-[0.98]'
                             }`}
                           >
                             {make}
@@ -473,7 +473,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                       {showAllMakes && (
                         <button
                           onClick={() => setShowAllMakes(false)}
-                          className="mt-3 text-sm font-semibold text-gray-600 active:opacity-60"
+                          className="mt-3 text-sm font-semibold text-white/60 active:opacity-60"
                         >
                           Show Less
                         </button>
@@ -483,14 +483,14 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                     {/* Model Selection - Only if make is selected */}
                     {filters.make && availableModels[filters.make] && (
                       <div>
-                        <label className="text-sm font-semibold text-gray-700 mb-3 block">Model</label>
+                        <label className="text-sm font-semibold text-white/70 mb-3 block">Model</label>
                         <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => handleFilterChange('model', '')}
                             className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
                               !filters.model
-                                ? 'bg-fnt-black text-white shadow-md scale-[1.02]'
-                                : 'bg-gray-100 text-gray-700 active:scale-[0.98]'
+                                ? 'btn-glass-red text-white scale-[1.02]'
+                                : 'glass-chip text-white/80 active:scale-[0.98]'
                             }`}
                           >
                             All Models
@@ -501,8 +501,8 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                               onClick={() => handleFilterChange('model', model)}
                               className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
                                 filters.model === model
-                                  ? 'bg-fnt-black text-white shadow-md scale-[1.02]'
-                                  : 'bg-gray-100 text-gray-700 active:scale-[0.98]'
+                                  ? 'btn-glass-red text-white scale-[1.02]'
+                                  : 'glass-chip text-white/80 active:scale-[0.98]'
                               }`}
                             >
                               {model}
@@ -514,30 +514,30 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
 
                     {/* Price Range */}
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-3 block">Price Range</label>
+                      <label className="text-sm font-semibold text-white/70 mb-3 block">Price Range</label>
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">£</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium">£</span>
                             <input
                               type="text"
                               placeholder="Min"
                               value={filters.priceFrom}
                               onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
-                              className="w-full pl-8 pr-4 py-3.5 text-sm font-medium bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-fnt-black focus:outline-none transition-colors"
+                              className="glass-input w-full pl-8 pr-4 py-3.5 text-sm font-medium rounded-2xl"
                             />
                           </div>
                         </div>
-                        <div className="w-3 h-0.5 bg-gray-300 flex-shrink-0" />
+                        <div className="w-3 h-0.5 bg-white/20 flex-shrink-0" />
                         <div className="flex-1">
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">£</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-sm font-medium">£</span>
                             <input
                               type="text"
                               placeholder="Max"
                               value={filters.priceTo}
                               onChange={(e) => handleFilterChange('priceTo', e.target.value)}
-                              className="w-full pl-8 pr-4 py-3.5 text-sm font-medium bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-fnt-black focus:outline-none transition-colors"
+                              className="glass-input w-full pl-8 pr-4 py-3.5 text-sm font-medium rounded-2xl"
                             />
                           </div>
                         </div>
@@ -546,14 +546,14 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
 
                     {/* Fuel Type */}
                     <div>
-                      <label className="text-sm font-semibold text-gray-700 mb-3 block">Fuel Type</label>
+                      <label className="text-sm font-semibold text-white/70 mb-3 block">Fuel Type</label>
                       <div className="grid grid-cols-2 gap-3">
                         <button
                           onClick={() => handleFilterChange('fuelType', '')}
                           className={`px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                             !filters.fuelType
-                              ? 'bg-fnt-black text-white shadow-md scale-[1.02]'
-                              : 'bg-gray-100 text-gray-700 active:scale-[0.98]'
+                              ? 'btn-glass-red text-white scale-[1.02]'
+                              : 'glass-chip text-white/80 active:scale-[0.98]'
                           }`}
                         >
                           All Types
@@ -564,8 +564,8 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                             onClick={() => handleFilterChange('fuelType', fuel)}
                             className={`px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                               filters.fuelType === fuel
-                                ? 'bg-fnt-black text-white shadow-md scale-[1.02]'
-                                : 'bg-gray-100 text-gray-700 active:scale-[0.98]'
+                                ? 'btn-glass-red text-white scale-[1.02]'
+                                : 'glass-chip text-white/80 active:scale-[0.98]'
                             }`}
                           >
                             {fuel}
@@ -576,13 +576,13 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                   </div>
 
                   {/* Footer - Search Button */}
-                  <div className="px-6 py-4 border-t border-gray-100 bg-white/80 backdrop-blur-xl">
+                  <div className="px-6 py-4 border-t border-white/10">
                     <button
                       onClick={() => {
                         handleSearch();
                         setIsMobileFilterOpen(false);
                       }}
-                      className="w-full bg-fnt-red text-white px-6 py-4 rounded-2xl text-base font-bold shadow-lg active:scale-[0.98] transition-transform duration-150 flex items-center justify-center gap-2"
+                      className="btn-glass-red w-full text-white px-6 py-4 rounded-2xl text-base font-bold active:scale-[0.98] flex items-center justify-center gap-2"
                     >
                       <Search className="w-5 h-5" />
                       Search {hasActiveFilters && 'with Filters'}

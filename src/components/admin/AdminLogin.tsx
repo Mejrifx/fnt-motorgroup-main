@@ -61,7 +61,7 @@ const AdminLogin = () => {
   // Show loading screen while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-fnt-black via-gray-900 to-fnt-black flex items-center justify-center px-4">
+      <div className="min-h-screen glass-scene flex items-center justify-center px-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
           <p className="text-white">Checking authentication...</p>
@@ -71,7 +71,7 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fnt-black via-gray-900 to-fnt-black flex items-center justify-center px-4">
+    <div className="min-h-screen glass-scene flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -87,7 +87,7 @@ const AdminLogin = () => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8">
+        <div className="glass rounded-3xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
@@ -101,7 +101,7 @@ const AdminLogin = () => {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                  className="glass-input w-full pl-12 pr-4 py-3 rounded-xl"
                   placeholder="admin@fntmotorgroup.com"
                   required
                 />
@@ -120,7 +120,7 @@ const AdminLogin = () => {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                  className="glass-input w-full pl-12 pr-12 py-3 rounded-xl"
                   placeholder="Enter your password"
                   required
                 />
@@ -145,7 +145,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full bg-fnt-red hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="btn-glass-red w-full disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl"
             >
               {loginLoading ? 'Signing in...' : 'Access Dashboard'}
             </button>

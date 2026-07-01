@@ -3,104 +3,328 @@
 @tailwind utilities;
 
 @layer base {
-  /* Critical: Reset and normalize everything */
   *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
-  
+
   html {
-    /* Force consistent font size - this is key! */
-    font-size: 16px !important;
+    font-size: 16px;
     line-height: 1.5;
     scroll-behavior: smooth;
-    /* Prevent zoom on mobile */
     -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    /* Fix for display consistency across devices */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    /* Prevent horizontal scroll */
     overflow-x: hidden;
   }
-  
+
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    /* Force consistent font size */
-    font-size: 16px !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 16px;
     line-height: 1.5;
-    margin: 0;
-    padding: 0;
-    background-color: #000000;
-    /* Prevent horizontal scroll */
+    background-color: #0b0c0f;
+    color: #f4f4f5;
     overflow-x: hidden;
-    /* Ensure consistent rendering across displays */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    /* Force consistent text sizing */
-    -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
-    text-size-adjust: 100%;
   }
-  
-  /* Force root div to behave consistently */
+
   #root {
     min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
   }
-  
-  /* Fix for images and logos across different displays */
+
   img {
     max-width: 100%;
     height: auto;
     display: block;
   }
-  
-  /* Reset all headings to prevent browser defaults */
+
   h1, h2, h3, h4, h5, h6 {
-    margin: 0;
-    padding: 0;
     font-weight: inherit;
     font-size: inherit;
     line-height: inherit;
   }
-  
-  /* Reset paragraphs */
-  p {
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Reset buttons */
+
   button {
     background: none;
     border: none;
-    padding: 0;
-    margin: 0;
     font: inherit;
     cursor: pointer;
   }
-  
-  /* Reset inputs */
+
   input, textarea, select {
     font: inherit;
-    margin: 0;
-    padding: 0;
+  }
+
+  ::selection {
+    background: rgba(255, 73, 67, 0.35);
+    color: #fff;
   }
 }
 
 @layer components {
-  .fixed-nav {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 9999 !important;
+  /* ---------------------------------------------------------------- */
+  /* FNT Glass Design System                                          */
+  /* Recipe: blur + 1px edge + inset top highlight + tinted shadow    */
+  /* ---------------------------------------------------------------- */
+
+  /* Ambient page backdrop for dark sections: deep ink with soft glows */
+  .glass-scene {
+    position: relative;
+    background-color: #0b0c0f;
+    background-image:
+      radial-gradient(1100px 520px at 85% -10%, rgba(255, 73, 67, 0.08), transparent 60%),
+      radial-gradient(900px 480px at 8% 22%, rgba(120, 140, 190, 0.07), transparent 62%),
+      radial-gradient(1200px 700px at 50% 118%, rgba(255, 73, 67, 0.05), transparent 55%);
+  }
+
+  /* Core dark glass surface */
+  .glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.045));
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.18),
+      0 24px 48px -24px rgba(0, 0, 0, 0.65);
+  }
+
+  /* Quieter glass, for nested elements */
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    backdrop-filter: blur(16px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Interactive glass card: lift + brighten on hover */
+  .glass-card {
+    @apply glass rounded-3xl transition-all duration-500;
+    transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .glass-card:hover {
+    transform: translateY(-6px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.18),
+      0 32px 64px -24px rgba(0, 0, 0, 0.75);
+  }
+
+  /* Frosted light glass (over photos / light admin mode) */
+  .glass-light {
+    background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.66));
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+      0 16px 40px -20px rgba(15, 23, 42, 0.25);
+  }
+
+  /* Pill chip */
+  .glass-chip {
+    @apply glass-subtle rounded-full transition-all duration-300;
+  }
+  .glass-chip:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+
+  /* Primary action: red glass */
+  .btn-glass-red {
+    background: linear-gradient(180deg, #ff5a54, #f0403a);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.15),
+      0 12px 32px -12px rgba(255, 73, 67, 0.55);
+    transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .btn-glass-red:hover {
+    background: linear-gradient(180deg, #ff6b66, #ff4943);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.36),
+      0 18px 40px -12px rgba(255, 73, 67, 0.65);
+  }
+  .btn-glass-red:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Neutral glass button */
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+  }
+  .btn-glass:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* Glass form input on dark */
+  .glass-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: #f4f4f5;
+    transition: all 0.25s ease;
+  }
+  .glass-input::placeholder {
+    color: rgba(244, 244, 245, 0.4);
+  }
+  .glass-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 73, 67, 0.6);
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.2),
+      0 0 0 3px rgba(255, 73, 67, 0.18);
+  }
+
+  /* Frosted dropdown menu panel */
+  .glass-menu {
+    background: rgba(18, 19, 23, 0.85);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
+    backdrop-filter: blur(28px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
+      0 24px 56px -16px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Section heading kit */
+  .section-title {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .section-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold tracking-widest uppercase;
+    background: rgba(255, 73, 67, 0.10);
+    border: 1px solid rgba(255, 73, 67, 0.25);
+    color: #ff6b66;
+  }
+
+  /* Grain overlay to break digital flatness */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Admin (light + dark aware)                                        */
+  /* ---------------------------------------------------------------- */
+
+  /* Admin page backdrop: soft tinted light mode, deep ink dark mode */
+  .admin-scene {
+    background-color: #eef0f4;
+    background-image:
+      radial-gradient(900px 420px at 90% -10%, rgba(255, 73, 67, 0.06), transparent 60%),
+      radial-gradient(800px 400px at 0% 30%, rgba(100, 120, 180, 0.06), transparent 60%);
+    background-attachment: fixed;
+  }
+  .dark .admin-scene {
+    background-color: #0b0c0f;
+    background-image:
+      radial-gradient(900px 420px at 90% -10%, rgba(255, 73, 67, 0.07), transparent 60%),
+      radial-gradient(800px 400px at 0% 30%, rgba(120, 140, 190, 0.06), transparent 60%);
+  }
+
+  /* Frosted sticky admin header */
+  .admin-glass-header {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .dark .admin-glass-header {
+    background: rgba(11, 12, 15, 0.72);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Admin segmented tab pills */
+  .admin-tab {
+    @apply whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold flex items-center space-x-2 flex-shrink-0 transition-all duration-300;
+    color: rgb(100 116 139);
+  }
+  .admin-tab:hover {
+    color: rgb(15 23 42);
+    background: rgba(15, 23, 42, 0.05);
+  }
+  .dark .admin-tab {
+    color: rgb(148 163 184);
+  }
+  .dark .admin-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .admin-tab-active {
+    background: linear-gradient(180deg, #ff5a54, #f0403a);
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+      0 8px 20px -8px rgba(255, 73, 67, 0.5);
+  }
+  .admin-tab-active:hover {
+    background: linear-gradient(180deg, #ff6b66, #ff4943);
+  }
+
+  .admin-glass-card {
+    @apply rounded-2xl transition-colors duration-200;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.75));
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+      0 12px 32px -16px rgba(15, 23, 42, 0.18);
+  }
+  .dark .admin-glass-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.09),
+      0 16px 40px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  .field-input {
+    @apply w-full px-3 py-2.5 text-sm rounded-xl transition placeholder-gray-400 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+  .field-input:focus {
+    @apply outline-none;
+    border-color: rgba(255, 73, 67, 0.55);
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 3px rgba(255, 73, 67, 0.15);
+  }
+  .dark .field-input {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  .field-label {
+    @apply block text-xs font-semibold text-gray-500 mb-1.5 dark:text-gray-400;
   }
 }
 
@@ -108,7 +332,7 @@
   .animate-fade-in-up {
     animation: fadeInUp 1s ease-out;
   }
-  
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -119,11 +343,11 @@
       transform: translateY(0);
     }
   }
-  
+
   .animate-slide-in {
     animation: slideIn 0.3s ease-out;
   }
-  
+
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -134,11 +358,11 @@
       transform: translateX(0);
     }
   }
-  
+
   .animate-fade-in {
     animation: fadeIn 0.2s ease-out;
   }
-  
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -147,11 +371,11 @@
       opacity: 1;
     }
   }
-  
+
   .animate-scale-in {
     animation: scaleIn 0.2s ease-out;
   }
-  
+
   @keyframes scaleIn {
     from {
       opacity: 0;
@@ -162,11 +386,11 @@
       transform: scale(1);
     }
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   }
-  
+
   @keyframes slideUp {
     from {
       opacity: 0;
@@ -177,60 +401,41 @@
       transform: translateY(0);
     }
   }
-  
-  .bg-gradient-luxury {
-    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #f59e0b 100%);
-  }
-  
+
   /* Hide scrollbar but keep scrolling functionality */
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+    display: none;
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(148, 163, 184, 0.55);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #1f2937;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-/* Cross-platform display consistency fixes */
-* {
-  /* Ensure consistent box-sizing */
-  box-sizing: border-box;
-}
-
-/* Production environment consistency fixes */
+/* Layout container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -251,125 +456,17 @@
   .container { max-width: 1200px; }
 }
 
-/* Fix for color consistency across displays */
-.fnt-red {
-  color: #ff4943 !important;
-}
-
-.fnt-black {
-  color: #000000 !important;
-}
-
-.fnt-white {
-  color: #ffffff !important;
-}
-
 /* Ensure consistent backdrop blur across browsers */
 .backdrop-blur-xl {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
 
-/* Fix for shadow consistency */
-.shadow-2xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+/* Edit drawer slide-in animation */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
-
-/* Ensure consistent border rendering */
-.border-gray-200\/50 {
-  border-color: rgba(229, 231, 235, 0.5);
+.animate-slide-in-right {
+  animation: slideInRight 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
-
-/* Mac-specific fixes for Retina displays and different scaling */
-@media screen and (-webkit-min-device-pixel-ratio: 2) {
-  /* This targets Mac Retina displays specifically */
-  
-  /* Fix address and phone button positioning on Mac */
-  .mac-nav-buttons {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  
-  .mac-nav-buttons.left {
-    left: 200px !important; /* Move further from nav bar on Mac */
-  }
-  
-  .mac-nav-buttons.right {
-    right: 200px !important; /* Move further from nav bar on Mac */
-  }
-  
-  /* Fix FNT logo positioning on Mac */
-  .mac-logo-container {
-    margin-top: -100px !important; /* Move logo down on Mac */
-  }
-  
-  /* Adjust navigation bar positioning on Mac */
-  .mac-nav-container {
-    top: 3rem !important; /* Move nav bar down slightly on Mac */
-  }
-}
-
-    /* Additional Mac-specific media query for Safari */
-    @media screen and (min-resolution: 2dppx) {
-      /* Similar fixes for Safari on Mac */
-      .mac-nav-buttons.left {
-        left: 200px !important;
-      }
-      
-      .mac-nav-buttons.right {
-        right: 200px !important;
-      }
-      
-      .mac-logo-container {
-        margin-top: -100px !important;
-      }
-      
-      .mac-nav-container {
-        top: 3rem !important;
-      }
-    }
-
-    /* Subtle red glow with breathing effect */
-    .glow-effect {
-      text-shadow: 
-        0 0 5px rgba(255, 73, 67, 0.3),
-        0 0 10px rgba(255, 73, 67, 0.2),
-        0 0 15px rgba(255, 73, 67, 0.1);
-      animation: breathe 3s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% {
-        text-shadow: 
-          0 0 5px rgba(255, 73, 67, 0.3),
-          0 0 10px rgba(255, 73, 67, 0.2),
-          0 0 15px rgba(255, 73, 67, 0.1);
-      }
-      50% {
-        text-shadow: 
-          0 0 8px rgba(255, 73, 67, 0.4),
-          0 0 15px rgba(255, 73, 67, 0.3),
-          0 0 20px rgba(255, 73, 67, 0.2);
-      }
-    }
-
-    /* Stock management field inputs */
-    .field-input {
-      @apply w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl
-             focus:outline-none focus:ring-2 focus:ring-fnt-red focus:border-transparent
-             transition placeholder-gray-400 text-gray-900
-             dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500;
-    }
-    .field-label {
-      @apply block text-xs font-semibold text-gray-500 mb-1.5 dark:text-gray-400;
-    }
-
-    /* Edit drawer slide-in animation */
-    @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to   { transform: translateX(0);    opacity: 1; }
-    }
-    .animate-slide-in-right {
-      animation: slideInRight 0.25s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-    }

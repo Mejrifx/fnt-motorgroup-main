@@ -306,7 +306,7 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
       {/* Form */}
       <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="admin-glass-card !rounded-xl p-8">
             {/* Invoice Details */}
             <div className="mb-6">
               <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Invoice Details</h4>
@@ -701,7 +701,7 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
                 <button
                   onClick={fillPDFForm}
                   disabled={isGenerating || !formData.invoiceNumber || !formData.financeCompanyName || !formData.vehMake || !formData.vehModel || !formData.retailPrice}
-                  className="flex items-center space-x-2 px-6 py-3 bg-fnt-red hover:bg-red-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 px-6 py-3 btn-glass-red text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isGenerating ? (
                     <>

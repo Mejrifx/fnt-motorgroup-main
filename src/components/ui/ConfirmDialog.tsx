@@ -55,7 +55,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       />
       
       {/* Dialog */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scale-in border border-gray-100 dark:border-gray-700">
+      <div className="admin-glass-card relative rounded-2xl max-w-md w-full mx-4 animate-scale-in">
         {/* Close button */}
         <button
           onClick={onCancel}

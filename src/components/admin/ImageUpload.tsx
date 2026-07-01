@@ -239,7 +239,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center space-x-2 px-4 py-2 bg-fnt-red text-white rounded-md hover:bg-red-600 disabled:opacity-50 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 btn-glass-red text-white rounded-lg disabled:opacity-50 transition-colors"
             >
               <ImageIcon className="w-4 h-4" />
               <span>Choose Files</span>

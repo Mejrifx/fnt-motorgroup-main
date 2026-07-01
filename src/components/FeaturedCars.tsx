@@ -186,11 +186,19 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
 
   if (loading) {
     return (
-      <section id="inventory" className="py-20" style={{ backgroundColor: '#171819' }}>
+      <section id="inventory" className="py-20 glass-scene">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
-            <p className="text-white">Loading cars...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="glass rounded-3xl overflow-hidden animate-pulse">
+                <div className="h-64 bg-white/5"></div>
+                <div className="p-6 space-y-3">
+                  <div className="h-5 w-2/3 bg-white/10 rounded-full"></div>
+                  <div className="h-7 w-1/3 bg-white/10 rounded-full"></div>
+                  <div className="h-4 w-full bg-white/5 rounded-full"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -198,26 +206,27 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   }
 
   return (
-    <section id="inventory" className="py-20" style={{ backgroundColor: '#171819' }}>
+    <section id="inventory" className="py-24 glass-scene">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-black text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <div className="text-center mb-16">
+          <span className="section-eyebrow mb-5">Showroom</span>
+          <h2 className="section-title text-5xl md:text-6xl font-black text-white mb-6">
             Our Car Collection
           </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Browse our wide selection of reliable cars in various styles - Saloon, Hatchback, Estate, Van, Coupe, Convertible, and 4x4 vehicles, all inspected and ready for their next adventure
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-6 mb-16">
+        <div className="flex flex-wrap justify-center gap-3 mb-16">
           {filters.map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 ${
+              className={`px-6 py-3 rounded-full font-semibold text-base transition-all duration-300 ${
                 activeFilter === filter
-                  ? 'bg-fnt-red text-white shadow-lg'
-                  : 'bg-white text-fnt-black hover:bg-gray-50 hover:text-fnt-red'
+                  ? 'btn-glass-red text-white'
+                  : 'glass-chip text-white/80 hover:text-white'
               }`}
             >
               {filter}
@@ -231,30 +240,31 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               <div
                 key={car.id}
                 onClick={() => navigate(`/car/${car.id}`)}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 group cursor-pointer"
+                className="glass-card overflow-hidden group cursor-pointer"
               >
                 <div className="relative overflow-hidden">
                   <img
                     src={resolveImageUrl(car)}
                     alt={`${car.make} ${car.model}`}
-                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="w-full h-64 object-cover transition-transform duration-700 ease-spring group-hover:scale-105"
                   />
-                  <div className="absolute top-4 right-4 bg-fnt-red text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                  <div className="absolute top-4 right-4 glass-subtle text-white px-3 py-1 rounded-full text-sm font-semibold">
                     {car.year}
                   </div>
                 </div>
                 
                 <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-fnt-black mb-1">
+                  <div className="mb-5 flex items-start justify-between gap-3">
+                    <h3 className="text-xl font-bold text-white leading-snug" style={{ fontFamily: 'Outfit, sans-serif' }}>
                       {car.make} {car.model}
                     </h3>
-                    <p className="text-2xl font-bold text-fnt-red">
+                    <p className="text-2xl font-bold text-fnt-red whitespace-nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       £{car.price.toLocaleString()}
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-2 gap-3 text-sm text-gray-400">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-fnt-red" />
                       <span>{formatMileage(car.mileage)}</span>
@@ -268,7 +278,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
                       <span>{car.fuel_type}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                      <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.7)]"></span>
                       <span>Available</span>
                     </div>
                   </div>
@@ -277,14 +287,14 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
             ))
           ) : (
             <div className="col-span-full text-center py-16">
-              <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="glass rounded-3xl p-8 max-w-md mx-auto">
+                <div className="w-16 h-16 glass-subtle rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-fnt-black mb-2">No Cars Found</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-xl font-bold text-white mb-2">No cars found</h3>
+                <p className="text-gray-400 mb-4">
                   Sorry, we don't have any cars matching your search criteria right now.
                 </p>
                 <p className="text-sm text-gray-500">
@@ -293,12 +303,6 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               </div>
             </div>
           )}
-        </div>
-
-        <div className="text-center mt-12">
-          <button className="bg-fnt-black text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-300">
-            View All Inventory
-          </button>
         </div>
       </div>
     </section>

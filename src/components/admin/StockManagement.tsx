@@ -281,7 +281,7 @@ const StockManagement: React.FC = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 px-4 py-3">
+      <div className="admin-glass-card px-4 py-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -317,7 +317,7 @@ const StockManagement: React.FC = () => {
               <RefreshCw className="w-4 h-4" />
             </button>
             <button onClick={openAdd}
-              className="flex items-center gap-1.5 bg-fnt-red hover:bg-red-600 text-white text-xs font-semibold px-3 py-2 rounded-xl transition">
+              className="flex items-center gap-1.5 btn-glass-red text-white text-xs font-semibold px-3 py-2 rounded-xl transition">
               <Plus className="w-3.5 h-3.5" /> Add Vehicle
             </button>
           </div>
@@ -325,7 +325,7 @@ const StockManagement: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="admin-glass-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-24 text-gray-400 dark:text-gray-500">
             <RefreshCw className="w-5 h-5 animate-spin mr-2" /> Loading stock…
@@ -620,7 +620,7 @@ const EditDrawer: React.FC<{
             Cancel
           </button>
           <button onClick={onSave} disabled={saving}
-            className="flex-1 py-3 rounded-xl bg-fnt-red text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-60 flex items-center justify-center gap-2">
+            className="flex-1 py-3 rounded-xl btn-glass-red text-white text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-2">
             {saving ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</> : <><Save className="w-4 h-4" /> {isAdding ? 'Add Vehicle' : 'Save Changes'}</>}
           </button>
         </div>
@@ -628,16 +628,5 @@ const EditDrawer: React.FC<{
     </>
   );
 };
-
-// Need Save icon
-function Save(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-      <polyline points="17 21 17 13 7 13 7 21" />
-      <polyline points="7 3 7 8 15 8" />
-    </svg>
-  );
-}
 
 export default StockManagement;

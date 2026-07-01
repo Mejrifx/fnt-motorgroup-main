@@ -250,7 +250,7 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Search Bar — filters as you type (same pattern as Stock tab) */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+      <div className="admin-glass-card !rounded-xl p-4">
         <div className="flex items-center space-x-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -276,7 +276,7 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+      <div className="admin-glass-card !rounded-xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fnt-red"></div>
@@ -354,7 +354,7 @@ const InvoiceHistory: React.FC = () => {
                   // Regular invoice row
                   const invoice = item.data;
                   return (
-                    <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <tr key={invoice.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTabColor(invoice.invoice_type)}`}>

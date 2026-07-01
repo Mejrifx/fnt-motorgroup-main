@@ -83,7 +83,7 @@ const MigrationGuide: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 sm:p-8 max-w-3xl mx-auto">
+    <div className="admin-glass-card p-6 sm:p-8 max-w-3xl mx-auto">
       <div className="flex items-start gap-4 mb-6">
         <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
           <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -123,7 +123,7 @@ const MigrationGuide: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
 
       <button
         onClick={onRetry}
-        className="mt-6 flex items-center gap-2 px-6 py-3 bg-fnt-red hover:bg-red-600 text-white font-semibold rounded-lg transition-colors"
+        className="mt-6 flex items-center gap-2 px-6 py-3 btn-glass-red text-white font-semibold rounded-lg transition-colors"
       >
         <RefreshCw className="w-4 h-4" />
         I've run the SQL — Load Showroom
@@ -144,7 +144,7 @@ interface RetrieveModalProps {
 const RetrieveModal: React.FC<RetrieveModalProps> = ({ car, sequence, rowName, onClose }) => (
   <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
     <div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+      className="admin-glass-card w-full max-w-md max-h-[90vh] overflow-y-auto"
       onClick={e => e.stopPropagation()}
     >
       {/* Header */}
@@ -314,7 +314,7 @@ const CarCard: React.FC<CarCardProps> = ({
         <div className="mt-3 space-y-1.5">
           <button
             onClick={onRetrieve}
-            className="w-full flex items-center justify-center gap-1.5 py-2 bg-fnt-red hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 py-2 btn-glass-red text-white text-xs font-semibold rounded-lg transition-colors"
           >
             <Key className="w-3.5 h-3.5" />
             Retrieve This Car
@@ -376,7 +376,7 @@ const LaneSection: React.FC<LaneSectionProps> = ({
   row, cars, onRetrieve, onEditCar, onDeleteCar, onMoveCar, onEditRow, onDeleteRow, getBlockingCount
 }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow mb-4 overflow-hidden">
+    <div className="admin-glass-card !rounded-xl mb-4 overflow-hidden">
       {/* Lane header */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-3">
@@ -496,7 +496,7 @@ const RowModal: React.FC<RowModalProps> = ({ initial, onSave, onClose, saving })
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
+      <div className="admin-glass-card w-full max-w-sm" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">{initial ? 'Edit Lane' : 'Add New Lane'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
@@ -527,13 +527,13 @@ const RowModal: React.FC<RowModalProps> = ({ initial, onSave, onClose, saving })
           </div>
         </div>
         <div className="flex gap-3 px-5 pb-5">
-          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
             Cancel
           </button>
           <button
             onClick={() => name.trim() && onSave(name.trim(), description.trim())}
             disabled={!name.trim() || saving}
-            className="flex-1 py-2.5 bg-fnt-red hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
+            className="flex-1 py-2.5 btn-glass-red disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
           >
             {saving ? 'Saving…' : initial ? 'Save Changes' : 'Add Lane'}
           </button>
@@ -610,7 +610,7 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="admin-glass-card w-full max-w-sm max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">{initial ? 'Edit Car' : 'Add Car to Showroom'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
@@ -804,7 +804,7 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
         </div>
 
         <div className="flex gap-3 px-5 pb-5">
-          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
             Cancel
           </button>
           <button
@@ -821,7 +821,7 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
               });
             }}
             disabled={!registration.trim() || saving}
-            className="flex-1 py-2.5 bg-fnt-red hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
+            className="flex-1 py-2.5 btn-glass-red disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
           >
             {saving ? 'Saving…' : initial ? 'Save Changes' : 'Add Car'}
           </button>
@@ -1059,7 +1059,7 @@ const ShowroomManager: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* ── Header & Stats ── */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 sm:p-6">
+      <div className="admin-glass-card !rounded-xl p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Showroom Parking</h2>
@@ -1077,7 +1077,7 @@ const ShowroomManager: React.FC = () => {
             </button>
             <button
               onClick={() => setShowAddCarModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-fnt-red hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2 btn-glass-red text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Add Car
@@ -1123,17 +1123,17 @@ const ShowroomManager: React.FC = () => {
 
       {/* ── Lanes ── */}
       {rows.length === 0 && cars.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center">
+        <div className="admin-glass-card !rounded-xl p-12 text-center">
           <Car className="w-14 h-14 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Showroom is empty</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
             Start by adding a parking lane (e.g. "Front Row", "Back Alley"), then add your cars to each lane in the order they're parked — closest to the exit first.
           </p>
           <div className="flex gap-3 justify-center">
-            <button onClick={() => setShowAddRowModal(true)} className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button onClick={() => setShowAddRowModal(true)} className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
               <MapPin className="w-4 h-4" /> Add First Lane
             </button>
-            <button onClick={() => setShowAddCarModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-fnt-red hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-colors">
+            <button onClick={() => setShowAddCarModal(true)} className="flex items-center gap-2 px-5 py-2.5 btn-glass-red text-white rounded-lg text-sm font-semibold transition-colors">
               <Plus className="w-4 h-4" /> Add First Car
             </button>
           </div>
@@ -1157,7 +1157,7 @@ const ShowroomManager: React.FC = () => {
 
       {/* ── Unassigned Cars ── */}
       {unassigned.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
+        <div className="admin-glass-card !rounded-xl overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-700">
             <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
             <h3 className="font-bold text-gray-900 dark:text-white">Unassigned Cars</h3>

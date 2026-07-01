@@ -186,7 +186,7 @@ const InvoiceManager = () => {
       {/* Invoice Type Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {/* Selling Invoice Card */}
-        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
+        <div className="admin-glass-card !rounded-xl p-6 hover:!border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -227,7 +227,7 @@ const InvoiceManager = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => openSimplePDFEditorInline('selling')}
-              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+              className="flex-1 flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
             >
               <Plus className="w-4 h-4" />
               <span>Create Invoice</span>
@@ -246,7 +246,7 @@ const InvoiceManager = () => {
         </div>
 
         {/* Purchase Invoice Card */}
-        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
+        <div className="admin-glass-card !rounded-xl p-6 hover:!border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -287,7 +287,7 @@ const InvoiceManager = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => openSimplePDFEditorInline('purchase')}
-              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+              className="flex-1 flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
             >
               <Plus className="w-4 h-4" />
               <span>Create Invoice</span>
@@ -306,7 +306,7 @@ const InvoiceManager = () => {
         </div>
 
         {/* Finance Invoice Card */}
-        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
+        <div className="admin-glass-card !rounded-xl p-6 hover:!border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
@@ -347,7 +347,7 @@ const InvoiceManager = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => openSimplePDFEditorInline('finance')}
-              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+              className="flex-1 flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
             >
               <Plus className="w-4 h-4" />
               <span>Create Invoice</span>
@@ -366,7 +366,7 @@ const InvoiceManager = () => {
         </div>
 
         {/* TNT Services Invoice Card */}
-        <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-fnt-red dark:hover:border-fnt-red transition-all">
+        <div className="admin-glass-card !rounded-xl p-6 hover:!border-fnt-red transition-all">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
@@ -407,7 +407,7 @@ const InvoiceManager = () => {
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => openSimplePDFEditorInline('tnt')}
-              className="flex-1 flex items-center justify-center space-x-2 bg-fnt-red hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+              className="flex-1 flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
             >
               <Plus className="w-4 h-4" />
               <span>Create Invoice</span>

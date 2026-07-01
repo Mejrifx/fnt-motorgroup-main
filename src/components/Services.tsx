@@ -36,13 +36,13 @@ const Services = () => {
   ];
 
   return (
-    <section id="services" className="py-20" style={{ backgroundColor: '#171819' }}>
+    <section id="services" className="py-24 glass-scene">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="section-title text-4xl md:text-5xl font-black text-white mb-4">
             Our Services
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
             From buying to selling, we're here to help with all your car needs
           </p>
         </div>
@@ -51,15 +51,15 @@ const Services = () => {
           {services.map((service, index) => (
             <div
               key={index}
-              className="bg-gray-50 rounded-2xl p-8 hover:bg-gradient-to-br hover:from-gray-50 hover:to-red-50 transition-all duration-500 transform hover:-translate-y-2 hover:shadow-xl group"
+              className="glass-card p-8 group"
             >
-              <div className="text-fnt-red mb-6 group-hover:text-red-600 transition-colors duration-300">
+              <div className="inline-flex p-4 rounded-2xl glass-subtle text-fnt-red mb-6 transition-transform duration-500 ease-spring group-hover:scale-110">
                 {service.icon}
               </div>
-              <h3 className="text-xl font-bold text-fnt-black mb-4">
+              <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>
                 {service.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-400 leading-relaxed">
                 {service.description}
               </p>
             </div>

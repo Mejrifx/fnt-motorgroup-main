@@ -58,7 +58,7 @@ const Reviews: React.FC = () => {
           <Star
             key={index}
             className={`w-5 h-5 ${
-              index < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+              index < rating ? 'text-amber-400 fill-amber-400' : 'text-white/20'
             }`}
           />
         ))}
@@ -68,11 +68,15 @@ const Reviews: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-20 glass-scene">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto"></div>
-            <p className="text-gray-600 mt-4">Loading reviews...</p>
+          <div className="max-w-5xl mx-auto">
+            <div className="glass rounded-3xl p-8 md:p-12 animate-pulse space-y-4">
+              <div className="h-5 w-40 bg-white/10 rounded-full mx-auto"></div>
+              <div className="h-4 w-full bg-white/5 rounded-full"></div>
+              <div className="h-4 w-5/6 bg-white/5 rounded-full mx-auto"></div>
+              <div className="h-12 w-12 bg-white/10 rounded-full mx-auto"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -86,28 +90,30 @@ const Reviews: React.FC = () => {
   const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
 
   return (
-    <section id="reviews" className="py-20" style={{ backgroundColor: '#171819' }}>
+    <section id="reviews" className="py-24 glass-scene">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-6xl font-black text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <h2 className="section-title text-5xl md:text-6xl font-black text-white mb-6">
             What Our <span className="text-fnt-red">Customers</span> Say
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
             Don't just take our word for it - hear from our satisfied customers
           </p>
           
           {/* Rating Summary */}
-          <div className="flex items-center justify-center space-x-4 bg-white rounded-2xl shadow-lg p-6 max-w-md mx-auto">
+          <div className="flex items-center justify-center space-x-4 glass rounded-3xl p-6 max-w-md mx-auto">
             <div className="text-center">
-              <div className="text-5xl font-bold text-fnt-black mb-2">{averageRating.toFixed(1)}</div>
+              <div className="text-5xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{averageRating.toFixed(1)}</div>
               <div className="flex justify-center mb-2">{renderStars(5)}</div>
-              <div className="text-sm text-gray-600 mb-3">Based on {reviews.length}+ reviews</div>
-              <img 
-                src="/autotrader-logo.jpg" 
-                alt="AutoTrader" 
-                className="h-8 w-auto mx-auto"
-              />
+              <div className="text-sm text-gray-400 mb-3">Based on {reviews.length}+ reviews</div>
+              <div className="inline-block bg-white rounded-lg px-3 py-1.5">
+                <img 
+                  src="/autotrader-logo.jpg" 
+                  alt="AutoTrader" 
+                  className="h-8 w-auto mx-auto"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -115,7 +121,7 @@ const Reviews: React.FC = () => {
         {/* Review Carousel */}
         <div className="max-w-5xl mx-auto">
           <div
-            className="relative bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100"
+            className="relative glass rounded-3xl p-8 md:p-12"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -131,11 +137,13 @@ const Reviews: React.FC = () => {
                 <div className="flex items-center justify-center w-full">
                   <p className="text-xs text-gray-500 mb-2" style={{ transform: 'translateX(-7px)' }}>Reviewed on</p>
                 </div>
-                <img 
-                  src="/feefo%20image.png" 
-                  alt="Feefo" 
-                  className="h-6 w-auto"
-                />
+                <div className="bg-white rounded-md px-2 py-1">
+                  <img 
+                    src="/feefo%20image.png" 
+                    alt="Feefo" 
+                    className="h-6 w-auto"
+                  />
+                </div>
               </div>
 
               {/* Stars */}
@@ -146,25 +154,25 @@ const Reviews: React.FC = () => {
               {/* Review Text */}
               <blockquote className="text-center mb-8">
                 <div className="max-h-32 sm:max-h-40 overflow-y-auto px-2">
-                  <p className="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed italic mb-6">
+                  <p className="text-lg sm:text-xl md:text-2xl text-gray-200 leading-relaxed italic mb-6">
                     "{reviews[currentReview].review_text}"
                   </p>
                 </div>
                 
                 {/* Reviewer Info */}
                 <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-fnt-red to-red-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-3">
+                  <div className="w-16 h-16 btn-glass-red rounded-full flex items-center justify-center text-white font-bold text-xl mb-3">
                     {reviews[currentReview].customer_name.charAt(0)}
                   </div>
-                  <div className="font-bold text-fnt-black text-lg">
+                  <div className="font-bold text-white text-lg">
                     {reviews[currentReview].customer_name}
                   </div>
                   {reviews[currentReview].vehicle_purchased && (
-                    <div className="text-gray-500 text-sm mb-1">
+                    <div className="text-gray-400 text-sm mb-1">
                       Purchased: {reviews[currentReview].vehicle_purchased}
                     </div>
                   )}
-                  <div className="text-gray-400 text-sm">
+                  <div className="text-gray-500 text-sm">
                     {reviews[currentReview].review_date}
                   </div>
                 </div>
@@ -175,7 +183,7 @@ const Reviews: React.FC = () => {
                 <div className="flex items-center justify-center space-x-2 sm:space-x-4">
                   <button
                     onClick={previousReview}
-                    className="p-2 sm:p-3 rounded-full bg-gray-100 hover:bg-fnt-red hover:text-white transition-all duration-300 group"
+                    className="p-2 sm:p-3 rounded-full glass-chip text-white hover:text-fnt-red transition-all duration-300 group"
                     aria-label="Previous review"
                   >
                     <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -190,7 +198,7 @@ const Reviews: React.FC = () => {
                         className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 flex-shrink-0 ${
                           index === currentReview
                             ? 'bg-fnt-red w-6 sm:w-8'
-                            : 'bg-gray-300 hover:bg-gray-400'
+                            : 'bg-white/20 hover:bg-white/40'
                         }`}
                         aria-label={`Go to review ${index + 1}`}
                       />
@@ -199,7 +207,7 @@ const Reviews: React.FC = () => {
 
                   <button
                     onClick={nextReview}
-                    className="p-2 sm:p-3 rounded-full bg-gray-100 hover:bg-fnt-red hover:text-white transition-all duration-300 group"
+                    className="p-2 sm:p-3 rounded-full glass-chip text-white hover:text-fnt-red transition-all duration-300 group"
                     aria-label="Next review"
                   >
                     <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -211,17 +219,17 @@ const Reviews: React.FC = () => {
 
           {/* Trust Badges */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <div className="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="text-4xl font-bold text-fnt-red mb-2">1000+</div>
-              <div className="text-gray-600 font-medium">Happy Customers</div>
+            <div className="glass-card p-6 text-center">
+              <div className="text-4xl font-bold text-fnt-red mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>1000+</div>
+              <div className="text-gray-400 font-medium">Happy Customers</div>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="text-4xl font-bold text-fnt-red mb-2">{averageRating.toFixed(1)}</div>
-              <div className="text-gray-600 font-medium">Average Rating</div>
+            <div className="glass-card p-6 text-center">
+              <div className="text-4xl font-bold text-fnt-red mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{averageRating.toFixed(1)}</div>
+              <div className="text-gray-400 font-medium">Average Rating</div>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="text-4xl font-bold text-fnt-red mb-2">100%</div>
-              <div className="text-gray-600 font-medium">Satisfaction Guarantee</div>
+            <div className="glass-card p-6 text-center">
+              <div className="text-4xl font-bold text-fnt-red mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>100%</div>
+              <div className="text-gray-400 font-medium">Satisfaction Guarantee</div>
             </div>
           </div>
 

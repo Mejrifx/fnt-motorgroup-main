@@ -135,7 +135,7 @@ const CarDetails: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen glass-scene flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fnt-red mx-auto mb-4"></div>
           <p className="text-white">Loading car details...</p>
@@ -146,14 +146,14 @@ const CarDetails: React.FC = () => {
 
   if (error || !car) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <CarIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Car Not Found</h2>
+      <div className="min-h-screen glass-scene flex items-center justify-center">
+        <div className="glass rounded-3xl p-10 text-center max-w-md mx-4">
+          <CarIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>Car Not Found</h2>
           <p className="text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => navigate('/')}
-            className="bg-fnt-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+            className="btn-glass-red text-white px-6 py-3 rounded-xl font-semibold"
           >
             Back to Homepage
           </button>
@@ -165,9 +165,9 @@ const CarDetails: React.FC = () => {
   const images = getAllImages();
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen glass-scene">
       {/* Header */}
-      <div className="bg-black/90 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-40">
+      <div className="border-b border-white/10 sticky top-0 z-40" style={{ background: 'rgba(11, 12, 15, 0.75)', backdropFilter: 'blur(24px) saturate(140%)', WebkitBackdropFilter: 'blur(24px) saturate(140%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <button
@@ -190,7 +190,7 @@ const CarDetails: React.FC = () => {
           {/* Left Column - Images and Description */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <div className="relative bg-gray-900 rounded-2xl overflow-hidden">
+            <div className="relative glass rounded-3xl overflow-hidden">
               {images.length > 0 ? (
                 <>
                   <img
@@ -227,9 +227,9 @@ const CarDetails: React.FC = () => {
                   )}
                 </>
               ) : (
-                <div className="w-full h-96 lg:h-[500px] flex items-center justify-center bg-gray-800">
+                <div className="w-full h-96 lg:h-[500px] flex items-center justify-center">
                   <div className="text-center">
-                    <CarIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <CarIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
                     <p className="text-gray-400">No images available</p>
                   </div>
                 </div>
@@ -240,13 +240,13 @@ const CarDetails: React.FC = () => {
                 <div className="md:hidden flex items-center justify-center gap-4 py-3">
                   <button
                     onClick={previousImage}
-                    className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
+                    className="btn-glass text-white p-3 rounded-full"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 transition-colors"
+                    className="btn-glass text-white p-3 rounded-full"
                   >
                     <ChevronRight className="w-6 h-6" />
                   </button>
@@ -261,8 +261,8 @@ const CarDetails: React.FC = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                      index === currentImageIndex ? 'border-fnt-red' : 'border-gray-700'
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+                      index === currentImageIndex ? 'border-fnt-red shadow-glass-red' : 'border-white/15 hover:border-white/40'
                     }`}
                   >
                     <img
@@ -277,13 +277,13 @@ const CarDetails: React.FC = () => {
 
             {/* Description Section */}
             {car.description && (
-              <div className="bg-gray-900 rounded-2xl p-6">
-                <h3 className="text-2xl font-bold text-white mb-4">Description</h3>
+              <div className="glass rounded-3xl p-6 md:p-8">
+                <h3 className="text-2xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>Description</h3>
                 <div className="text-gray-300 leading-relaxed text-lg whitespace-pre-line">
                   {/* Split description to highlight attention grabber if present */}
                   {car.description.startsWith('✨') ? (
                     <>
-                      <div className="text-fnt-red font-bold text-xl mb-4 pb-4 border-b border-gray-700">
+                      <div className="text-fnt-red font-bold text-xl mb-4 pb-4 border-b border-white/10">
                         {car.description.split('\n\n')[0].replace('✨ ', '')}
                       </div>
                       <div>{car.description.split('\n\n').slice(1).join('\n\n')}</div>
@@ -299,27 +299,28 @@ const CarDetails: React.FC = () => {
           {/* Right Column - Car Details */}
           <div className="space-y-6">
             {/* Price & Title */}
-            <div className="bg-gray-900 rounded-2xl p-6">
-              <h2 className="text-3xl font-bold text-white mb-2">{car.make} {car.model}</h2>
-              <p className="text-4xl font-bold text-fnt-red mb-4">{formatPrice(car.price)}</p>
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <div className="glass rounded-3xl p-6">
+              <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>{car.make} {car.model}</h2>
+              <p className="text-4xl font-bold text-fnt-red mb-4" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatPrice(car.price)}</p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium text-emerald-300" style={{ background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+                <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.7)]"></span>
                 Available
               </div>
             </div>
 
             {/* Car Specifications */}
-            <div className="bg-gray-900 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Details</h3>
+            <div className="glass rounded-3xl p-6">
+              <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>Details</h3>
               <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400">Make:</span>
                   <span className="text-white font-medium">{car.make}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400">Model:</span>
                   <span className="text-white font-medium">{car.model}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 flex items-center gap-2">
                     <Fuel className="w-4 h-4" />
                     Fuel:
@@ -327,7 +328,7 @@ const CarDetails: React.FC = () => {
                   <span className="text-white font-medium">{car.fuel_type}</span>
                 </div>
                 {car.colour && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-gray-400 flex items-center gap-2">
                       <Palette className="w-4 h-4" />
                       Colour:
@@ -335,14 +336,14 @@ const CarDetails: React.FC = () => {
                     <span className="text-white font-medium">{car.colour}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Year:
                   </span>
                   <span className="text-white font-medium">{car.year}</span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 flex items-center gap-2">
                     <Settings className="w-4 h-4" />
                     Gearbox:
@@ -350,13 +351,13 @@ const CarDetails: React.FC = () => {
                   <span className="text-white font-medium">{car.transmission}</span>
                 </div>
                 {car.engine && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-gray-400">Engine:</span>
                     <span className="text-white font-medium">{car.engine}</span>
                   </div>
                 )}
                 {car.style && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-gray-400 flex items-center gap-2">
                       <CarIcon className="w-4 h-4" />
                       Style:
@@ -365,7 +366,7 @@ const CarDetails: React.FC = () => {
                   </div>
                 )}
                 {car.doors && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                  <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-gray-400 flex items-center gap-2">
                       <DoorOpen className="w-4 h-4" />
                       Doors:
@@ -373,7 +374,7 @@ const CarDetails: React.FC = () => {
                     <span className="text-white font-medium">{car.doors}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center py-2 border-b border-gray-700">
+                <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400">Mileage:</span>
                   <span className="text-white font-medium">{formatMileage(car.mileage)}</span>
                 </div>
@@ -390,19 +391,19 @@ const CarDetails: React.FC = () => {
             </div>
 
             {/* Contact Actions */}
-            <div className="bg-gray-900 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Interested?</h3>
+            <div className="glass rounded-3xl p-6">
+              <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>Interested?</h3>
               <div className="space-y-3">
                 <a
                   href="tel:07735770031"
-                  className="flex items-center justify-center space-x-2 w-full bg-fnt-red text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                  className="btn-glass-red flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"
                 >
                   <Phone className="w-5 h-5" />
                   <span>Call Now</span>
                 </a>
                 <a
                   href="mailto:fntgroupltd@gmail.com?subject=Inquiry about ${car.make} ${car.model}"
-                  className="flex items-center justify-center space-x-2 w-full bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
+                  className="btn-glass flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"
                 >
                   <Mail className="w-5 h-5" />
                   <span>Email Inquiry</span>
@@ -411,7 +412,7 @@ const CarDetails: React.FC = () => {
                   href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center space-x-2 w-full bg-gray-700 text-white py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors"
+                  className="btn-glass flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"
                 >
                   <MapPin className="w-5 h-5" />
                   <span>Visit Showroom</span>
@@ -464,10 +465,10 @@ const CarDetails: React.FC = () => {
               </button>
               
               {/* Mobile - Bottom navigation bar */}
-              <div className="md:hidden absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm py-4 px-4 flex items-center justify-center gap-6 border-t border-gray-800">
+              <div className="md:hidden absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm py-4 px-4 flex items-center justify-center gap-6 border-t border-white/10">
                 <button
                   onClick={previousImage}
-                  className="bg-gray-800 text-white p-4 rounded-full hover:bg-gray-700 transition-colors"
+                  className="btn-glass text-white p-4 rounded-full"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
@@ -476,7 +477,7 @@ const CarDetails: React.FC = () => {
                 </div>
                 <button
                   onClick={nextImage}
-                  className="bg-gray-800 text-white p-4 rounded-full hover:bg-gray-700 transition-colors"
+                  className="btn-glass text-white p-4 rounded-full"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>

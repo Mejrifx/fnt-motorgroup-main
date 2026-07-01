@@ -11,12 +11,12 @@ const TermsAndConditions: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen glass-scene">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center space-x-2 bg-white/90 backdrop-blur-xl text-fnt-black hover:text-fnt-red transition-colors duration-300 px-4 py-2 rounded-lg shadow-lg border border-gray-200/50"
+          className="btn-glass flex items-center space-x-2 text-white hover:text-fnt-red px-4 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
@@ -24,13 +24,13 @@ const TermsAndConditions: React.FC = () => {
       </div>
 
       {/* Header */}
-      <section className="bg-white border-b border-gray-200 py-16">
+      <section className="border-b border-white/10 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Terms and Conditions
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-400">
               Clear and transparent terms for vehicle sales
             </p>
             <p className="text-sm text-gray-500 mt-2">
@@ -50,9 +50,9 @@ const TermsAndConditions: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             
             {/* Introduction */}
-            <div className="bg-white rounded-lg border border-gray-200 p-8 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Important Information</h2>
-              <div className="text-gray-700 leading-relaxed space-y-4">
+            <div className="glass rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">Important Information</h2>
+              <div className="text-gray-300 leading-relaxed space-y-4">
                 <p>
                   These terms and conditions ("Terms") govern the sale of vehicles by FNT Motor Group ("we," "us," or "our"). 
                   Please read them carefully before making a purchase.
@@ -61,8 +61,8 @@ const TermsAndConditions: React.FC = () => {
                   By proceeding with a purchase, viewing a vehicle, paying a deposit, or entering into any agreement with us, 
                   you agree to be bound by these Terms.
                 </p>
-                <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
-                  <p className="text-gray-800">
+                <div className="glass-subtle border-l-4 border-white/30 p-4 mt-4">
+                  <p className="text-gray-200">
                     <strong>Your Statutory Rights:</strong> Nothing in these Terms affects your statutory rights under 
                     the Consumer Rights Act 2015, the Consumer Protection from Unfair Trading Regulations 2008, 
                     or any other applicable consumer protection legislation.
@@ -92,7 +92,7 @@ const TermsAndConditions: React.FC = () => {
                 <AccordionItem 
                   title="2. Contract Formation"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">When a contract is formed:</h4>
+                  <h4 className="font-semibold text-white mb-3">When a contract is formed:</h4>
                   <p>
                     A legally binding contract is formed when:
                   </p>
@@ -110,7 +110,7 @@ const TermsAndConditions: React.FC = () => {
                 <AccordionItem 
                   title="3. Deposits - Payment and Refund Policy"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Collection timeline:</h4>
+                  <h4 className="font-semibold text-white mb-3">Collection timeline:</h4>
                   <p>
                     From the time a deposit is paid, the vehicle must be collected within <strong>7 days</strong>. 
                     If you fail to collect the vehicle within 7 days, the deposit may be forfeited unless:
@@ -120,9 +120,9 @@ const TermsAndConditions: React.FC = () => {
                     <li>We have withdrawn the vehicle from sale and failed to notify you</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Deposits are NON-REFUNDABLE in the following circumstances:</h4>
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-3">
-                    <ul className="list-disc pl-6 space-y-2 text-gray-800">
+                  <h4 className="font-semibold text-white mt-6 mb-3">Deposits are NON-REFUNDABLE in the following circumstances:</h4>
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-3">
+                    <ul className="list-disc pl-6 space-y-2 text-gray-200">
                       <li>
                         <strong>Buyer changes their mind:</strong> If you decide not to proceed with the purchase for any reason, 
                         including finding another vehicle, financial difficulties, or simply changing your mind
@@ -138,9 +138,9 @@ const TermsAndConditions: React.FC = () => {
                     </ul>
                   </div>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Deposits are REFUNDABLE in the following circumstances:</h4>
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-3">
-                    <ul className="list-disc pl-6 space-y-2 text-gray-800">
+                  <h4 className="font-semibold text-white mt-6 mb-3">Deposits are REFUNDABLE in the following circumstances:</h4>
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-3">
+                    <ul className="list-disc pl-6 space-y-2 text-gray-200">
                       <li>
                         <strong>Vehicle is faulty or not as described:</strong> If the vehicle has defects that were not disclosed 
                         or the vehicle is materially different from the description or advertisement
@@ -160,7 +160,7 @@ const TermsAndConditions: React.FC = () => {
                 <AccordionItem 
                   title="4. Price and Payment"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Vehicle pricing:</h4>
+                  <h4 className="font-semibold text-white mb-3">Vehicle pricing:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>The price of the vehicle is as stated on the invoice or quotation provided to you</li>
                     <li>Prices are subject to change until a deposit is paid or a contract is formed</li>
@@ -168,7 +168,7 @@ const TermsAndConditions: React.FC = () => {
                     <li>Additional costs (e.g., delivery, number plates, first registration fee) will be clearly stated</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Payment methods:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Payment methods:</h4>
                   <p>We accept payment by:</p>
                   <ul className="list-disc pl-6 space-y-2 mt-3">
                     <li>Bank transfer (preferred method for large payments)</li>
@@ -191,13 +191,13 @@ const TermsAndConditions: React.FC = () => {
                     While we strive to provide accurate specifications, errors may occur.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Your responsibility to inspect:</h4>
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-3">
-                    <p className="text-gray-800">
+                  <h4 className="font-semibold text-white mt-6 mb-3">Your responsibility to inspect:</h4>
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-3">
+                    <p className="text-gray-200">
                       <strong>Important:</strong> It is your responsibility to inspect and verify the vehicle prior to purchase. 
                       We strongly recommend:
                     </p>
-                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-200 mt-2 space-y-1">
                       <li>Viewing the vehicle in person before purchase</li>
                       <li>Conducting a test drive (subject to valid insurance and driving license)</li>
                       <li>Requesting an independent inspection or vehicle history check</li>
@@ -205,7 +205,7 @@ const TermsAndConditions: React.FC = () => {
                     </ul>
                   </div>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Mileage and condition:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Mileage and condition:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Mileage is stated to the best of our knowledge and is believed to be accurate</li>
                     <li>We cannot guarantee mileage unless explicitly warranted in writing</li>
@@ -221,7 +221,7 @@ const TermsAndConditions: React.FC = () => {
                     If you are part-exchanging a vehicle as part of your purchase, the following conditions apply:
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Your obligations:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Your obligations:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>You must disclose any outstanding finance on the part-exchange vehicle</li>
                     <li>You must provide accurate information about the vehicle's condition, mileage, and service history</li>
@@ -229,7 +229,7 @@ const TermsAndConditions: React.FC = () => {
                     <li>You must provide all keys, service records, and the V5C registration document</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Our rights:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Our rights:</h4>
                   <p>
                     We reserve the right to adjust the agreed part-exchange value if:
                   </p>
@@ -248,7 +248,7 @@ const TermsAndConditions: React.FC = () => {
                 <AccordionItem 
                   title="7. Vehicle Collection and Delivery"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Collection:</h4>
+                  <h4 className="font-semibold text-white mb-3">Collection:</h4>
                   <p>
                     Vehicles must be collected within <strong>7 days</strong> of notification that the vehicle is ready for collection 
                     (or within the timeframe agreed in writing).
@@ -260,7 +260,7 @@ const TermsAndConditions: React.FC = () => {
                     <li>You must provide proof of insurance and a valid driving license before taking possession</li>
                   </ul>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Delivery:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Delivery:</h4>
                   <p>
                     If you request delivery, the following applies:
                   </p>
@@ -275,30 +275,30 @@ const TermsAndConditions: React.FC = () => {
                 <AccordionItem 
                   title="8. Warranty and After-Sales Support"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">Standard warranty:</h4>
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4">
-                    <p className="text-gray-800">
+                  <h4 className="font-semibold text-white mb-3">Standard warranty:</h4>
+                  <div className="glass-subtle border-l-4 border-white/30 p-4">
+                    <p className="text-gray-200">
                       <strong>All vehicles come with:</strong>
                     </p>
-                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-200 mt-2 space-y-1">
                       <li>6 months warranty (mechanical and electrical coverage)</li>
                       <li>6 months breakdown cover (nationwide roadside assistance and recovery)</li>
                     </ul>
                   </div>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Extended warranty options:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Extended warranty options:</h4>
                   <p>
                     We offer optional extended warranty packages (Silver, Gold, and Platinum) for additional coverage. 
                     Details and pricing are available upon request.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Manufacturer warranty:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Manufacturer warranty:</h4>
                   <p>
                     If the vehicle has remaining manufacturer's warranty, this will be disclosed and transferred to you. 
                     Manufacturer warranties are subject to the manufacturer's terms and conditions.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">What the warranty covers:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">What the warranty covers:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Mechanical failures (engine, gearbox, drivetrain components)</li>
                     <li>Electrical faults (excluding wear-and-tear items like bulbs and fuses)</li>
@@ -317,7 +317,7 @@ const TermsAndConditions: React.FC = () => {
                     Your statutory rights under the Consumer Rights Act 2015 are unaffected by these Terms.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Your rights under the Consumer Rights Act:</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Your rights under the Consumer Rights Act:</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>
                       <strong>Right to reject (first 30 days):</strong> If the vehicle is faulty or not as described, 
@@ -333,11 +333,11 @@ const TermsAndConditions: React.FC = () => {
                     </li>
                   </ul>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
-                    <p className="text-gray-800">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-4">
+                    <p className="text-gray-200">
                       <strong>Important:</strong> Under the Consumer Rights Act, goods must be:
                     </p>
-                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-200 mt-2 space-y-1">
                       <li>Of satisfactory quality</li>
                       <li>Fit for purpose</li>
                       <li>As described</li>
@@ -353,13 +353,13 @@ const TermsAndConditions: React.FC = () => {
                     you may have additional rights under the Consumer Contracts Regulations 2013.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">14-day cooling-off period:</h4>
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4">
-                    <p className="text-gray-800">
+                  <h4 className="font-semibold text-white mt-6 mb-3">14-day cooling-off period:</h4>
+                  <div className="glass-subtle border-l-4 border-white/30 p-4">
+                    <p className="text-gray-200">
                       You have the right to cancel the purchase within <strong>14 days</strong> of receiving the vehicle, 
                       without giving a reason. To exercise this right, you must:
                     </p>
-                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-200 mt-2 space-y-1">
                       <li>Inform us in writing (email or letter) of your decision to cancel</li>
                       <li>Return the vehicle in the same condition it was delivered (reasonable wear and tear excepted)</li>
                       <li>Cover the cost of returning the vehicle to us</li>
@@ -398,11 +398,11 @@ const TermsAndConditions: React.FC = () => {
                     </li>
                   </ul>
                   
-                  <div className="bg-gray-100 border-l-4 border-gray-400 p-4 mt-4">
-                    <p className="text-gray-800">
+                  <div className="glass-subtle border-l-4 border-white/30 p-4 mt-4">
+                    <p className="text-gray-200">
                       <strong>Important:</strong> Nothing in these Terms limits our liability for:
                     </p>
-                    <ul className="list-disc pl-6 text-gray-800 mt-2 space-y-1">
+                    <ul className="list-disc pl-6 text-gray-200 mt-2 space-y-1">
                       <li>Death or personal injury caused by our negligence</li>
                       <li>Fraud or fraudulent misrepresentation</li>
                       <li>Any liability that cannot be excluded by law</li>
@@ -413,32 +413,32 @@ const TermsAndConditions: React.FC = () => {
                 <AccordionItem 
                   title="12. Complaints and Dispute Resolution"
                 >
-                  <h4 className="font-semibold text-gray-900 mb-3">How to make a complaint:</h4>
+                  <h4 className="font-semibold text-white mb-3">How to make a complaint:</h4>
                   <p>
                     If you are dissatisfied with any aspect of your purchase or our service, please contact us:
                   </p>
                   
-                  <div className="bg-gray-100 p-4 rounded mt-4">
-                    <p className="font-semibold text-gray-900">FNT Motor Group</p>
-                    <p className="text-gray-700 mt-2">Email: fntgroupltd@gmail.com</p>
-                    <p className="text-gray-700">Phone: 07735770031</p>
-                    <p className="text-gray-700">Address: Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB</p>
+                  <div className="glass-subtle p-4 rounded-xl mt-4">
+                    <p className="font-semibold text-white">FNT Motor Group</p>
+                    <p className="text-gray-300 mt-2">Email: fntgroupltd@gmail.com</p>
+                    <p className="text-gray-300">Phone: 07735770031</p>
+                    <p className="text-gray-300">Address: Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB</p>
                   </div>
                   
                   <p className="mt-4">
                     We will acknowledge your complaint within 3 working days and aim to resolve it within 14 days.
                   </p>
                   
-                  <h4 className="font-semibold text-gray-900 mt-6 mb-3">Alternative Dispute Resolution (ADR):</h4>
+                  <h4 className="font-semibold text-white mt-6 mb-3">Alternative Dispute Resolution (ADR):</h4>
                   <p>
                     If we cannot resolve your complaint to your satisfaction, you may refer it to an alternative dispute resolution body:
                   </p>
                   <ul className="list-disc pl-6 space-y-2 mt-3">
                     <li>
-                      <strong>The Motor Ombudsman:</strong> <a href="https://www.themotorombudsman.org" target="_blank" rel="noopener noreferrer" className="text-fnt-red underline hover:text-red-600">www.themotorombudsman.org</a>
+                      <strong>The Motor Ombudsman:</strong> <a href="https://www.themotorombudsman.org" target="_blank" rel="noopener noreferrer" className="text-fnt-red underline hover:text-red-400">www.themotorombudsman.org</a>
                     </li>
                     <li>
-                      <strong>Citizens Advice Consumer Service:</strong> <a href="https://www.citizensadvice.org.uk" target="_blank" rel="noopener noreferrer" className="text-fnt-red underline hover:text-red-600">www.citizensadvice.org.uk</a>
+                      <strong>Citizens Advice Consumer Service:</strong> <a href="https://www.citizensadvice.org.uk" target="_blank" rel="noopener noreferrer" className="text-fnt-red underline hover:text-red-400">www.citizensadvice.org.uk</a>
                     </li>
                   </ul>
                 </AccordionItem>
@@ -483,21 +483,21 @@ const TermsAndConditions: React.FC = () => {
             </div>
 
             {/* Contact Section */}
-            <div className="mt-12 bg-white rounded-lg border border-gray-200 p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Questions About These Terms?</h3>
-              <p className="text-gray-700 mb-6">
+            <div className="mt-12 glass rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-white mb-4">Questions About These Terms?</h3>
+              <p className="text-gray-300 mb-6">
                 If you have any questions about these Terms and Conditions, please contact us:
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a 
                   href="tel:07735770031"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-fnt-red text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                  className="inline-flex items-center justify-center btn-glass-red px-6 py-3 text-white rounded-xl font-semibold"
                 >
                   Call: 07735770031
                 </a>
                 <a 
                   href="mailto:fntgroupltd@gmail.com"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors"
+                  className="inline-flex items-center justify-center btn-glass px-6 py-3 text-white rounded-xl font-semibold"
                 >
                   Email Us
                 </a>
@@ -505,8 +505,8 @@ const TermsAndConditions: React.FC = () => {
             </div>
 
             {/* Footer Note */}
-            <div className="mt-8 bg-gray-100 border-l-4 border-gray-400 p-6">
-              <p className="text-gray-800">
+            <div className="mt-8 glass-subtle border-l-4 border-white/30 p-6">
+              <p className="text-gray-200">
                 <strong>Legal Compliance:</strong> These Terms comply with the Consumer Rights Act 2015, 
                 the Consumer Contracts Regulations 2013, and the Consumer Protection from Unfair Trading Regulations 2008.
               </p>

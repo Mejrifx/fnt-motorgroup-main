@@ -50,8 +50,8 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({ onClose, onSuccess }) =
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white/90 backdrop-blur-xl border-b px-6 py-4 flex justify-between items-center rounded-t-2xl">
           <h2 className="text-2xl font-bold text-gray-900">Add New Review</h2>
           <button
             onClick={onClose}
@@ -171,7 +171,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({ onClose, onSuccess }) =
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-fnt-red text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 btn-glass-red text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Adding...' : 'Add Review'}
             </button>
