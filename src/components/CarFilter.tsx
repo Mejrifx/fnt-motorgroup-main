@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, ChevronDown, X } from 'lucide-react';
+import { MagnifyingGlass, CaretDown, X } from '@phosphor-icons/react';
 import { supabase } from '../lib/supabase';
 
 interface CarFilterProps {
@@ -179,7 +179,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 className="px-3 py-2 text-sm font-semibold text-white hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
               >
                 <span>{filters.make || 'Any Make'}</span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
+                <CaretDown className={`h-4 w-4 transition-transform duration-200 ${isMakeOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isMakeOpen && (
@@ -220,7 +220,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 className="px-3 py-2 text-sm font-semibold text-white hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
               >
                 <span>{filters.model || 'Any Model'}</span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
+                <CaretDown className={`h-4 w-4 transition-transform duration-200 ${isModelOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isModelOpen && (
@@ -294,7 +294,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 className="px-3 py-2 text-sm font-semibold text-white hover:text-fnt-red transition-all duration-300 flex items-center gap-2 min-w-0 flex-shrink"
               >
                 <span>{filters.fuelType || 'Any Fuel Type'}</span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
+                <CaretDown className={`h-4 w-4 transition-transform duration-200 ${isFuelOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isFuelOpen && (
@@ -333,7 +333,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
               onClick={handleSearch}
               className="btn-glass-red text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2"
             >
-              <Search className="h-4 w-4" />
+              <MagnifyingGlass className="h-4 w-4" />
               Search
             </button>
 
@@ -357,7 +357,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
             className="w-full px-6 py-4 rounded-2xl active:scale-[0.98] transition-transform duration-150 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <Search className="w-5 h-5 text-white/50" />
+              <MagnifyingGlass className="w-5 h-5 text-white/50" />
               <div className="text-left">
                 <div className="text-sm font-semibold text-white">
                   {filters.make || filters.model || filters.fuelType ? (
@@ -377,7 +377,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                 )}
               </div>
             </div>
-            <ChevronDown className={`w-5 h-5 text-white/50 transition-transform duration-300 ${isMobileFilterOpen ? 'rotate-180' : ''}`} />
+            <CaretDown className={`w-5 h-5 text-white/50 transition-transform duration-300 ${isMobileFilterOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Full-Screen Modal - Portal to body to escape stacking context */}
@@ -584,7 +584,7 @@ const CarFilter: React.FC<CarFilterProps> = ({ onFilterChange }) => {
                       }}
                       className="btn-glass-red w-full text-white px-6 py-4 rounded-2xl text-base font-bold active:scale-[0.98] flex items-center justify-center gap-2"
                     >
-                      <Search className="w-5 h-5" />
+                      <MagnifyingGlass className="w-5 h-5" />
                       Search {hasActiveFilters && 'with Filters'}
                     </button>
                   </div>

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Shield, CreditCard, Phone, Mail, MapPin, CheckCircle, Star, Clock, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, CreditCard, Phone, EnvelopeSimple, MapPin, CheckCircle, Star, Clock, ArrowLeft } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 
 const WarrantyFinancing: React.FC = () => {
@@ -11,7 +11,7 @@ const WarrantyFinancing: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen glass-scene">
+    <div className="min-h-screen glass-scene grain">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <button
@@ -27,7 +27,7 @@ const WarrantyFinancing: React.FC = () => {
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(800px 400px at 50% -10%, rgba(255,73,67,0.10), transparent 65%)' }}></div>
         <div className="container mx-auto px-4 text-center relative">
-          <h1 className="section-title text-4xl md:text-6xl font-black text-white mb-6">
+          <h1 className="section-title text-4xl md:text-6xl text-white mb-6">
             <span className="text-white">Warranty & </span><span className="text-fnt-red">Financing</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
@@ -44,10 +44,10 @@ const WarrantyFinancing: React.FC = () => {
             <div className="text-center mb-16">
               <div className="flex justify-center mb-6">
                 <div className="glass-subtle p-4 rounded-full">
-                  <Shield className="w-12 h-12 text-emerald-400" />
+                  <ShieldCheck className="w-12 h-12 text-emerald-400" />
                 </div>
               </div>
-              <h2 className="section-title text-3xl md:text-4xl font-black text-white mb-4">
+              <h2 className="section-title text-3xl md:text-4xl text-white mb-4">
                 Vehicle Warranty Protection
               </h2>
               <p className="text-lg text-gray-400 max-w-2xl mx-auto">
@@ -172,7 +172,7 @@ const WarrantyFinancing: React.FC = () => {
                   <CreditCard className="w-12 h-12 text-fnt-red" />
                 </div>
               </div>
-              <h2 className="section-title text-3xl md:text-4xl font-black text-white mb-4">
+              <h2 className="section-title text-3xl md:text-4xl text-white mb-4">
                 Flexible Financing Options
               </h2>
               <p className="text-lg text-gray-400 max-w-2xl mx-auto">
@@ -267,7 +267,7 @@ const WarrantyFinancing: React.FC = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="section-title text-3xl md:text-4xl font-black text-white mb-6">
+            <h2 className="section-title text-3xl md:text-4xl text-white mb-6">
               Get Your Quote Today
             </h2>
             <p className="text-lg text-gray-400 mb-12">
@@ -287,7 +287,7 @@ const WarrantyFinancing: React.FC = () => {
 
               <div className="glass-card p-6 text-center">
                 <div className="glass-subtle p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Mail className="w-8 h-8 text-fnt-red" />
+                  <EnvelopeSimple className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-white mb-2">Email Us</h3>
                 <a href="mailto:fntgroupltd@gmail.com" className="text-fnt-red hover:text-red-400 font-semibold break-all">

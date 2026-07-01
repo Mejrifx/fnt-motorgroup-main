@@ -1,29 +1,27 @@
 import React from 'react';
-import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { MapPin, Phone, EnvelopeSimple, Clock, PaperPlaneTilt } from '@phosphor-icons/react';
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-24 glass-scene">
+    <section id="contact" className="py-24 glass-scene grain">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="section-title text-4xl md:text-5xl font-black text-white mb-4">
-            Visit Our Showroom
+        <div className="max-w-3xl mb-16 reveal">
+          <h2 className="section-title text-4xl md:text-6xl text-white mb-5">
+            Visit our showroom
           </h2>
-          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-400 leading-relaxed">
             Come see our cars in person at our Manchester showroom, or get in touch with our friendly team
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          <div>
+          <div className="reveal">
             <div className="glass rounded-3xl p-8 mb-8">
               <h3 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>Get in Touch</h3>
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="p-2.5 rounded-xl glass-subtle flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-fnt-red" />
-                  </div>
+                  <MapPin size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Location</h4>
                     <p className="text-gray-400">
@@ -35,9 +33,7 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="p-2.5 rounded-xl glass-subtle flex-shrink-0">
-                    <Phone className="w-5 h-5 text-fnt-red" />
-                  </div>
+                  <Phone size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Phone</h4>
                     <a href="tel:07735770031" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">07735770031</a>
@@ -45,9 +41,7 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="p-2.5 rounded-xl glass-subtle flex-shrink-0">
-                    <Mail className="w-5 h-5 text-fnt-red" />
-                  </div>
+                  <EnvelopeSimple size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Email</h4>
                     <a href="mailto:fntgroupltd@gmail.com" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">fntgroupltd@gmail.com</a>
@@ -55,9 +49,7 @@ const Contact = () => {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="p-2.5 rounded-xl glass-subtle flex-shrink-0">
-                    <Clock className="w-5 h-5 text-fnt-red" />
-                  </div>
+                  <Clock size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Hours</h4>
                     <div className="text-gray-400 text-sm space-y-1">
@@ -86,7 +78,7 @@ const Contact = () => {
             </div>
           </div>
 
-          <div>
+          <div className="reveal" style={{ '--reveal-delay': '120ms' } as React.CSSProperties}>
             <form className="glass rounded-3xl p-8">
               <h3 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>Sell Your Car</h3>
               
@@ -175,7 +167,7 @@ const Contact = () => {
                 type="submit"
                 className="btn-glass-red w-full text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center space-x-2"
               >
-                <Send className="w-5 h-5" />
+                <PaperPlaneTilt size={20} weight="bold" />
                 <span>Send Message</span>
               </button>
             </form>

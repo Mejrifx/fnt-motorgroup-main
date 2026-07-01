@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Quotes, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { supabase, type Review } from '../lib/supabase';
 
 const Reviews: React.FC = () => {
@@ -57,9 +57,9 @@ const Reviews: React.FC = () => {
         {[...Array(5)].map((_, index) => (
           <Star
             key={index}
-            className={`w-5 h-5 ${
-              index < rating ? 'text-amber-400 fill-amber-400' : 'text-white/20'
-            }`}
+            size={20}
+            weight="fill"
+            className={index < rating ? 'text-amber-400' : 'text-white/15'}
           />
         ))}
       </div>
@@ -68,7 +68,7 @@ const Reviews: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="py-20 glass-scene">
+      <section className="py-20 glass-scene grain">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="glass rounded-3xl p-8 md:p-12 animate-pulse space-y-4">
@@ -90,12 +90,12 @@ const Reviews: React.FC = () => {
   const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
 
   return (
-    <section id="reviews" className="py-24 glass-scene">
+    <section id="reviews" className="py-24 glass-scene grain">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="section-title text-5xl md:text-6xl font-black text-white mb-6">
-            What Our <span className="text-fnt-red">Customers</span> Say
+        <div className="text-center mb-16 reveal">
+          <h2 className="section-title text-5xl md:text-7xl text-white mb-6">
+            What our <span className="text-fnt-red">customers</span> say
           </h2>
           <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
             Don't just take our word for it - hear from our satisfied customers
@@ -121,13 +121,13 @@ const Reviews: React.FC = () => {
         {/* Review Carousel */}
         <div className="max-w-5xl mx-auto">
           <div
-            className="relative glass rounded-3xl p-8 md:p-12"
+            className="relative glass rounded-3xl p-8 md:p-12 reveal"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
             {/* Quote Icon */}
             <div className="absolute top-8 left-8 opacity-10">
-              <Quote className="w-24 h-24 text-fnt-red" />
+              <Quotes size={96} weight="fill" className="text-fnt-red" />
             </div>
 
             {/* Review Content */}
@@ -186,51 +186,57 @@ const Reviews: React.FC = () => {
                     className="p-2 sm:p-3 rounded-full glass-chip text-white hover:text-fnt-red transition-all duration-300 group"
                     aria-label="Previous review"
                   >
-                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <CaretLeft size={22} weight="bold" />
                   </button>
 
-                  {/* Dots Indicator */}
-                  <div className="flex space-x-1 sm:space-x-2 max-w-full overflow-hidden">
-                    {reviews.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentReview(index)}
-                        className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 flex-shrink-0 ${
-                          index === currentReview
-                            ? 'bg-fnt-red w-6 sm:w-8'
-                            : 'bg-white/20 hover:bg-white/40'
-                        }`}
-                        aria-label={`Go to review ${index + 1}`}
-                      />
-                    ))}
-                  </div>
+                  {/* Position indicator: dots for small sets, counter for large */}
+                  {reviews.length <= 8 ? (
+                    <div className="flex space-x-1 sm:space-x-2 max-w-full overflow-hidden">
+                      {reviews.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentReview(index)}
+                          className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 flex-shrink-0 ${
+                            index === currentReview
+                              ? 'bg-fnt-red w-6 sm:w-8'
+                              : 'bg-white/20 hover:bg-white/40'
+                          }`}
+                          aria-label={`Go to review ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-4 text-sm text-gray-400 font-medium" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {currentReview + 1} <span className="text-gray-600">/ {reviews.length}</span>
+                    </div>
+                  )}
 
                   <button
                     onClick={nextReview}
                     className="p-2 sm:p-3 rounded-full glass-chip text-white hover:text-fnt-red transition-all duration-300 group"
                     aria-label="Next review"
                   >
-                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <CaretRight size={22} weight="bold" />
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Trust Badges */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <div className="glass-card p-6 text-center">
-              <div className="text-4xl font-bold text-fnt-red mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>1000+</div>
-              <div className="text-gray-400 font-medium">Happy Customers</div>
-            </div>
-            <div className="glass-card p-6 text-center">
-              <div className="text-4xl font-bold text-fnt-red mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{averageRating.toFixed(1)}</div>
-              <div className="text-gray-400 font-medium">Average Rating</div>
-            </div>
-            <div className="glass-card p-6 text-center">
-              <div className="text-4xl font-bold text-fnt-red mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>100%</div>
-              <div className="text-gray-400 font-medium">Satisfaction Guarantee</div>
-            </div>
+          {/* Trust stats: open row, no card chrome */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 mt-16 border-t hairline reveal">
+            {[
+              { value: '1000+', label: 'Happy Customers' },
+              { value: averageRating.toFixed(1), label: 'Average Rating' },
+              { value: '100%', label: 'Satisfaction Guarantee' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center py-10 sm:border-r hairline last:border-r-0">
+                <div className="text-5xl md:text-6xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
+                  {stat.value}
+                </div>
+                <div className="text-gray-500 font-medium text-sm uppercase" style={{ letterSpacing: '0.14em' }}>{stat.label}</div>
+              </div>
+            ))}
           </div>
 
         </div>

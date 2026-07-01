@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Send } from 'lucide-react';
+import { X, PaperPlaneTilt } from '@phosphor-icons/react';
 import Airtable from 'airtable';
 
 interface SellCarModalProps {
@@ -294,7 +294,7 @@ const SellCarModal: React.FC<SellCarModalProps> = ({ isOpen, onClose }) => {
               disabled={isSubmitting}
               className="btn-glass-red px-6 py-3 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-semibold"
             >
-              <Send className="w-4 h-4" />
+              <PaperPlaneTilt className="w-4 h-4" />
               <span>{isSubmitting ? 'Submitting...' : 'Submit'}</span>
             </button>
           </div>

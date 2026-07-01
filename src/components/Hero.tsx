@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Menu, X, Phone, MapPin } from 'lucide-react';
+import { List, X, Phone, MapPin } from '@phosphor-icons/react';
 import fntLogo from '../assets/fnt-logo.png';
 import CarFilter from './CarFilter';
 
@@ -71,7 +71,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             href="tel:07735770031"
             className="p-3 text-white hover:text-fnt-red transition-all duration-300 btn-glass rounded-full"
           >
-            <Phone className="w-6 h-6" />
+            <Phone size={24} weight="duotone" />
           </a>
           
           {/* Mobile FNT Logo - Top Center */}
@@ -86,7 +86,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-3 text-white hover:text-fnt-red transition-all duration-300 btn-glass rounded-full"
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? <X size={24} weight="bold" /> : <List size={24} weight="bold" />}
           </button>
         </div>
 
@@ -104,7 +104,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="p-3 text-white hover:text-fnt-red btn-glass rounded-full transition-all duration-300"
               >
-                <X className="w-7 h-7" />
+                <X size={28} weight="bold" />
               </button>
             </div>
             
@@ -172,7 +172,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             rel="noopener noreferrer"
             className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"
           >
-            <MapPin className="w-4 h-4" />
+            <MapPin size={16} weight="duotone" />
             <span>Manchester M11 2NB</span>
           </a>
         </div>
@@ -186,7 +186,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             href="tel:07735770031"
             className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"
           >
-            <Phone className="w-4 h-4" />
+            <Phone size={16} weight="duotone" />
             <span>07735770031</span>
           </a>
         </div>

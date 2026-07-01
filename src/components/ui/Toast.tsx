@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { CheckCircle, XCircle, WarningCircle, X } from '@phosphor-icons/react';
 
 export type ToastType = 'success' | 'error' | 'warning';
 
@@ -26,7 +26,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 3000 }
       case 'error':
         return <XCircle className="w-5 h-5 text-red-400" />;
       case 'warning':
-        return <AlertCircle className="w-5 h-5 text-amber-400" />;
+        return <WarningCircle className="w-5 h-5 text-amber-400" />;
     }
   };
 

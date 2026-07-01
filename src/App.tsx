@@ -16,6 +16,7 @@ import CookiePolicy from './components/CookiePolicy';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { ToastProvider } from './components/ui/ToastContainer';
+import { useRevealObserver } from './hooks/useRevealObserver';
 
 // Main Site Component
 const MainSite = () => {
@@ -40,6 +41,7 @@ const MainSite = () => {
 };
 
 function App() {
+  useRevealObserver();
   return (
     <ToastProvider>
       <Router>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { Warning, X } from '@phosphor-icons/react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -68,7 +68,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <div className="p-6">
           {/* Icon */}
           <div className={`w-12 h-12 rounded-full ${styles.icon} flex items-center justify-center mb-4`}>
-            <AlertTriangle className="w-6 h-6" />
+            <Warning className="w-6 h-6" />
           </div>
 
           {/* Title */}

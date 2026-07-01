@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Car, Star, DollarSign, MessageCircle, ArrowRight } from 'lucide-react';
+import { CarProfile, Star, CurrencyGbp, ChatCircleText, ArrowRight } from '@phosphor-icons/react';
 import SellCarModal from './SellCarModal';
 
 const WhatWouldYouLikeToDo = () => {
@@ -10,14 +10,14 @@ const WhatWouldYouLikeToDo = () => {
       id: 1,
       title: "Find Your Car",
       description: "Browse our wide selection of reliable cars",
-      icon: Car,
+      icon: CarProfile,
       link: "#inventory"
     },
     {
       id: 2,
       title: "Sell Your Car",
       description: "Get a fair price for your current vehicle",
-      icon: DollarSign,
+      icon: CurrencyGbp,
       link: "#services",
       isModal: true
     },
@@ -32,7 +32,7 @@ const WhatWouldYouLikeToDo = () => {
       id: 4,
       title: "Get In Touch",
       description: "Speak with our friendly team for honest advice",
-      icon: MessageCircle,
+      icon: ChatCircleText,
       link: "#contact"
     }
   ];
@@ -47,45 +47,52 @@ const WhatWouldYouLikeToDo = () => {
   };
 
   return (
-    <section className="py-24 relative z-0 overflow-visible glass-scene">
+    <section className="py-28 relative z-0 overflow-visible glass-scene grain">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="section-title text-5xl md:text-6xl font-black text-white mb-6">
-            How Can We <span className="text-fnt-red">Help</span> You?
+        <div className="max-w-3xl mb-16 reveal">
+          <h2 className="section-title text-5xl md:text-7xl text-white mb-6">
+            How can we <span className="text-fnt-red">help</span> you?
           </h2>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-400 leading-relaxed">
             Quality cars at prices that work for your budget
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {actions.map((action) => {
-            const IconComponent = action.icon;
+        {/* Flat interactive tiles: surface only appears on hover */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t hairline">
+          {actions.map((action, index) => {
+            const Icon = action.icon;
             return (
               <div
                 key={action.id}
                 onClick={() => handleCardClick(action)}
-                className="group glass-card p-8 flex flex-col items-center text-center cursor-pointer overflow-hidden relative"
+                className="group relative cursor-pointer px-6 py-12 lg:py-16 border-b lg:border-b-0 lg:border-r hairline last:border-r-0 last:border-b-0 transition-colors duration-500 hover:bg-white/[0.04] reveal"
+                style={{ '--reveal-delay': `${index * 80}ms` } as React.CSSProperties}
               >
-                {/* Subtle red bloom on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none" style={{ background: 'radial-gradient(400px 200px at 50% 0%, rgba(255,73,67,0.10), transparent 70%)' }}></div>
-                
-                <div className="relative z-1 flex flex-col items-center h-full">
-                  <div className="p-5 rounded-2xl glass-subtle text-fnt-red mb-8 transform transition-all duration-500 ease-spring group-hover:scale-110 group-hover:-translate-y-1">
-                    <IconComponent className="w-8 h-8" />
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-white mb-4 transition-colors duration-300" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>
+                {/* Red bloom rising from the top edge on hover */}
+                <div
+                  className="absolute inset-x-0 top-0 h-24 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: 'radial-gradient(320px 96px at 50% 0%, rgba(255,73,67,0.12), transparent 70%)' }}
+                ></div>
+
+                <div className="relative flex flex-col h-full">
+                  <Icon
+                    size={34}
+                    weight="duotone"
+                    className="text-fnt-red mb-8 transition-transform duration-500 ease-spring group-hover:-translate-y-1"
+                  />
+
+                  <h3 className="text-2xl font-semibold text-white mb-3" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>
                     {action.title}
                   </h3>
-                  
+
                   <p className="text-gray-400 mb-8 leading-relaxed group-hover:text-gray-300 transition-colors duration-300 flex-grow">
                     {action.description}
                   </p>
-                  
-                  <div className="flex items-center text-fnt-red font-semibold transition-all duration-300 transform group-hover:translate-x-1">
+
+                  <div className="flex items-center gap-2 text-fnt-red font-semibold transition-transform duration-300 group-hover:translate-x-1">
                     Get Started
-                    <ArrowRight className="w-5 h-5 ml-2 transform transition-transform duration-300 group-hover:translate-x-1" />
+                    <ArrowRight size={18} weight="bold" className="transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </div>
               </div>
@@ -93,10 +100,10 @@ const WhatWouldYouLikeToDo = () => {
           })}
         </div>
       </div>
-      
-      <SellCarModal 
-        isOpen={isSellCarModalOpen} 
-        onClose={() => setIsSellCarModalOpen(false)} 
+
+      <SellCarModal
+        isOpen={isSellCarModalOpen}
+        onClose={() => setIsSellCarModalOpen(false)}
       />
     </section>
   );

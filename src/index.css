@@ -71,26 +71,39 @@
   /* Recipe: blur + 1px edge + inset top highlight + tinted shadow    */
   /* ---------------------------------------------------------------- */
 
-  /* Ambient page backdrop for dark sections: deep ink with soft glows */
+  /* Ambient page backdrop for dark sections: deep ink with visible light pools.
+     The glows are deliberately strong; frosted panels need luminance behind
+     them to read as glass instead of flat gray cards. */
   .glass-scene {
     position: relative;
     background-color: #0b0c0f;
     background-image:
-      radial-gradient(1100px 520px at 85% -10%, rgba(255, 73, 67, 0.08), transparent 60%),
-      radial-gradient(900px 480px at 8% 22%, rgba(120, 140, 190, 0.07), transparent 62%),
-      radial-gradient(1200px 700px at 50% 118%, rgba(255, 73, 67, 0.05), transparent 55%);
+      radial-gradient(1200px 620px at 82% -12%, rgba(255, 73, 67, 0.2), transparent 58%),
+      radial-gradient(1000px 560px at 6% 18%, rgba(96, 125, 190, 0.16), transparent 60%),
+      radial-gradient(760px 480px at 68% 62%, rgba(255, 110, 90, 0.08), transparent 62%),
+      radial-gradient(1300px 760px at 45% 115%, rgba(210, 60, 60, 0.14), transparent 56%),
+      linear-gradient(180deg, #0d0e12 0%, #0b0c0f 40%, #0a0b0e 100%);
+  }
+  /* Desktop: pin the glow field to the viewport so adjacent sections share
+     one continuous background with no visible seams. (iOS ignores fixed
+     attachment, so mobile keeps the default per-section painting.) */
+  @media (min-width: 769px) {
+    .glass-scene {
+      background-attachment: fixed;
+    }
   }
 
   /* Core dark glass surface */
   .glass {
-    background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.045));
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
-    backdrop-filter: blur(24px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: linear-gradient(165deg, rgba(255,255,255,0.11), rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.06));
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.18),
-      0 24px 48px -24px rgba(0, 0, 0, 0.65);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.25),
+      0 28px 56px -24px rgba(5, 3, 8, 0.7);
   }
 
   /* Quieter glass, for nested elements */
@@ -109,12 +122,12 @@
   }
   .glass-card:hover {
     transform: translateY(-6px);
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06));
-    border-color: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(165deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06) 45%, rgba(255,255,255,0.08));
+    border-color: rgba(255, 255, 255, 0.2);
     box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
-      inset 0 -1px 0 0 rgba(0, 0, 0, 0.18),
-      0 32px 64px -24px rgba(0, 0, 0, 0.75);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+      inset 0 -1px 0 0 rgba(0, 0, 0, 0.22),
+      0 36px 72px -28px rgba(5, 3, 8, 0.8);
   }
 
   /* Frosted light glass (over photos / light admin mode) */
@@ -210,14 +223,15 @@
   /* Section heading kit */
   .section-title {
     font-family: 'Outfit', sans-serif;
-    letter-spacing: -0.03em;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
     text-wrap: balance;
   }
   .section-eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold tracking-widest uppercase;
-    background: rgba(255, 73, 67, 0.10);
-    border: 1px solid rgba(255, 73, 67, 0.25);
-    color: #ff6b66;
+    @apply inline-flex items-center text-xs font-semibold uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255, 107, 102, 0.9);
   }
 
   /* Grain overlay to break digital flatness */
@@ -226,8 +240,28 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.03;
+    opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Hairline divider for open (card-free) layouts */
+  .hairline {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Scroll-in reveal. JS adds .is-revealed when the element enters the
+     viewport; falls back to visible for reduced-motion users. */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    .reveal.is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* ---------------------------------------------------------------- */

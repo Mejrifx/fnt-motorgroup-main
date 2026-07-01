@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
 
@@ -11,7 +11,7 @@ const CookiePolicy: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen glass-scene">
+    <div className="min-h-screen glass-scene grain">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
         <button

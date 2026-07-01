@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Fuel, Settings, Calendar } from 'lucide-react';
+import { GasPump, GearSix, Gauge, MagnifyingGlass } from '@phosphor-icons/react';
 import { supabase, type Car } from '../lib/supabase';
 
 // AutoTrader CDN URLs contain a {resize} template that must be substituted.
@@ -186,7 +186,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
 
   if (loading) {
     return (
-      <section id="inventory" className="py-20 glass-scene">
+      <section id="inventory" className="py-20 glass-scene grain">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
@@ -206,19 +206,18 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   }
 
   return (
-    <section id="inventory" className="py-24 glass-scene">
+    <section id="inventory" className="py-24 glass-scene grain">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <span className="section-eyebrow mb-5">Showroom</span>
-          <h2 className="section-title text-5xl md:text-6xl font-black text-white mb-6">
+        <div className="max-w-3xl mb-14 reveal">
+          <h2 className="section-title text-5xl md:text-7xl text-white mb-6">
             Our Car Collection
           </h2>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Browse our wide selection of reliable cars in various styles - Saloon, Hatchback, Estate, Van, Coupe, Convertible, and 4x4 vehicles, all inspected and ready for their next adventure
+          <p className="text-lg md:text-xl text-gray-400 leading-relaxed">
+            Every car inspected and ready for its next adventure
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
+        <div className="flex flex-wrap gap-3 mb-14 reveal">
           {filters.map((filter) => (
             <button
               key={filter}
@@ -240,7 +239,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
               <div
                 key={car.id}
                 onClick={() => navigate(`/car/${car.id}`)}
-                className="glass-card overflow-hidden group cursor-pointer"
+                className="glass-card overflow-hidden group cursor-pointer reveal"
               >
                 <div className="relative overflow-hidden">
                   <img
@@ -266,19 +265,19 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
 
                   <div className="grid grid-cols-2 gap-3 text-sm text-gray-400">
                     <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-fnt-red" />
+                      <Gauge size={17} weight="duotone" className="text-gray-500" />
                       <span>{formatMileage(car.mileage)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Settings className="w-4 h-4 text-fnt-red" />
+                      <GearSix size={17} weight="duotone" className="text-gray-500" />
                       <span>{car.transmission}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Fuel className="w-4 h-4 text-fnt-red" />
+                      <GasPump size={17} weight="duotone" className="text-gray-500" />
                       <span>{car.fuel_type}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.7)]"></span>
+                      <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.7)]"></span>
                       <span>Available</span>
                     </div>
                   </div>
@@ -289,9 +288,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
             <div className="col-span-full text-center py-16">
               <div className="glass rounded-3xl p-8 max-w-md mx-auto">
                 <div className="w-16 h-16 glass-subtle rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+                  <MagnifyingGlass size={30} weight="duotone" className="text-white/40" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">No cars found</h3>
                 <p className="text-gray-400 mb-4">

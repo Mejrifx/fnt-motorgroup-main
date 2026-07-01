@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Phone, Mail, MapPin } from 'lucide-react';
+import { InstagramLogo, Phone, EnvelopeSimple, MapPin } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import fntLogo from '../assets/fnt-logo.png';
 
@@ -34,7 +34,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-10 h-10 glass-chip rounded-full flex items-center justify-center hover:text-fnt-red transition-colors duration-300"
               >
-                <Instagram className="w-5 h-5" />
+                <InstagramLogo className="w-5 h-5" />
               </a>
               <a 
                 href="https://www.tiktok.com/@fntmotorgroup?_t=ZN-90FaqSjhSRa&_r=1" 
@@ -87,7 +87,7 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>Contact Info</h4>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-fnt-red mt-1 flex-shrink-0" />
+                <MapPin weight="duotone" className="w-5 h-5 text-fnt-red mt-1 flex-shrink-0" />
                 <div className="text-gray-400">
                   Unit 1, Clayton Court, 5 Welcomb Street<br />
                   Manchester M11 2NB<br />
@@ -95,11 +95,11 @@ const Footer = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-fnt-red flex-shrink-0" />
+                <Phone weight="duotone" className="w-5 h-5 text-fnt-red flex-shrink-0" />
                 <span className="text-gray-400">07735770031</span>
               </div>
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-fnt-red flex-shrink-0" />
+                <EnvelopeSimple weight="duotone" className="w-5 h-5 text-fnt-red flex-shrink-0" />
                 <span className="text-gray-400">fntgroupltd@gmail.com</span>
               </div>
             </div>

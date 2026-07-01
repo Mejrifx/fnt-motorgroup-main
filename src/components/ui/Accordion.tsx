@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus } from '@phosphor-icons/react';
 
 interface AccordionItemProps {
   title: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle } from '@phosphor-icons/react';
 
 const About = () => {
   const achievements = [
@@ -10,12 +10,12 @@ const About = () => {
   ];
 
   return (
-    <section id="about" className="py-24 glass-scene">
+    <section id="about" className="py-24 glass-scene grain">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <h2 className="section-title text-4xl md:text-5xl font-black text-white mb-6">
-              Your Trusted Car Dealer In Manchester
+          <div className="reveal">
+            <h2 className="section-title text-4xl md:text-6xl text-white mb-6">
+              Your trusted car dealer in Manchester
             </h2>
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
               At FNT Motor Group, we believe everyone deserves a reliable car that fits their budget. 
@@ -23,10 +23,10 @@ const About = () => {
               whether you're buying your first car or upgrading to something better.
             </p>
             
-            <div className="space-y-3 mb-8">
+            <div className="mb-8 divide-y divide-white/[0.07] border-y hairline">
               {achievements.map((achievement, index) => (
-                <div key={index} className="flex items-center space-x-3 glass-subtle rounded-2xl px-4 py-3">
-                  <CheckCircle className="w-6 h-6 text-fnt-red flex-shrink-0" />
+                <div key={index} className="flex items-center space-x-3 py-3.5">
+                  <CheckCircle size={22} weight="duotone" className="text-fnt-red flex-shrink-0" />
                   <span className="text-gray-200 font-medium">{achievement}</span>
                 </div>
               ))}
@@ -39,7 +39,7 @@ const About = () => {
             </p>
           </div>
 
-          <div className="relative">
+          <div className="relative reveal" style={{ '--reveal-delay': '120ms' } as React.CSSProperties}>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <img

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, ChevronRight, Phone, Mail, MapPin, Calendar, Fuel, Settings, Palette, Car as CarIcon, DoorOpen, Banknote } from 'lucide-react';
+import { ArrowLeft, CaretLeft, CaretRight, Phone, EnvelopeSimple, MapPin, Calendar, GasPump, GearSix, Palette, CarProfile as CarIcon, Door, Money } from '@phosphor-icons/react';
 import { supabase, type Car } from '../lib/supabase';
 
 // Replace AutoTrader's {resize} placeholder with actual dimensions
@@ -165,7 +165,7 @@ const CarDetails: React.FC = () => {
   const images = getAllImages();
 
   return (
-    <div className="min-h-screen glass-scene">
+    <div className="min-h-screen glass-scene grain">
       {/* Header */}
       <div className="border-b border-white/10 sticky top-0 z-40" style={{ background: 'rgba(11, 12, 15, 0.75)', backdropFilter: 'blur(24px) saturate(140%)', WebkitBackdropFilter: 'blur(24px) saturate(140%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -210,13 +210,13 @@ const CarDetails: React.FC = () => {
                         onClick={previousImage}
                         className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
                       >
-                        <ChevronLeft className="w-6 h-6" />
+                        <CaretLeft className="w-6 h-6" />
                       </button>
                       <button
                         onClick={nextImage}
                         className="hidden md:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
                       >
-                        <ChevronRight className="w-6 h-6" />
+                        <CaretRight className="w-6 h-6" />
                       </button>
                       
                       {/* Image Counter */}
@@ -242,13 +242,13 @@ const CarDetails: React.FC = () => {
                     onClick={previousImage}
                     className="btn-glass text-white p-3 rounded-full"
                   >
-                    <ChevronLeft className="w-6 h-6" />
+                    <CaretLeft className="w-6 h-6" />
                   </button>
                   <button
                     onClick={nextImage}
                     className="btn-glass text-white p-3 rounded-full"
                   >
-                    <ChevronRight className="w-6 h-6" />
+                    <CaretRight className="w-6 h-6" />
                   </button>
                 </div>
               )}
@@ -322,7 +322,7 @@ const CarDetails: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 flex items-center gap-2">
-                    <Fuel className="w-4 h-4" />
+                    <GasPump className="w-4 h-4" />
                     Fuel:
                   </span>
                   <span className="text-white font-medium">{car.fuel_type}</span>
@@ -345,7 +345,7 @@ const CarDetails: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
+                    <GearSix className="w-4 h-4" />
                     Gearbox:
                   </span>
                   <span className="text-white font-medium">{car.transmission}</span>
@@ -368,7 +368,7 @@ const CarDetails: React.FC = () => {
                 {car.doors && (
                   <div className="flex justify-between items-center py-2 border-b border-white/10">
                     <span className="text-gray-400 flex items-center gap-2">
-                      <DoorOpen className="w-4 h-4" />
+                      <Door className="w-4 h-4" />
                       Doors:
                     </span>
                     <span className="text-white font-medium">{car.doors}</span>
@@ -381,7 +381,7 @@ const CarDetails: React.FC = () => {
                 {car.road_tax && (
                   <div className="flex justify-between items-center py-2">
                     <span className="text-gray-400 flex items-center gap-2">
-                      <Banknote className="w-4 h-4" />
+                      <Money className="w-4 h-4" />
                       Previous Owners:
                     </span>
                     <span className="text-white font-medium">{car.road_tax}</span>
@@ -405,7 +405,7 @@ const CarDetails: React.FC = () => {
                   href="mailto:fntgroupltd@gmail.com?subject=Inquiry about ${car.make} ${car.model}"
                   className="btn-glass flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"
                 >
-                  <Mail className="w-5 h-5" />
+                  <EnvelopeSimple className="w-5 h-5" />
                   <span>Email Inquiry</span>
                 </a>
                 <a
@@ -455,13 +455,13 @@ const CarDetails: React.FC = () => {
                 onClick={previousImage}
                 className="hidden md:block absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors z-10"
               >
-                <ChevronLeft className="w-8 h-8" />
+                <CaretLeft className="w-8 h-8" />
               </button>
               <button
                 onClick={nextImage}
                 className="hidden md:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-colors z-10"
               >
-                <ChevronRight className="w-8 h-8" />
+                <CaretRight className="w-8 h-8" />
               </button>
               
               {/* Mobile - Bottom navigation bar */}
@@ -470,7 +470,7 @@ const CarDetails: React.FC = () => {
                   onClick={previousImage}
                   className="btn-glass text-white p-4 rounded-full"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <CaretLeft className="w-6 h-6" />
                 </button>
                 <div className="text-white text-sm font-medium">
                   {currentImageIndex + 1} / {images.length}
@@ -479,7 +479,7 @@ const CarDetails: React.FC = () => {
                   onClick={nextImage}
                   className="btn-glass text-white p-4 rounded-full"
                 >
-                  <ChevronRight className="w-6 h-6" />
+                  <CaretRight className="w-6 h-6" />
                 </button>
               </div>
               
