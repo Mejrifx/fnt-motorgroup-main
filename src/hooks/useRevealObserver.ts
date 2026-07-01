@@ -36,9 +36,22 @@ export function useRevealObserver() {
             observeAll(node);
           }
         });
+        // React reuses DOM nodes across renders, so an element can *become*
+        // a .reveal via a className update with no node insertion.
+        if (m.type === 'attributes' && m.target instanceof HTMLElement) {
+          const el = m.target;
+          if (el.classList.contains('reveal') && !el.classList.contains('is-revealed')) {
+            io.observe(el);
+          }
+        }
       }
     });
-    mo.observe(document.body, { childList: true, subtree: true });
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
 
     return () => {
       io.disconnect();
