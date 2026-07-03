@@ -380,13 +380,19 @@
   }
 
   /* Invoice forms render as fixed overlays outside .admin-scene,
-   * so they need the same protection via their own wrapper class. */
+   * so they need the same protection via their own wrapper class.
+   * Also covers <th>/<td> which have no text colour class and would
+   * otherwise inherit the near-white body colour. */
   .bg-white input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
   .bg-white textarea,
   .bg-white select,
+  .bg-white th,
+  .bg-white td,
   .bg-gray-50 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
   .bg-gray-50 textarea,
-  .bg-gray-50 select {
+  .bg-gray-50 select,
+  .bg-gray-100 th,
+  .bg-gray-100 td {
     color: rgb(17 24 39); /* gray-900 */
   }
 }
