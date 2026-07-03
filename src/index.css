@@ -360,6 +360,35 @@
   .field-label {
     @apply block text-xs font-semibold text-gray-500 mb-1.5 dark:text-gray-400;
   }
+
+  /* ----------------------------------------------------------------
+   * Admin: body sets color:#f4f4f5 (near-white) for the dark main
+   * site. Any admin form control that lacks an explicit text-color
+   * class would inherit that and be invisible on the admin's light
+   * backgrounds. This blanket rule ensures all controls are legible
+   * in both light and dark admin modes without touching each component.
+   * ---------------------------------------------------------------- */
+  .admin-scene input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  .admin-scene textarea,
+  .admin-scene select {
+    color: rgb(17 24 39); /* gray-900 */
+  }
+  .dark .admin-scene input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  .dark .admin-scene textarea,
+  .dark .admin-scene select {
+    color: rgb(243 244 246); /* gray-100 */
+  }
+
+  /* Invoice forms render as fixed overlays outside .admin-scene,
+   * so they need the same protection via their own wrapper class. */
+  .bg-white input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  .bg-white textarea,
+  .bg-white select,
+  .bg-gray-50 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  .bg-gray-50 textarea,
+  .bg-gray-50 select {
+    color: rgb(17 24 39); /* gray-900 */
+  }
 }
 
 @layer utilities {
