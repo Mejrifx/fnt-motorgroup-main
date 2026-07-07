@@ -84,14 +84,13 @@
       radial-gradient(1300px 760px at 45% 115%, rgba(210, 60, 60, 0.14), transparent 56%),
       linear-gradient(180deg, #0d0e12 0%, #0b0c0f 40%, #0a0b0e 100%);
   }
-  /* Desktop: pin the glow field to the viewport so adjacent sections share
-     one continuous background with no visible seams. (iOS ignores fixed
-     attachment, so mobile keeps the default per-section painting.) */
-  @media (min-width: 769px) {
-    .glass-scene {
-      background-attachment: fixed;
-    }
-  }
+  /* Note: intentionally NOT using background-attachment:fixed here.
+     Combined with backdrop-filter glass panels, a fixed background forces
+     the browser to re-sample and re-blur the region behind every glass
+     card on almost every scroll frame (the backdrop moves relative to the
+     foreground), which is very heavy on integrated GPUs. Scrolling the
+     background together with the page keeps the relative position behind
+     each glass panel static, so the compositor can scroll it cheaply. */
 
   /* Core dark glass surface */
   .glass {
@@ -274,7 +273,6 @@
     background-image:
       radial-gradient(900px 420px at 90% -10%, rgba(255, 73, 67, 0.06), transparent 60%),
       radial-gradient(800px 400px at 0% 30%, rgba(100, 120, 180, 0.06), transparent 60%);
-    background-attachment: fixed;
   }
   .dark .admin-scene {
     background-color: #0b0c0f;
@@ -469,6 +467,13 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Skip layout/paint work for grid items until they're near the viewport.
+     Cuts main-thread cost while scrolling through long lists of cards. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 480px;
   }
 
   /* Hide scrollbar but keep scrolling functionality */

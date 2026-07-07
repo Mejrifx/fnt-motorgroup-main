@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CaretLeft, CaretRight, Phone, EnvelopeSimple, MapPin, Calendar, GasPump, GearSix, Palette, CarProfile as CarIcon, Door, Money } from '@phosphor-icons/react';
 import { supabase, type Car } from '../lib/supabase';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 // Replace AutoTrader's {resize} placeholder with actual dimensions
 const resolveUrl = (url: string) => url.replace('{resize}', 'w800');
@@ -132,6 +133,63 @@ const CarDetails: React.FC = () => {
   const formatPrice = (price: number): string => {
     return `£${price.toLocaleString()}`;
   };
+
+  const pageImages = car ? getAllImages() : [];
+
+  usePageMeta({
+    title: car ? `${car.year} ${car.make} ${car.model} for Sale` : 'Car Details',
+    description: car
+      ? `${car.year} ${car.make} ${car.model} — ${formatMileage(car.mileage)}, ${car.fuel_type}, ${car.transmission}. ${formatPrice(car.price)} at FNT Motor Group, Manchester. 6-month warranty included.`
+      : 'View this vehicle for sale at FNT Motor Group, Manchester.',
+    path: `/car/${id}`,
+    image: pageImages[0],
+    type: 'product',
+    jsonLd: car
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Vehicle',
+          name: `${car.year} ${car.make} ${car.model}`,
+          brand: { '@type': 'Brand', name: car.make },
+          model: car.model,
+          vehicleModelDate: String(car.year),
+          fuelType: car.fuel_type,
+          vehicleTransmission: car.transmission,
+          ...(car.colour ? { color: car.colour } : {}),
+          ...(car.doors ? { numberOfDoors: car.doors } : {}),
+          ...(car.mileage
+            ? {
+                mileageFromOdometer: {
+                  '@type': 'QuantitativeValue',
+                  value: parseInt(car.mileage.replace(/[^\d]/g, ''), 10) || undefined,
+                  unitCode: 'SMI',
+                },
+              }
+            : {}),
+          image: pageImages.slice(0, 8),
+          url: `https://fntmotorgroup.co.uk/car/${car.id}`,
+          offers: {
+            '@type': 'Offer',
+            price: car.price,
+            priceCurrency: 'GBP',
+            availability: 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/UsedCondition',
+            url: `https://fntmotorgroup.co.uk/car/${car.id}`,
+            seller: {
+              '@type': 'AutomotiveBusiness',
+              name: 'FNT Motor Group',
+              telephone: '+447735770031',
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: 'Unit 1, Clayton Court, 5 Welcomb Street',
+                addressLocality: 'Manchester',
+                postalCode: 'M11 2NB',
+                addressCountry: 'GB',
+              },
+            },
+          },
+        }
+      : undefined,
+  });
 
   if (loading) {
     return (

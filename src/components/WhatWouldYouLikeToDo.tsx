@@ -47,7 +47,7 @@ const WhatWouldYouLikeToDo = () => {
   };
 
   return (
-    <section className="py-28 relative z-0 overflow-visible glass-scene grain">
+    <section className="py-28 relative z-0 overflow-visible grain">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mb-16 reveal">
           <h2 className="section-title text-5xl md:text-7xl text-white mb-6">

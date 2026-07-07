@@ -1,6 +1,6 @@
 import React from 'react';
 import { InstagramLogo, Phone, EnvelopeSimple, MapPin } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import fntLogo from '../assets/fnt-logo.png';
 
 const Footer = () => {
@@ -77,9 +77,9 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>Services</h4>
             <ul className="space-y-3">
               <li><a href="#inventory" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Vehicle Sales</a></li>
-              <li><button onClick={() => navigate('/warranty-financing')} className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Financing</button></li>
+              <li><Link to="/warranty-financing" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Financing</Link></li>
               <li><a href="#services" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Trade-In</a></li>
-              <li><button onClick={() => navigate('/warranty-financing')} className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Warranty</button></li>
+              <li><Link to="/warranty-financing" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Warranty</Link></li>
             </ul>
           </div>
 
@@ -130,9 +130,9 @@ const Footer = () => {
             </div>
             
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <button onClick={() => navigate('/privacy-policy')} className="text-gray-400 hover:text-fnt-red text-sm transition-colors duration-300">Privacy Policy</button>
-              <button onClick={() => navigate('/terms-conditions')} className="text-gray-400 hover:text-fnt-red text-sm transition-colors duration-300">Terms of Service</button>
-              <button onClick={() => navigate('/cookie-policy')} className="text-gray-400 hover:text-fnt-red text-sm transition-colors duration-300">Cookie Policy</button>
+              <Link to="/privacy-policy" className="text-gray-400 hover:text-fnt-red text-sm transition-colors duration-300">Privacy Policy</Link>
+              <Link to="/terms-conditions" className="text-gray-400 hover:text-fnt-red text-sm transition-colors duration-300">Terms of Service</Link>
+              <Link to="/cookie-policy" className="text-gray-400 hover:text-fnt-red text-sm transition-colors duration-300">Cookie Policy</Link>
             </div>
           </div>
         </div>

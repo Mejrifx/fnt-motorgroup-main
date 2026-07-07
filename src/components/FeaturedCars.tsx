@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { GasPump, GearSix, Gauge, MagnifyingGlass } from '@phosphor-icons/react';
 import { supabase, type Car } from '../lib/supabase';
 
@@ -26,7 +26,6 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   // Helper function to format mileage
   const formatMileage = (mileage: string): string => {
@@ -186,7 +185,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
 
   if (loading) {
     return (
-      <section id="inventory" className="py-20 glass-scene grain">
+      <section id="inventory" className="py-20 relative grain">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
@@ -206,7 +205,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
   }
 
   return (
-    <section id="inventory" className="py-24 glass-scene grain">
+    <section id="inventory" className="py-24 relative grain">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mb-14 reveal">
           <h2 className="section-title text-5xl md:text-7xl text-white mb-6">
@@ -236,15 +235,19 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="car-grid">
           {filteredCars.length > 0 ? (
             filteredCars.map((car) => (
-              <div
+              <Link
                 key={car.id}
-                onClick={() => navigate(`/car/${car.id}`)}
-                className="glass-card overflow-hidden group cursor-pointer reveal"
+                to={`/car/${car.id}`}
+                className="glass-card overflow-hidden group cursor-pointer reveal cv-auto block"
               >
                 <div className="relative overflow-hidden">
                   <img
                     src={resolveImageUrl(car)}
                     alt={`${car.make} ${car.model}`}
+                    loading="lazy"
+                    decoding="async"
+                    width={800}
+                    height={256}
                     className="w-full h-64 object-cover transition-transform duration-700 ease-spring group-hover:scale-105"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
@@ -282,7 +285,7 @@ const FeaturedCars: React.FC<FeaturedCarsProps> = ({ searchFilters }) => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="col-span-full text-center py-16">

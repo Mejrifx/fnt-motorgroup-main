@@ -2,9 +2,16 @@ import React, { useEffect } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const CookiePolicy: React.FC = () => {
   const navigate = useNavigate();
+
+  usePageMeta({
+    title: 'Cookie Policy',
+    description: 'Learn how FNT Motor Group uses cookies on our website.',
+    path: '/cookie-policy',
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

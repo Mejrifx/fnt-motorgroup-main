@@ -3,7 +3,7 @@ import { MapPin, Phone, EnvelopeSimple, Clock, PaperPlaneTilt } from '@phosphor-
 
 const Contact = () => {
   return (
-    <section id="contact" className="py-24 glass-scene grain">
+    <section id="contact" className="py-24 relative grain">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mb-16 reveal">
           <h2 className="section-title text-4xl md:text-6xl text-white mb-5">

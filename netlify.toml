@@ -9,6 +9,12 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Dynamic sitemap (must come before the SPA catch-all below)
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+
 # Redirects for SPA routing
 [[redirects]]
   from = "/*"

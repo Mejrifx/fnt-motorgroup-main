@@ -2,9 +2,16 @@ import React, { useEffect } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const TermsAndConditions: React.FC = () => {
   const navigate = useNavigate();
+
+  usePageMeta({
+    title: 'Terms & Conditions',
+    description: 'Read the terms and conditions for buying a vehicle from FNT Motor Group, Manchester.',
+    path: '/terms-conditions',
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

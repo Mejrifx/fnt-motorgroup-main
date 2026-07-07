@@ -2,9 +2,16 @@ import React, { useEffect } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const PrivacyPolicy: React.FC = () => {
   const navigate = useNavigate();
+
+  usePageMeta({
+    title: 'Privacy Policy',
+    description: 'Read the FNT Motor Group privacy policy to learn how we collect, use and protect your personal data.',
+    path: '/privacy-policy',
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);

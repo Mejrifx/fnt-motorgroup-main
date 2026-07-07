@@ -1,9 +1,16 @@
 import React, { useEffect } from 'react';
 import { ShieldCheck, CreditCard, Phone, EnvelopeSimple, MapPin, CheckCircle, Star, Clock, ArrowLeft } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const WarrantyFinancing: React.FC = () => {
   const navigate = useNavigate();
+
+  usePageMeta({
+    title: 'Warranty & Car Finance in Manchester',
+    description: 'Every car from FNT Motor Group comes with 6 months warranty and breakdown cover. Flexible finance options available on all vehicles in Manchester.',
+    path: '/warranty-financing',
+  });
 
   // Scroll to top when component mounts
   useEffect(() => {

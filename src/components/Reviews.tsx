@@ -68,7 +68,7 @@ const Reviews: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="py-20 glass-scene grain">
+      <section className="py-20 relative grain">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="glass rounded-3xl p-8 md:p-12 animate-pulse space-y-4">
@@ -90,7 +90,7 @@ const Reviews: React.FC = () => {
   const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length;
 
   return (
-    <section id="reviews" className="py-24 glass-scene grain">
+    <section id="reviews" className="py-24 relative grain">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-16 reveal">

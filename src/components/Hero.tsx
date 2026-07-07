@@ -18,7 +18,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       setIsScrolled(scrollTop > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -49,8 +49,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
       style={{
         backgroundImage: 'url("https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop")',
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll'
+        backgroundPosition: 'center'
       }}
     >
       {/* Mobile Header - Phone Left, Logo Center, Hamburger Right */}

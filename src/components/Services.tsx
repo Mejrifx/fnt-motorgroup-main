@@ -36,7 +36,7 @@ const Services = () => {
   ];
 
   return (
-    <section id="services" className="py-28 glass-scene grain">
+    <section id="services" className="py-28 relative grain">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mb-20 reveal">
           <h2 className="section-title text-4xl md:text-6xl text-white mb-5">
