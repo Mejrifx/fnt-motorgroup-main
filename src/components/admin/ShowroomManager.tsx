@@ -1,56 +1,36 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Plus, Edit, Trash2, Key, ChevronLeft, ChevronRight, X,
-  Car, AlertTriangle, CheckCircle, Copy, MapPin, Info,
-  ArrowLeft, ArrowRight, MoveHorizontal, RefreshCw, Search
+  DndContext, DragOverlay, useDraggable, useDroppable,
+  PointerSensor, useSensor, useSensors, type DragStartEvent, type DragEndEvent,
+} from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  Plus, Minus, Edit, Trash2, Key, X,
+  AlertTriangle, CheckCircle, Copy, Info,
+  ArrowRight, RefreshCw, Search, LogOut,
 } from 'lucide-react';
-import { supabase, type Car as StockCar } from '../../lib/supabase';
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface ShowroomRow {
-  id: string;
-  name: string;
-  display_order: number;
-  description: string;
-  created_at: string;
-}
-
-interface ShowroomCar {
-  id: string;
-  registration: string;
-  make: string;
-  model: string;
-  color: string;
-  notes: string;
-  row_id: string | null;
-  position_in_row: number;
-  created_at: string;
-  updated_at: string;
-}
+import { supabase, type Car as StockCar, type ShowroomCar, type ShowroomSlot } from '../../lib/supabase';
+import { useToast } from '../ui/ToastContainer';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const toUpper = (s: string) => s.toUpperCase();
 
-const blockingLabel = (count: number) => {
-  if (count === 0) return { text: 'Free to Move', bg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300', dot: 'bg-emerald-500', border: 'border-emerald-300 dark:border-emerald-700' };
-  if (count === 1) return { text: `1 car blocking`, bg: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300', dot: 'bg-amber-500', border: 'border-amber-300 dark:border-amber-700' };
-  return { text: `${count} cars blocking`, bg: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300', dot: 'bg-red-500', border: 'border-red-300 dark:border-red-700' };
+const isMissingTableError = (err: any): boolean => {
+  if (!err) return false;
+  const code = err.code;
+  const message: string = err.message ?? '';
+  return code === '42P01' || code === 'PGRST205' || message.includes('does not exist') || message.includes('schema cache');
 };
+
+const describeSlot = (slot: ShowroomSlot): string =>
+  slot.zone === 'left'
+    ? `Row ${slot.lane} · ${slot.depth === 1 ? 'Aisle side' : 'Wall side'}`
+    : `Bay ${slot.lane}`;
 
 // ─── Migration Guide ──────────────────────────────────────────────────────────
 
 const MIGRATION_SQL = `-- Run this in your Supabase SQL editor to set up the Showroom feature
-
-create table if not exists showroom_rows (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  display_order integer not null default 0,
-  description text not null default '',
-  created_at timestamptz default now()
-);
-
 create table if not exists showroom_cars (
   id uuid primary key default gen_random_uuid(),
   registration text not null,
@@ -58,20 +38,41 @@ create table if not exists showroom_cars (
   model text not null default '',
   color text not null default '',
   notes text not null default '',
-  row_id uuid references showroom_rows(id) on delete set null,
-  position_in_row integer not null default 0,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
-alter table showroom_rows enable row level security;
+create table if not exists showroom_slots (
+  id uuid primary key default gen_random_uuid(),
+  zone text not null check (zone in ('left', 'right')),
+  lane integer not null,
+  depth integer not null default 1,
+  display_order integer not null default 0,
+  car_id uuid references showroom_cars(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (zone, lane, depth)
+);
+
 alter table showroom_cars enable row level security;
+alter table showroom_slots enable row level security;
 
-create policy "Showroom rows - full access"
-  on showroom_rows for all using (true) with check (true);
+create policy "Showroom cars - full access" on showroom_cars for all using (true) with check (true);
+create policy "Showroom slots - full access" on showroom_slots for all using (true) with check (true);
 
-create policy "Showroom cars - full access"
-  on showroom_cars for all using (true) with check (true);`;
+do $$
+declare i integer;
+begin
+  if not exists (select 1 from showroom_slots) then
+    for i in 1..10 loop
+      insert into showroom_slots (zone, lane, depth, display_order) values ('left', i, 1, i);
+      insert into showroom_slots (zone, lane, depth, display_order) values ('left', i, 2, i);
+    end loop;
+    for i in 1..10 loop
+      insert into showroom_slots (zone, lane, depth, display_order) values ('right', i, 1, i);
+    end loop;
+  end if;
+end $$;`;
 
 const MigrationGuide: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
   const [copied, setCopied] = useState(false);
@@ -99,7 +100,7 @@ const MigrationGuide: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
         </div>
       </div>
 
-      <div className="steps mb-6 space-y-3">
+      <div className="mb-6 space-y-3">
         {['Go to app.supabase.com → your project', 'Click SQL Editor in the left sidebar', 'Paste the SQL below and click Run', 'Come back here and click "I\'ve run the SQL"'].map((step, i) => (
           <div key={i} className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-fnt-red text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
@@ -132,441 +133,26 @@ const MigrationGuide: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
   );
 };
 
-// ─── Retrieve Modal ───────────────────────────────────────────────────────────
+// ─── Car Form Modal (add / edit) ──────────────────────────────────────────────
 
-interface RetrieveModalProps {
-  car: ShowroomCar;
-  sequence: ShowroomCar[];
-  rowName: string;
-  onClose: () => void;
-}
-
-const RetrieveModal: React.FC<RetrieveModalProps> = ({ car, sequence, rowName, onClose }) => (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-    <div
-      className="admin-glass-card w-full max-w-md max-h-[90vh] overflow-y-auto"
-      onClick={e => e.stopPropagation()}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-fnt-red flex items-center justify-center flex-shrink-0">
-            <Key className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Key Retrieval Guide</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Follow the steps below</p>
-          </div>
-        </div>
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-          <X className="w-5 h-5 text-gray-500" />
-        </button>
-      </div>
-
-      <div className="p-5">
-        {/* Target car */}
-        <div className="mb-5 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">You want to retrieve</p>
-          <p className="text-2xl font-black text-gray-900 dark:text-white tracking-widest">{car.registration}</p>
-          {(car.make || car.model) && <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5">{[car.make, car.model].filter(Boolean).join(' ')}{car.color ? ` · ${car.color}` : ''}</p>}
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{rowName} · Position {car.position_in_row}</p>
-        </div>
-
-        {/* Steps */}
-        {sequence.length === 0 ? (
-          <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700">
-            <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-emerald-800 dark:text-emerald-300">This car is free to move!</p>
-              <p className="text-sm text-emerald-700 dark:text-emerald-400">No cars are blocking it. Grab the key and go.</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center gap-2 mb-4 px-1">
-              <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Move <span className="font-bold text-fnt-red">{sequence.length}</span> car{sequence.length > 1 ? 's' : ''} first — in this order:
-              </p>
-            </div>
-
-            <div className="space-y-3 mb-5">
-              {sequence.map((blockingCar, idx) => (
-                <div key={blockingCar.id} className="relative">
-                  <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500 text-white text-sm font-black flex items-center justify-center">
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-black text-gray-900 dark:text-white tracking-widest">{blockingCar.registration}</span>
-                        {idx === 0 && (
-                          <span className="text-xs bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 px-1.5 py-0.5 rounded font-medium">Move first</span>
-                        )}
-                      </div>
-                      {(blockingCar.make || blockingCar.model) && (
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5 truncate">
-                          {[blockingCar.make, blockingCar.model].filter(Boolean).join(' ')}
-                          {blockingCar.color ? ` · ${blockingCar.color}` : ''}
-                        </p>
-                      )}
-                      {blockingCar.notes && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 italic">{blockingCar.notes}</p>
-                      )}
-                    </div>
-                  </div>
-                  {/* Connector arrow */}
-                  {idx < sequence.length - 1 && (
-                    <div className="flex justify-center my-1">
-                      <ChevronRight className="w-4 h-4 text-gray-400 rotate-90" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Then get target */}
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <ChevronRight className="w-4 h-4 text-emerald-500 rotate-90" />
-              <p className="text-xs text-gray-400 dark:text-gray-500">Then you can get your car</p>
-            </div>
-            <div className="flex gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border-2 border-emerald-300 dark:border-emerald-700">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xl font-black text-gray-900 dark:text-white tracking-widest">{car.registration}</p>
-                {(car.make || car.model) && <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5">{[car.make, car.model].filter(Boolean).join(' ')}{car.color ? ` · ${car.color}` : ''}</p>}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="px-5 pb-5">
-        <button
-          onClick={onClose}
-          className="w-full py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold rounded-xl transition-colors"
-        >
-          Back to Showroom
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-// ─── Car Card ─────────────────────────────────────────────────────────────────
-
-interface CarCardProps {
-  car: ShowroomCar;
-  blockingCount: number;
-  isFirst: boolean;
-  isLast: boolean;
-  onRetrieve: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onMoveForward: () => void;
-  onMoveBack: () => void;
-}
-
-const CarCard: React.FC<CarCardProps> = ({
-  car, blockingCount, isFirst, isLast, onRetrieve, onEdit, onDelete, onMoveForward, onMoveBack
-}) => {
-  const label = blockingLabel(blockingCount);
-
-  return (
-    <div className={`relative flex-shrink-0 w-48 sm:w-52 rounded-xl border-2 ${label.border} bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden`}>
-      {/* Position badge */}
-      <div className={`absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full ${label.bg}`}>
-        #{car.position_in_row}
-      </div>
-
-      {/* Status dot */}
-      <div className={`absolute top-2 right-2 w-2.5 h-2.5 rounded-full ${label.dot}`} />
-
-      <div className="pt-9 px-3 pb-3">
-        {/* Registration — the most important thing */}
-        <p className="text-xl font-black text-gray-900 dark:text-white tracking-widest leading-tight">{car.registration}</p>
-
-        {/* Make / Model */}
-        {(car.make || car.model) ? (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{[car.make, car.model].filter(Boolean).join(' ')}</p>
-        ) : (
-          <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5 italic">No details</p>
-        )}
-
-        {/* Color */}
-        {car.color && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{car.color}</p>}
-
-        {/* Status label */}
-        <div className="mt-2">
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${label.bg}`}>
-            {label.text}
-          </span>
-        </div>
-
-        {/* Notes */}
-        {car.notes && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 italic line-clamp-2">{car.notes}</p>
-        )}
-
-        {/* Actions */}
-        <div className="mt-3 space-y-1.5">
-          <button
-            onClick={onRetrieve}
-            className="w-full flex items-center justify-center gap-1.5 py-2 btn-glass-red text-white text-xs font-semibold rounded-lg transition-colors"
-          >
-            <Key className="w-3.5 h-3.5" />
-            Retrieve This Car
-          </button>
-
-          <div className="flex gap-1">
-            <button
-              onClick={onMoveForward}
-              disabled={isFirst}
-              title="Move closer to exit"
-              className="flex-1 flex items-center justify-center py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 disabled:opacity-30 disabled:cursor-not-allowed text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={onEdit}
-              title="Edit car"
-              className="flex-1 flex items-center justify-center py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg transition-colors"
-            >
-              <Edit className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={onDelete}
-              title="Remove from showroom"
-              className="flex-1 flex items-center justify-center py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={onMoveBack}
-              disabled={isLast}
-              title="Move further from exit"
-              className="flex-1 flex items-center justify-center py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 disabled:opacity-30 disabled:cursor-not-allowed text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
-            >
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── Lane Section ─────────────────────────────────────────────────────────────
-
-interface LaneSectionProps {
-  row: ShowroomRow;
-  cars: ShowroomCar[];
-  onRetrieve: (car: ShowroomCar) => void;
-  onEditCar: (car: ShowroomCar) => void;
-  onDeleteCar: (carId: string) => void;
-  onMoveCar: (car: ShowroomCar, dir: 'forward' | 'backward') => void;
-  onEditRow: (row: ShowroomRow) => void;
-  onDeleteRow: (rowId: string) => void;
-  getBlockingCount: (car: ShowroomCar) => number;
-}
-
-const LaneSection: React.FC<LaneSectionProps> = ({
-  row, cars, onRetrieve, onEditCar, onDeleteCar, onMoveCar, onEditRow, onDeleteRow, getBlockingCount
-}) => {
-  return (
-    <div className="admin-glass-card !rounded-xl mb-4 overflow-hidden">
-      {/* Lane header */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-fnt-red flex-shrink-0" />
-          <div>
-            <h3 className="font-bold text-gray-900 dark:text-white text-base">{row.name}</h3>
-            {row.description && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{row.description}</p>}
-          </div>
-          <span className="ml-2 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-full">
-            {cars.length} car{cars.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => onEditRow(row)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg transition-colors"
-            title="Edit lane"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDeleteRow(row.id)}
-            className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 dark:text-gray-400 hover:text-red-500 rounded-lg transition-colors"
-            title="Delete lane"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Lane visual */}
-      <div className="p-4 sm:p-5">
-        {cars.length === 0 ? (
-          <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-xl">
-            <p className="text-sm text-gray-400 dark:text-gray-500">Empty lane — no cars parked here</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto pb-2">
-            {/* Direction indicators + car strip */}
-            <div className="flex items-stretch gap-0 min-w-max">
-              {/* EXIT label */}
-              <div className="flex flex-col items-center justify-center gap-1 pr-3 flex-shrink-0">
-                <div className="px-2 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg whitespace-nowrap flex items-center gap-1">
-                  <ArrowLeft className="w-3 h-3" />
-                  EXIT
-                </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 text-center leading-tight">
-                  Move<br/>here
-                </p>
-              </div>
-
-              {/* Cars with connectors */}
-              {cars.map((car, idx) => (
-                <React.Fragment key={car.id}>
-                  <CarCard
-                    car={car}
-                    blockingCount={getBlockingCount(car)}
-                    isFirst={idx === 0}
-                    isLast={idx === cars.length - 1}
-                    onRetrieve={() => onRetrieve(car)}
-                    onEdit={() => onEditCar(car)}
-                    onDelete={() => onDeleteCar(car.id)}
-                    onMoveForward={() => onMoveCar(car, 'forward')}
-                    onMoveBack={() => onMoveCar(car, 'backward')}
-                  />
-                  {idx < cars.length - 1 && (
-                    <div className="flex items-center px-2 flex-shrink-0">
-                      <div className="flex flex-col items-center gap-1">
-                        <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
-                        <span className="text-xs text-gray-300 dark:text-gray-600 font-mono">blocks</span>
-                      </div>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
-
-              {/* WALL label */}
-              <div className="flex flex-col items-center justify-center gap-1 pl-3 flex-shrink-0">
-                <div className="px-2 py-1.5 bg-gray-500 text-white text-xs font-bold rounded-lg whitespace-nowrap">
-                  WALL
-                </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 text-center leading-tight">
-                  Most<br/>blocked
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Lane key summary */}
-        {cars.length > 1 && (
-          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              <span className="font-semibold">Quick guide:</span>{' '}
-              {cars[0].registration} is free · {cars.slice(1).map((c, i) => `${c.registration} needs ${i + 1} key${i + 1 > 1 ? 's' : ''} first`).join(' · ')}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ─── Row Modal ────────────────────────────────────────────────────────────────
-
-interface RowModalProps {
-  initial?: ShowroomRow | null;
-  allRows: ShowroomRow[];
-  onSave: (name: string, description: string) => void;
-  onClose: () => void;
-  saving: boolean;
-}
-
-const RowModal: React.FC<RowModalProps> = ({ initial, onSave, onClose, saving }) => {
-  const [name, setName] = useState(initial?.name ?? '');
-  const [description, setDescription] = useState(initial?.description ?? '');
-
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="admin-glass-card w-full max-w-sm" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{initial ? 'Edit Lane' : 'Add New Lane'}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
-        <div className="p-5 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lane Name <span className="text-fnt-red">*</span></label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="e.g. Front Row, Back Alley, Left Side"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
-              autoFocus
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description <span className="text-gray-400 font-normal">(optional)</span></label>
-            <input
-              type="text"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="e.g. Right side of forecourt, 4 spaces"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
-            />
-          </div>
-        </div>
-        <div className="flex gap-3 px-5 pb-5">
-          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
-            Cancel
-          </button>
-          <button
-            onClick={() => name.trim() && onSave(name.trim(), description.trim())}
-            disabled={!name.trim() || saving}
-            className="flex-1 py-2.5 btn-glass-red disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
-          >
-            {saving ? 'Saving…' : initial ? 'Save Changes' : 'Add Lane'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── Car Modal ────────────────────────────────────────────────────────────────
-
-interface CarModalProps {
+interface CarFormModalProps {
   initial?: ShowroomCar | null;
-  rows: ShowroomRow[];
-  allCars: ShowroomCar[];
   stockCars: StockCar[];
+  targetSlotLabel?: string | null;
   onSave: (data: Partial<ShowroomCar>) => void;
   onClose: () => void;
   saving: boolean;
 }
 
-const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, onSave, onClose, saving }) => {
+const CarFormModal: React.FC<CarFormModalProps> = ({ initial, stockCars, targetSlotLabel, onSave, onClose, saving }) => {
   const [registration, setRegistration] = useState(initial?.registration ?? '');
   const [make, setMake] = useState(initial?.make ?? '');
   const [model, setModel] = useState(initial?.model ?? '');
   const [color, setColor] = useState(initial?.color ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
-  const [rowId, setRowId] = useState<string>(initial?.row_id ?? '');
-  const [position, setPosition] = useState<string>(initial?.position_in_row?.toString() ?? '');
   const [stockSearch, setStockSearch] = useState('');
   const [showStockPicker, setShowStockPicker] = useState(!initial);
 
-  // Filter stock cars by search query — reg, make, or model
   const filteredStock = stockCars.filter(c => {
     if (!stockSearch.trim()) return true;
     const q = stockSearch.toLowerCase();
@@ -594,33 +180,22 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
     setShowStockPicker(true);
   };
 
-  // When row changes, default to adding at the end
-  const handleRowChange = (newRowId: string) => {
-    setRowId(newRowId);
-    if (newRowId && !initial) {
-      const rowCars = allCars.filter(c => c.row_id === newRowId && c.id !== initial?.id);
-      const maxPos = rowCars.length > 0 ? Math.max(...rowCars.map(c => c.position_in_row)) : 0;
-      setPosition((maxPos + 1).toString());
-    } else if (!newRowId) {
-      setPosition('');
-    }
-  };
-
-  const carsInSelectedRow = rowId ? allCars.filter(c => c.row_id === rowId && c.id !== initial?.id) : [];
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="admin-glass-card w-full max-w-sm max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{initial ? 'Edit Car' : 'Add Car to Showroom'}</h2>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{initial ? 'Edit Car' : 'Add Car to Showroom'}</h2>
+            {targetSlotLabel && !initial && (
+              <p className="text-xs text-fnt-red font-medium mt-0.5">Will be placed in {targetSlotLabel}</p>
+            )}
+          </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
-
-          {/* ── Stock Picker (add mode only) ── */}
           {!initial && (
             <div>
               {showStockPicker ? (
@@ -641,7 +216,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
                     />
                   </div>
 
-                  {/* Stock list */}
                   <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden max-h-52 overflow-y-auto">
                     {filteredStock.length === 0 ? (
                       <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
@@ -671,7 +245,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
                     )}
                   </div>
 
-                  {/* Divider with manual option */}
                   <div className="relative mt-4 mb-1">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-200 dark:border-gray-600" />
@@ -682,7 +255,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
                   </div>
                 </div>
               ) : (
-                /* Selected car confirmation banner */
                 <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
@@ -702,7 +274,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
             </div>
           )}
 
-          {/* ── Manual fields ── */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Registration Plate <span className="text-fnt-red">*</span>
@@ -751,44 +322,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
             />
           </div>
 
-          {/* Lane assignment */}
-          <div className="pt-1 border-t border-gray-100 dark:border-gray-700">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Assign to Lane <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <select
-              value={rowId}
-              onChange={e => handleRowChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
-            >
-              <option value="">Not assigned (floating)</option>
-              {rows.map(r => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {rowId && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Position in Lane
-                <span className="ml-1 text-xs text-gray-400 font-normal">(1 = closest to exit)</span>
-              </label>
-              <input
-                type="number"
-                value={position}
-                onChange={e => setPosition(e.target.value)}
-                min={1}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
-              />
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                {carsInSelectedRow.length === 0
-                  ? 'This lane is empty — will be position 1'
-                  : `Lane has ${carsInSelectedRow.length} car(s). Leave blank to add at the back.`}
-              </p>
-            </div>
-          )}
-
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes <span className="text-gray-400 font-normal">(optional)</span>
@@ -801,6 +334,13 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-fnt-red"
             />
           </div>
+
+          {!initial && !targetSlotLabel && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5 flex-shrink-0" />
+              This car will go into the Unassigned tray — drag it onto any open spot afterwards.
+            </p>
+          )}
         </div>
 
         <div className="flex gap-3 px-5 pb-5">
@@ -816,8 +356,6 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
                 model: model.trim(),
                 color: color.trim(),
                 notes: notes.trim(),
-                row_id: rowId || null,
-                position_in_row: rowId && position ? parseInt(position) : 0,
               });
             }}
             disabled={!registration.trim() || saving}
@@ -831,55 +369,269 @@ const CarModal: React.FC<CarModalProps> = ({ initial, rows, allCars, stockCars, 
   );
 };
 
+// ─── Car Detail Sheet (click a parked car) ────────────────────────────────────
+
+interface CarDetailModalProps {
+  car: ShowroomCar;
+  slot: ShowroomSlot;
+  blocker: ShowroomCar | null;
+  onClose: () => void;
+  onEdit: () => void;
+  onUnassign: () => void;
+  onDelete: () => void;
+}
+
+const CarDetailModal: React.FC<CarDetailModalProps> = ({ car, slot, blocker, onClose, onEdit, onUnassign, onDelete }) => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="admin-glass-card w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${blocker ? 'bg-amber-500' : 'bg-emerald-500'}`}>
+            <Key className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-widest font-mono">{car.registration}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{describeSlot(slot)}</p>
+          </div>
+        </div>
+        <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+          <X className="w-5 h-5 text-gray-500" />
+        </button>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {(car.make || car.model || car.color) && (
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {[car.make, car.model].filter(Boolean).join(' ')}{car.color ? ` · ${car.color}` : ''}
+          </p>
+        )}
+        {car.notes && <p className="text-xs text-gray-400 dark:text-gray-500 italic">{car.notes}</p>}
+
+        {blocker ? (
+          <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Move this car first to retrieve {car.registration}:</p>
+            </div>
+            <p className="text-xl font-black text-gray-900 dark:text-white tracking-widest font-mono">{blocker.registration}</p>
+            {(blocker.make || blocker.model) && (
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5">{[blocker.make, blocker.model].filter(Boolean).join(' ')}{blocker.color ? ` · ${blocker.color}` : ''}</p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700">
+            <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-emerald-800 dark:text-emerald-300">Free to move!</p>
+              <p className="text-sm text-emerald-700 dark:text-emerald-400">Nothing is blocking this car — grab the key and go.</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="px-5 pb-5 space-y-2">
+        <button
+          onClick={onEdit}
+          className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
+        >
+          <Edit className="w-4 h-4" /> Edit Details
+        </button>
+        <button
+          onClick={onUnassign}
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
+        >
+          <LogOut className="w-4 h-4" /> Send Back to Unassigned
+        </button>
+        <button
+          onClick={onDelete}
+          className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors"
+        >
+          <Trash2 className="w-4 h-4" /> Remove From Showroom
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+// ─── Draggable Car Chip (sits inside a slot) ──────────────────────────────────
+
+interface CarChipProps {
+  car: ShowroomCar;
+  slotId: string;
+  blocked: boolean;
+  onClick: () => void;
+}
+
+const CarChip: React.FC<CarChipProps> = ({ car, slotId, blocked, onClick }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `car-${car.id}`,
+    data: { carId: car.id, sourceSlotId: slotId },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={onClick}
+      style={{
+        transform: transform ? CSS.Translate.toString(transform) : undefined,
+        opacity: isDragging ? 0.35 : 1,
+        touchAction: 'none',
+      }}
+      className={`w-full h-full rounded-xl border-2 flex flex-col items-center justify-center gap-0.5 px-1 cursor-grab active:cursor-grabbing select-none transition-colors ${
+        blocked
+          ? 'bg-amber-50 border-amber-300 dark:bg-amber-900/25 dark:border-amber-700'
+          : 'bg-emerald-50 border-emerald-300 dark:bg-emerald-900/25 dark:border-emerald-700'
+      }`}
+    >
+      <span className="font-mono font-black text-[11px] sm:text-xs tracking-wider text-gray-900 dark:text-white leading-tight">
+        {car.registration}
+      </span>
+      {(car.make || car.model) && (
+        <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-full leading-tight">
+          {[car.make, car.model].filter(Boolean).join(' ')}
+        </span>
+      )}
+      {blocked && (
+        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
+          !
+        </span>
+      )}
+    </div>
+  );
+};
+
+// ─── Slot Cell (droppable spot in the grid) ───────────────────────────────────
+
+interface SlotCellProps {
+  slot: ShowroomSlot;
+  car: ShowroomCar | null;
+  blocked: boolean;
+  onQuickAdd: () => void;
+  onClickCar: () => void;
+}
+
+const SlotCell: React.FC<SlotCellProps> = ({ slot, car, blocked, onQuickAdd, onClickCar }) => {
+  const { isOver, setNodeRef } = useDroppable({ id: `slot-${slot.id}`, data: { slotId: slot.id } });
+
+  if (!car) {
+    return (
+      <button
+        ref={setNodeRef}
+        onClick={onQuickAdd}
+        title={`Add car to ${describeSlot(slot)}`}
+        className={`relative w-[4.5rem] h-14 sm:w-24 sm:h-16 rounded-xl border-2 border-dashed flex items-center justify-center transition-all flex-shrink-0 ${
+          isOver
+            ? 'border-fnt-red bg-fnt-red/10 scale-105'
+            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-black/[0.02] dark:hover:bg-white/[0.03]'
+        }`}
+      >
+        <Plus className={`w-4 h-4 sm:w-5 sm:h-5 ${isOver ? 'text-fnt-red' : 'text-gray-300 dark:text-gray-600'}`} />
+      </button>
+    );
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`relative w-[4.5rem] h-14 sm:w-24 sm:h-16 rounded-xl transition-all flex-shrink-0 ${
+        isOver ? 'ring-2 ring-fnt-red ring-offset-2 dark:ring-offset-gray-800 scale-105' : ''
+      }`}
+    >
+      <CarChip car={car} slotId={slot.id} blocked={blocked} onClick={onClickCar} />
+    </div>
+  );
+};
+
+// ─── Unassigned pool card ──────────────────────────────────────────────────────
+
+interface PoolCardProps {
+  car: ShowroomCar;
+  onClick: () => void;
+  onDelete: () => void;
+}
+
+const PoolCard: React.FC<PoolCardProps> = ({ car, onClick, onDelete }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `car-${car.id}`,
+    data: { carId: car.id, sourceSlotId: null },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={onClick}
+      style={{
+        transform: transform ? CSS.Translate.toString(transform) : undefined,
+        opacity: isDragging ? 0.35 : 1,
+        touchAction: 'none',
+      }}
+      className="relative flex-shrink-0 w-32 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 p-2.5 cursor-grab active:cursor-grabbing select-none hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
+    >
+      <button
+        onPointerDown={e => e.stopPropagation()}
+        onClick={e => { e.stopPropagation(); onDelete(); }}
+        title="Remove from showroom"
+        className="absolute top-1 right-1 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
+      <p className="text-sm font-black text-gray-900 dark:text-white tracking-widest font-mono pr-4">{car.registration}</p>
+      {(car.make || car.model) && <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{[car.make, car.model].filter(Boolean).join(' ')}</p>}
+    </div>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const ShowroomManager: React.FC = () => {
-  const [rows, setRows] = useState<ShowroomRow[]>([]);
+  const { showToast } = useToast();
   const [cars, setCars] = useState<ShowroomCar[]>([]);
+  const [slots, setSlots] = useState<ShowroomSlot[]>([]);
+  const [stockCars, setStockCars] = useState<StockCar[]>([]);
   const [loading, setLoading] = useState(true);
   const [migrationNeeded, setMigrationNeeded] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [stockCars, setStockCars] = useState<StockCar[]>([]);
 
-  // Modal state
-  const [showAddRowModal, setShowAddRowModal] = useState(false);
-  const [editingRow, setEditingRow] = useState<ShowroomRow | null>(null);
   const [showAddCarModal, setShowAddCarModal] = useState(false);
+  const [addTargetSlotId, setAddTargetSlotId] = useState<string | null>(null);
   const [editingCar, setEditingCar] = useState<ShowroomCar | null>(null);
-  const [retrievingCar, setRetrievingCar] = useState<ShowroomCar | null>(null);
+  const [detailCarSlotId, setDetailCarSlotId] = useState<string | null>(null);
+  const [activeDragCarId, setActiveDragCarId] = useState<string | null>(null);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   // ── Data Fetching ──
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [rowsRes, carsRes, stockRes] = await Promise.all([
-        supabase.from('showroom_rows').select('*').order('display_order', { ascending: true }),
-        supabase.from('showroom_cars').select('*').order('position_in_row', { ascending: true }),
+      const [carsRes, slotsRes, stockRes] = await Promise.all([
+        supabase.from('showroom_cars').select('*'),
+        supabase.from('showroom_slots').select('*').order('display_order', { ascending: true }),
         supabase.from('cars').select('id,make,model,year,registration,colour,is_available').order('make', { ascending: true }),
       ]);
 
-      const tablesMissing =
-        (rowsRes.error && (rowsRes.error.code === '42P01' || rowsRes.error.message?.includes('does not exist'))) ||
-        (carsRes.error && (carsRes.error.code === '42P01' || carsRes.error.message?.includes('does not exist')));
+      const tablesMissing = isMissingTableError(carsRes.error) || isMissingTableError(slotsRes.error);
 
       if (tablesMissing) {
         setMigrationNeeded(true);
         return;
       }
 
-      if (rowsRes.error) throw rowsRes.error;
       if (carsRes.error) throw carsRes.error;
+      if (slotsRes.error) throw slotsRes.error;
 
-      setRows(rowsRes.data ?? []);
       setCars(carsRes.data ?? []);
-      // Stock cars: sort available first, then by make
+      setSlots(slotsRes.data ?? []);
       const stock = (stockRes.data ?? []) as StockCar[];
       setStockCars([...stock.filter(c => c.is_available), ...stock.filter(c => !c.is_available)]);
       setMigrationNeeded(false);
     } catch (err: any) {
-      const isMissing = err?.code === '42P01' || err?.message?.includes('does not exist');
-      if (isMissing) setMigrationNeeded(true);
+      if (isMissingTableError(err)) setMigrationNeeded(true);
       else console.error('Showroom fetch error:', err);
     } finally {
       setLoading(false);
@@ -890,154 +642,200 @@ const ShowroomManager: React.FC = () => {
 
   // ── Derived Data ──
 
-  const getCarsInRow = useCallback((rowId: string) =>
-    cars.filter(c => c.row_id === rowId).sort((a, b) => a.position_in_row - b.position_in_row),
-    [cars]);
+  const carsById = useMemo(() => new Map(cars.map(c => [c.id, c])), [cars]);
 
-  const getUnassignedCars = useCallback(() => cars.filter(c => !c.row_id), [cars]);
+  const leftLaneNumbers = useMemo(() => {
+    const lanes = new Map<number, number>();
+    slots.filter(s => s.zone === 'left').forEach(s => lanes.set(s.lane, s.display_order));
+    return Array.from(lanes.entries()).sort((a, b) => a[1] - b[1]).map(([lane]) => lane);
+  }, [slots]);
 
-  const getRetrievalSequence = useCallback((car: ShowroomCar): ShowroomCar[] => {
-    if (!car.row_id) return [];
-    const rowCars = getCarsInRow(car.row_id);
-    const idx = rowCars.findIndex(c => c.id === car.id);
-    return rowCars.slice(0, idx);
-  }, [getCarsInRow]);
+  const rightBaySlots = useMemo(() =>
+    slots.filter(s => s.zone === 'right').sort((a, b) => a.display_order - b.display_order),
+    [slots]);
 
-  const getBlockingCount = useCallback((car: ShowroomCar) => getRetrievalSequence(car).length, [getRetrievalSequence]);
+  const unassignedCars = useMemo(() => {
+    const parkedIds = new Set(slots.filter(s => s.car_id).map(s => s.car_id));
+    return cars.filter(c => !parkedIds.has(c.id));
+  }, [cars, slots]);
 
-  // ── Row Operations ──
+  const getBlocker = useCallback((slot: ShowroomSlot): ShowroomSlot | null => {
+    if (slot.zone !== 'left' || slot.depth !== 2) return null;
+    return slots.find(s => s.zone === 'left' && s.lane === slot.lane && s.depth === 1) ?? null;
+  }, [slots]);
 
-  const handleSaveRow = async (name: string, description: string) => {
-    setSaving(true);
+  const isSlotBlocked = useCallback((slot: ShowroomSlot) => {
+    const blocker = getBlocker(slot);
+    return !!(blocker && blocker.car_id);
+  }, [getBlocker]);
+
+  const parkedSlots = useMemo(() => slots.filter(s => s.car_id), [slots]);
+  const blockedSlots = useMemo(() => parkedSlots.filter(isSlotBlocked), [parkedSlots, isSlotBlocked]);
+  const freeParkedCount = parkedSlots.length - blockedSlots.length;
+
+  // ── Mutations (optimistic) ──
+
+  const moveCar = useCallback(async (carId: string, sourceSlotId: string | null, targetSlotId: string) => {
+    const targetSlot = slots.find(s => s.id === targetSlotId);
+    if (!targetSlot || targetSlot.car_id === carId) return;
+    const displacedCarId = targetSlot.car_id;
+
+    const prevSlots = slots;
+    setSlots(prev => prev.map(s => {
+      if (s.id === targetSlotId) return { ...s, car_id: carId };
+      if (sourceSlotId && s.id === sourceSlotId) return { ...s, car_id: displacedCarId };
+      return s;
+    }));
+
     try {
-      if (editingRow) {
-        await supabase.from('showroom_rows').update({ name, description }).eq('id', editingRow.id);
-        setEditingRow(null);
-      } else {
-        const maxOrder = rows.length > 0 ? Math.max(...rows.map(r => r.display_order)) : 0;
-        await supabase.from('showroom_rows').insert({ name, description, display_order: maxOrder + 1 });
-        setShowAddRowModal(false);
+      const now = new Date().toISOString();
+      const updates = [supabase.from('showroom_slots').update({ car_id: carId, updated_at: now }).eq('id', targetSlotId)];
+      if (sourceSlotId) {
+        updates.push(supabase.from('showroom_slots').update({ car_id: displacedCarId, updated_at: now }).eq('id', sourceSlotId));
       }
-      await fetchData();
-    } finally {
-      setSaving(false);
+      const results = await Promise.all(updates);
+      const failed = results.find(r => r.error);
+      if (failed?.error) throw failed.error;
+    } catch (err) {
+      console.error('Failed to move car:', err);
+      showToast('Could not move car — try again', 'error');
+      setSlots(prevSlots);
+    }
+  }, [slots, showToast]);
+
+  const unassignCar = useCallback(async (sourceSlotId: string) => {
+    const prevSlots = slots;
+    setSlots(prev => prev.map(s => s.id === sourceSlotId ? { ...s, car_id: null } : s));
+    try {
+      const { error } = await supabase.from('showroom_slots').update({ car_id: null, updated_at: new Date().toISOString() }).eq('id', sourceSlotId);
+      if (error) throw error;
+    } catch (err) {
+      console.error(err);
+      showToast('Could not update showroom — try again', 'error');
+      setSlots(prevSlots);
+    }
+  }, [slots, showToast]);
+
+  // ── Drag handlers ──
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const data = event.active.data.current as { carId: string } | undefined;
+    setActiveDragCarId(data?.carId ?? null);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveDragCarId(null);
+    const { active, over } = event;
+    if (!over) return;
+    const data = active.data.current as { carId: string; sourceSlotId: string | null } | undefined;
+    if (!data) return;
+
+    const overId = String(over.id);
+    if (overId === 'pool') {
+      if (data.sourceSlotId) unassignCar(data.sourceSlotId);
+      return;
+    }
+    if (overId.startsWith('slot-')) {
+      const targetSlotId = overId.replace('slot-', '');
+      if (targetSlotId === data.sourceSlotId) return;
+      moveCar(data.carId, data.sourceSlotId, targetSlotId);
     }
   };
 
-  const handleDeleteRow = async (rowId: string) => {
-    const rowCars = getCarsInRow(rowId);
-    const msg = rowCars.length > 0
-      ? `This lane has ${rowCars.length} car(s). Deleting it will move them to Unassigned. Continue?`
-      : 'Delete this empty lane?';
-    if (!window.confirm(msg)) return;
+  const { setNodeRef: setPoolRef, isOver: isOverPool } = useDroppable({ id: 'pool' });
 
-    if (rowCars.length > 0) {
-      await supabase.from('showroom_cars')
-        .update({ row_id: null, position_in_row: 0, updated_at: new Date().toISOString() })
-        .eq('row_id', rowId);
-    }
-    await supabase.from('showroom_rows').delete().eq('id', rowId);
-    await fetchData();
-  };
-
-  // ── Car Operations ──
+  // ── Car CRUD ──
 
   const handleSaveCar = async (data: Partial<ShowroomCar>) => {
     setSaving(true);
     try {
       if (editingCar) {
-        // If changing to a new row, need to renormalize
-        const needsRenormalize = data.row_id !== editingCar.row_id;
-        const oldRowId = editingCar.row_id;
-
-        await supabase.from('showroom_cars')
-          .update({ ...data, updated_at: new Date().toISOString() })
-          .eq('id', editingCar.id);
-
-        // Renormalize old row if moved out
-        if (needsRenormalize && oldRowId) {
-          await renormalizeRow(oldRowId, editingCar.id);
-        }
+        await supabase.from('showroom_cars').update({ ...data, updated_at: new Date().toISOString() }).eq('id', editingCar.id);
         setEditingCar(null);
       } else {
-        // Inserting: if position is specified and there are cars in the way, shift them down
-        if (data.row_id && data.position_in_row) {
-          await shiftPositionsUp(data.row_id, data.position_in_row);
-        }
-        await supabase.from('showroom_cars').insert({
+        const { data: inserted, error } = await supabase.from('showroom_cars').insert({
           registration: data.registration,
           make: data.make ?? '',
           model: data.model ?? '',
           color: data.color ?? '',
           notes: data.notes ?? '',
-          row_id: data.row_id ?? null,
-          position_in_row: data.position_in_row ?? 0,
-        });
+        }).select().single();
+        if (error) throw error;
+
+        if (addTargetSlotId && inserted) {
+          await supabase.from('showroom_slots').update({ car_id: inserted.id, updated_at: new Date().toISOString() }).eq('id', addTargetSlotId);
+        }
         setShowAddCarModal(false);
+        setAddTargetSlotId(null);
       }
       await fetchData();
+      showToast(editingCar ? 'Car updated' : 'Car added', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Could not save car', 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  // Shift cars at >= targetPos down by 1 to make room for an insertion
-  const shiftPositionsUp = async (rowId: string, targetPos: number) => {
-    const rowCars = getCarsInRow(rowId).filter(c => c.position_in_row >= targetPos);
-    if (rowCars.length === 0) return;
-    // Do shifts in reverse order to avoid conflicts
-    for (const car of rowCars.reverse()) {
-      await supabase.from('showroom_cars')
-        .update({ position_in_row: car.position_in_row + 1, updated_at: new Date().toISOString() })
-        .eq('id', car.id);
-    }
-  };
-
-  // Renormalize positions in a row after a removal
-  const renormalizeRow = async (rowId: string, excludeId?: string) => {
-    const rowCars = getCarsInRow(rowId)
-      .filter(c => c.id !== excludeId)
-      .sort((a, b) => a.position_in_row - b.position_in_row);
-
-    for (let i = 0; i < rowCars.length; i++) {
-      if (rowCars[i].position_in_row !== i + 1) {
-        await supabase.from('showroom_cars')
-          .update({ position_in_row: i + 1, updated_at: new Date().toISOString() })
-          .eq('id', rowCars[i].id);
-      }
-    }
-  };
-
   const handleDeleteCar = async (carId: string) => {
-    if (!window.confirm('Remove this car from the showroom?')) return;
-    const car = cars.find(c => c.id === carId);
-    await supabase.from('showroom_cars').delete().eq('id', carId);
-    if (car?.row_id) await renormalizeRow(car.row_id, carId);
-    await fetchData();
+    if (!window.confirm('Remove this car from the showroom entirely?')) return;
+    try {
+      await supabase.from('showroom_cars').delete().eq('id', carId);
+      await fetchData();
+      showToast('Car removed', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Could not remove car', 'error');
+    }
   };
 
-  const handleMoveCar = async (car: ShowroomCar, direction: 'forward' | 'backward') => {
-    if (!car.row_id) return;
-    const rowCars = getCarsInRow(car.row_id);
-    const idx = rowCars.findIndex(c => c.id === car.id);
-    const swapIdx = direction === 'forward' ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= rowCars.length) return;
+  // ── Lane / Bay management ──
 
-    const swapCar = rowCars[swapIdx];
-    const now = new Date().toISOString();
-    await Promise.all([
-      supabase.from('showroom_cars').update({ position_in_row: swapCar.position_in_row, updated_at: now }).eq('id', car.id),
-      supabase.from('showroom_cars').update({ position_in_row: car.position_in_row, updated_at: now }).eq('id', swapCar.id),
+  const addLane = async () => {
+    const maxLane = leftLaneNumbers.length > 0 ? Math.max(...leftLaneNumbers) : 0;
+    const newLane = maxLane + 1;
+    await supabase.from('showroom_slots').insert([
+      { zone: 'left', lane: newLane, depth: 1, display_order: newLane },
+      { zone: 'left', lane: newLane, depth: 2, display_order: newLane },
     ]);
     await fetchData();
   };
 
-  // ── Stats ──
+  const removeLane = async (lane: number) => {
+    const laneSlots = slots.filter(s => s.zone === 'left' && s.lane === lane);
+    const occupied = laneSlots.filter(s => s.car_id).length;
+    const msg = occupied > 0
+      ? `This row has ${occupied} car(s) parked. Removing it will send them back to Unassigned. Continue?`
+      : 'Remove this empty row?';
+    if (!window.confirm(msg)) return;
+    await supabase.from('showroom_slots').delete().in('id', laneSlots.map(s => s.id));
+    await fetchData();
+  };
 
-  const totalCarsInRows = cars.filter(c => c.row_id).length;
-  const freeCars = cars.filter(c => c.row_id && getBlockingCount(c) === 0);
-  const blockedCars = cars.filter(c => c.row_id && getBlockingCount(c) > 0);
-  const unassigned = getUnassignedCars();
+  const addBay = async () => {
+    const maxLane = rightBaySlots.length > 0 ? Math.max(...rightBaySlots.map(s => s.lane)) : 0;
+    const newLane = maxLane + 1;
+    await supabase.from('showroom_slots').insert({ zone: 'right', lane: newLane, depth: 1, display_order: newLane });
+    await fetchData();
+  };
+
+  const removeBay = async (slotId: string) => {
+    const slot = slots.find(s => s.id === slotId);
+    const msg = slot?.car_id ? 'This bay has a car parked. Removing it will send the car back to Unassigned. Continue?' : 'Remove this empty bay?';
+    if (!window.confirm(msg)) return;
+    await supabase.from('showroom_slots').delete().eq('id', slotId);
+    await fetchData();
+  };
+
+  // ── Detail modal derived data ──
+
+  const detailSlot = detailCarSlotId ? slots.find(s => s.id === detailCarSlotId) ?? null : null;
+  const detailCar = detailSlot?.car_id ? carsById.get(detailSlot.car_id) ?? null : null;
+  const detailBlockerSlot = detailSlot ? getBlocker(detailSlot) : null;
+  const detailBlockerCar = detailBlockerSlot?.car_id ? carsById.get(detailBlockerSlot.car_id) ?? null : null;
+
+  const activeDragCar = activeDragCarId ? carsById.get(activeDragCarId) ?? null : null;
 
   // ── Render ──
 
@@ -1057,170 +855,245 @@ const ShowroomManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* ── Header & Stats ── */}
-      <div className="admin-glass-card !rounded-xl p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Showroom Parking</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Visual layout of which cars are blocking which — tap "Retrieve" on any car for a step-by-step key guide.
-            </p>
-          </div>
-          <div className="flex gap-2 flex-shrink-0">
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="space-y-4">
+        {/* ── Header & Stats ── */}
+        <div className="admin-glass-card !rounded-xl p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Showroom Parking</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Drag cars onto a spot to park them, or drag onto another car to swap. Tap any parked car for the key retrieval guide.
+              </p>
+            </div>
             <button
-              onClick={() => setShowAddRowModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add Lane
-            </button>
-            <button
-              onClick={() => setShowAddCarModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 btn-glass-red text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+              onClick={() => { setAddTargetSlotId(null); setShowAddCarModal(true); }}
+              className="flex items-center gap-1.5 px-4 py-2 btn-glass-red text-white rounded-lg text-sm font-semibold transition-colors shadow-sm flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
               Add Car
             </button>
           </div>
-        </div>
 
-        {/* Stats strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: 'Cars in Showroom', value: cars.length, color: 'text-gray-900 dark:text-white' },
-            { label: 'Parking Lanes', value: rows.length, color: 'text-gray-900 dark:text-white' },
-            { label: 'Free to Move', value: freeCars.length + unassigned.length, color: 'text-emerald-600 dark:text-emerald-400' },
-            { label: 'Blocked', value: blockedCars.length, color: 'text-red-600 dark:text-red-400' },
-          ].map(s => (
-            <div key={s.label} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3 text-center">
-              <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Legend */}
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span className="text-gray-600 dark:text-gray-400">Free to move</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-            <span className="text-gray-600 dark:text-gray-400">1 car blocking</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-            <span className="text-gray-600 dark:text-gray-400">2+ cars blocking</span>
-          </div>
-          <div className="flex items-center gap-1.5 ml-auto text-gray-400 dark:text-gray-500">
-            <ArrowLeft className="w-3 h-3" />
-            <span>Use ← → arrows to reorder cars within a lane</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Lanes ── */}
-      {rows.length === 0 && cars.length === 0 ? (
-        <div className="admin-glass-card !rounded-xl p-12 text-center">
-          <Car className="w-14 h-14 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Showroom is empty</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
-            Start by adding a parking lane (e.g. "Front Row", "Back Alley"), then add your cars to each lane in the order they're parked — closest to the exit first.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <button onClick={() => setShowAddRowModal(true)} className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
-              <MapPin className="w-4 h-4" /> Add First Lane
-            </button>
-            <button onClick={() => setShowAddCarModal(true)} className="flex items-center gap-2 px-5 py-2.5 btn-glass-red text-white rounded-lg text-sm font-semibold transition-colors">
-              <Plus className="w-4 h-4" /> Add First Car
-            </button>
-          </div>
-        </div>
-      ) : (
-        rows.map(row => (
-          <LaneSection
-            key={row.id}
-            row={row}
-            cars={getCarsInRow(row.id)}
-            onRetrieve={setRetrievingCar}
-            onEditCar={setEditingCar}
-            onDeleteCar={handleDeleteCar}
-            onMoveCar={handleMoveCar}
-            onEditRow={setEditingRow}
-            onDeleteRow={handleDeleteRow}
-            getBlockingCount={getBlockingCount}
-          />
-        ))
-      )}
-
-      {/* ── Unassigned Cars ── */}
-      {unassigned.length > 0 && (
-        <div className="admin-glass-card !rounded-xl overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="w-2.5 h-2.5 rounded-full bg-gray-400" />
-            <h3 className="font-bold text-gray-900 dark:text-white">Unassigned Cars</h3>
-            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-full">
-              {unassigned.length}
-            </span>
-            <Info className="w-4 h-4 text-gray-400 ml-1" title="These cars are in your showroom but not placed in a lane yet." />
-          </div>
-          <div className="p-4 sm:p-5 flex flex-wrap gap-3">
-            {unassigned.map(car => (
-              <div
-                key={car.id}
-                className="flex-shrink-0 w-44 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 p-3"
-              >
-                <p className="text-lg font-black text-gray-900 dark:text-white tracking-widest">{car.registration}</p>
-                {(car.make || car.model) && <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{[car.make, car.model].filter(Boolean).join(' ')}</p>}
-                {car.color && <p className="text-xs text-gray-400 dark:text-gray-500">{car.color}</p>}
-                <div className="mt-2 flex gap-1">
-                  <button onClick={() => setEditingCar(car)} className="flex-1 flex items-center justify-center py-1.5 bg-gray-200 dark:bg-gray-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-300 hover:text-blue-600 rounded-lg transition-colors">
-                    <Edit className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => handleDeleteCar(car.id)} className="flex-1 flex items-center justify-center py-1.5 bg-gray-200 dark:bg-gray-600 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-300 hover:text-red-500 rounded-lg transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+          {/* Stats strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Cars in Showroom', value: cars.length, color: 'text-gray-900 dark:text-white' },
+              { label: 'Parked', value: parkedSlots.length, color: 'text-gray-900 dark:text-white' },
+              { label: 'Free to Move', value: freeParkedCount + unassignedCars.length, color: 'text-emerald-600 dark:text-emerald-400' },
+              { label: 'Blocked', value: blockedSlots.length, color: 'text-red-600 dark:text-red-400' },
+            ].map(s => (
+              <div key={s.label} className="bg-gray-50 dark:bg-gray-700/50 rounded-xl px-4 py-3 text-center">
+                <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">{s.label}</div>
               </div>
             ))}
           </div>
+
+          {/* Legend */}
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="text-gray-600 dark:text-gray-400">Free to move</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-gray-600 dark:text-gray-400">Blocked (move the ! car first)</span>
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* ── Modals ── */}
-      {retrievingCar && (
-        <RetrieveModal
-          car={retrievingCar}
-          sequence={getRetrievalSequence(retrievingCar)}
-          rowName={rows.find(r => r.id === retrievingCar.row_id)?.name ?? 'Unassigned'}
-          onClose={() => setRetrievingCar(null)}
-        />
-      )}
+        {/* ── Birds-eye Plot ── */}
+        <div className="admin-glass-card !rounded-xl p-4 sm:p-6">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+            {/* LEFT ZONE */}
+            <div className="w-full lg:flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Wall Rows</h3>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Nose-to-tail · up to 2 deep per row</p>
+                </div>
+                <button
+                  onClick={addLane}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Row
+                </button>
+              </div>
 
-      {(showAddRowModal || editingRow) && (
-        <RowModal
-          initial={editingRow}
-          allRows={rows}
-          onSave={handleSaveRow}
-          onClose={() => { setShowAddRowModal(false); setEditingRow(null); }}
-          saving={saving}
-        />
-      )}
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {/* Wall hatch strip */}
+                <div
+                  className="h-3 bg-gray-200 dark:bg-gray-700"
+                  style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(100,100,110,0.35) 0 6px, transparent 6px 12px)' }}
+                  title="Wall"
+                />
+                <div className="p-3 space-y-2 max-h-[26rem] overflow-y-auto">
+                  {leftLaneNumbers.length === 0 ? (
+                    <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No rows yet — click "Row" to add one.</p>
+                  ) : (
+                    leftLaneNumbers.map((lane, idx) => {
+                      const wallSlot = slots.find(s => s.zone === 'left' && s.lane === lane && s.depth === 2);
+                      const aisleSlot = slots.find(s => s.zone === 'left' && s.lane === lane && s.depth === 1);
+                      if (!wallSlot || !aisleSlot) return null;
+                      return (
+                        <div key={lane} className="flex items-center gap-2">
+                          <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                          <SlotCell
+                            slot={wallSlot}
+                            car={wallSlot.car_id ? carsById.get(wallSlot.car_id) ?? null : null}
+                            blocked={isSlotBlocked(wallSlot)}
+                            onQuickAdd={() => { setAddTargetSlotId(wallSlot.id); setShowAddCarModal(true); }}
+                            onClickCar={() => setDetailCarSlotId(wallSlot.id)}
+                          />
+                          <ArrowRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                          <SlotCell
+                            slot={aisleSlot}
+                            car={aisleSlot.car_id ? carsById.get(aisleSlot.car_id) ?? null : null}
+                            blocked={isSlotBlocked(aisleSlot)}
+                            onQuickAdd={() => { setAddTargetSlotId(aisleSlot.id); setShowAddCarModal(true); }}
+                            onClickCar={() => setDetailCarSlotId(aisleSlot.id)}
+                          />
+                          <button
+                            onClick={() => removeLane(lane)}
+                            title="Remove this row"
+                            className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
 
-      {(showAddCarModal || editingCar) && (
-        <CarModal
-          initial={editingCar}
-          rows={rows}
-          allCars={cars}
-          stockCars={stockCars}
-          onSave={handleSaveCar}
-          onClose={() => { setShowAddCarModal(false); setEditingCar(null); }}
-          saving={saving}
-        />
-      )}
-    </div>
+            {/* DRIVEWAY divider */}
+            <div className="hidden lg:flex flex-col items-center justify-center gap-2 self-stretch py-8 flex-shrink-0">
+              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
+              <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap px-2 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 [writing-mode:vertical-rl]">
+                <ArrowRight className="w-3 h-3 rotate-90" /> Driveway
+              </div>
+              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
+            </div>
+            <div className="lg:hidden flex items-center gap-2 w-full text-gray-400 dark:text-gray-500">
+              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide"><ArrowRight className="w-3 h-3" /> Driveway</span>
+              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+            </div>
+
+            {/* RIGHT ZONE */}
+            <div className="w-full lg:w-56 flex-shrink-0">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Single Row</h3>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Independent bays</p>
+                </div>
+                <button
+                  onClick={addBay}
+                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Bay
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-3 space-y-2 max-h-[26rem] overflow-y-auto">
+                {rightBaySlots.length === 0 ? (
+                  <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No bays yet — click "Bay" to add one.</p>
+                ) : (
+                  rightBaySlots.map((slot, idx) => (
+                    <div key={slot.id} className="flex items-center gap-2">
+                      <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                      <SlotCell
+                        slot={slot}
+                        car={slot.car_id ? carsById.get(slot.car_id) ?? null : null}
+                        blocked={false}
+                        onQuickAdd={() => { setAddTargetSlotId(slot.id); setShowAddCarModal(true); }}
+                        onClickCar={() => setDetailCarSlotId(slot.id)}
+                      />
+                      <button
+                        onClick={() => removeBay(slot.id)}
+                        title="Remove this bay"
+                        className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Unassigned Pool ── */}
+        <div
+          ref={setPoolRef}
+          className={`admin-glass-card !rounded-xl overflow-hidden transition-all ${isOverPool ? 'ring-2 ring-fnt-red' : ''}`}
+        >
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+            <div className="w-2.5 h-2.5 rounded-full bg-gray-400 flex-shrink-0" />
+            <h3 className="font-bold text-gray-900 dark:text-white">Unassigned</h3>
+            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-full">
+              {unassignedCars.length}
+            </span>
+            <Info className="w-4 h-4 text-gray-400 ml-1" title="Cars added to the showroom but not yet placed on the grid — drag onto any open spot." />
+          </div>
+          <div className={`p-4 sm:p-5 flex flex-wrap gap-3 min-h-[5rem] ${unassignedCars.length === 0 ? 'items-center justify-center' : ''}`}>
+            {unassignedCars.length === 0 ? (
+              <p className="text-sm text-gray-400 dark:text-gray-500">Drop a car here to unassign it, or click "Add Car" above.</p>
+            ) : (
+              unassignedCars.map(car => (
+                <PoolCard
+                  key={car.id}
+                  car={car}
+                  onClick={() => { setEditingCar(car); }}
+                  onDelete={() => handleDeleteCar(car.id)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ── Modals ── */}
+        {detailCar && detailSlot && (
+          <CarDetailModal
+            car={detailCar}
+            slot={detailSlot}
+            blocker={detailBlockerCar}
+            onClose={() => setDetailCarSlotId(null)}
+            onEdit={() => { setEditingCar(detailCar); setDetailCarSlotId(null); }}
+            onUnassign={() => { unassignCar(detailSlot.id); setDetailCarSlotId(null); }}
+            onDelete={() => { setDetailCarSlotId(null); handleDeleteCar(detailCar.id); }}
+          />
+        )}
+
+        {(showAddCarModal || editingCar) && (
+          <CarFormModal
+            initial={editingCar}
+            stockCars={stockCars}
+            targetSlotLabel={addTargetSlotId ? describeSlot(slots.find(s => s.id === addTargetSlotId)!) : null}
+            onSave={handleSaveCar}
+            onClose={() => { setShowAddCarModal(false); setAddTargetSlotId(null); setEditingCar(null); }}
+            saving={saving}
+          />
+        )}
+      </div>
+
+      <DragOverlay>
+        {activeDragCar ? (
+          <div className="w-[4.5rem] h-14 sm:w-24 sm:h-16 rounded-xl border-2 bg-white dark:bg-gray-800 border-fnt-red shadow-2xl flex flex-col items-center justify-center gap-0.5 rotate-3 scale-110">
+            <span className="font-mono font-black text-[11px] sm:text-xs tracking-wider text-gray-900 dark:text-white">{activeDragCar.registration}</span>
+            {(activeDragCar.make || activeDragCar.model) && (
+              <span className="text-[9px] sm:text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-full">
+                {[activeDragCar.make, activeDragCar.model].filter(Boolean).join(' ')}
+              </span>
+            )}
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 

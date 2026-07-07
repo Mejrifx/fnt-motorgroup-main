@@ -132,14 +132,6 @@ export interface Lead {
   assigned_to: string | null
 }
 
-export interface ShowroomRow {
-  id: string;
-  name: string;
-  display_order: number;
-  description: string;
-  created_at: string;
-}
-
 export interface ShowroomCar {
   id: string;
   registration: string;
@@ -147,8 +139,25 @@ export interface ShowroomCar {
   model: string;
   color: string;
   notes: string;
-  row_id: string | null;
-  position_in_row: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * A single physical parking spot in the showroom's birds-eye grid.
+ * - 'left' zone: nose-to-tail lanes against the wall. depth 1 = aisle/exit
+ *   side (unblocked), depth 2 = against the wall (blocked while depth 1 is
+ *   occupied). Each lane has at most one slot per depth.
+ * - 'right' zone: a single row of independent bays — depth is always 1 and
+ *   never blocks anything.
+ */
+export interface ShowroomSlot {
+  id: string;
+  zone: 'left' | 'right';
+  lane: number;
+  depth: number;
+  display_order: number;
+  car_id: string | null;
   created_at: string;
   updated_at: string;
 }
