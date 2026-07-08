@@ -1059,9 +1059,9 @@ const ShowroomManager: React.FC = () => {
             />
 
             <div className="p-3 sm:p-4 max-h-[30rem] overflow-y-auto">
-              <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-0">
+              <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-center gap-4 lg:gap-0">
                 {/* WALL ROWS (left) — nose-to-tail, 2 deep */}
-                <div className="w-full flex-1 min-w-0">
+                <div className="w-full lg:w-auto">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Wall Rows · Wall side → Aisle side</p>
                   <div className="space-y-2">
                     {leftLaneNumbers.length === 0 ? (
@@ -1104,21 +1104,17 @@ const ShowroomManager: React.FC = () => {
                 </div>
 
                 {/* DRIVEWAY */}
-                <div className="hidden lg:flex flex-col items-center justify-center gap-2 flex-shrink-0 w-16 mx-4 bg-gray-50 dark:bg-gray-900/40 rounded-lg border-x border-gray-200 dark:border-gray-700">
-                  <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap">
+                <div className="hidden lg:flex flex-col items-center justify-center flex-shrink-0 w-20 mx-2 self-stretch">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap bg-gray-50 dark:bg-gray-900/40 px-1.5 py-2 rounded-full border border-gray-200 dark:border-gray-700">
                     Driveway
                   </span>
-                  <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
                 </div>
-                <div className="lg:hidden flex items-center gap-2 py-2 text-gray-400 dark:text-gray-500">
-                  <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">Driveway</span>
-                  <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                <div className="lg:hidden flex items-center justify-center py-2 text-gray-400 dark:text-gray-500">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap bg-gray-50 dark:bg-gray-900/40 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">Driveway</span>
                 </div>
 
                 {/* SINGLE ROW (right) — independent bays */}
-                <div className="w-full lg:w-56 flex-shrink-0">
+                <div className="w-full lg:w-auto flex-shrink-0">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Single Row · Independent Bays</p>
                   <div className="space-y-2">
                     {rightBaySlots.length === 0 ? (
