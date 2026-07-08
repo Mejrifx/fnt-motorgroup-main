@@ -1059,9 +1059,9 @@ const ShowroomManager: React.FC = () => {
             />
 
             <div className="p-3 sm:p-4 max-h-[30rem] overflow-y-auto">
-              <div className="flex flex-col lg:flex-row lg:items-stretch lg:justify-center gap-4 lg:gap-0">
+              <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-0">
                 {/* WALL ROWS (left) — nose-to-tail, 2 deep */}
-                <div className="w-full lg:w-auto">
+                <div className="w-full lg:w-auto lg:flex-shrink-0">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Wall Rows · Wall side → Aisle side</p>
                   <div className="space-y-2">
                     {leftLaneNumbers.length === 0 ? (
@@ -1103,8 +1103,8 @@ const ShowroomManager: React.FC = () => {
                   </div>
                 </div>
 
-                {/* DRIVEWAY */}
-                <div className="hidden lg:flex flex-col items-center justify-center flex-shrink-0 w-20 mx-2 self-stretch">
+                {/* DRIVEWAY — fills the space between the two zones, pill centered in it */}
+                <div className="hidden lg:flex flex-col items-center justify-center flex-1 min-w-[5rem] mx-2 self-stretch">
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap bg-gray-50 dark:bg-gray-900/40 px-1.5 py-2 rounded-full border border-gray-200 dark:border-gray-700">
                     Driveway
                   </span>
