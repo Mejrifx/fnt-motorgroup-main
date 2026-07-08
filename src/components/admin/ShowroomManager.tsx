@@ -9,12 +9,67 @@ import {
   AlertTriangle, CheckCircle, Copy, Info,
   ArrowRight, RefreshCw, Search, LogOut,
 } from 'lucide-react';
-import { supabase, type Car as StockCar, type ShowroomCar, type ShowroomSlot } from '../../lib/supabase';
+import { supabase, type Car as StockCar, type StockItem, type ShowroomCar, type ShowroomSlot } from '../../lib/supabase';
 import { useToast } from '../ui/ToastContainer';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const toUpper = (s: string) => s.toUpperCase();
+
+/** A car available to park, sourced from either the live "Cars" table or the "Stock" prep pipeline. */
+interface PickerCar {
+  key: string;
+  registration: string;
+  make: string;
+  model: string;
+  year: string | number | null;
+  colour: string | null;
+  badgeLabel: string;
+  badgeClass: string;
+}
+
+const badgeClass = {
+  available: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  sold: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+  ready: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  inPrep: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  needsWork: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+};
+
+const buildPickerList = (stockCars: StockCar[], stockItems: StockItem[]): PickerCar[] => {
+  const map = new Map<string, PickerCar>();
+
+  for (const item of stockItems) {
+    const key = (item.registration || item.id).toUpperCase();
+    map.set(key, {
+      key,
+      registration: (item.registration ?? '').toUpperCase(),
+      make: item.make,
+      model: item.model,
+      year: null,
+      colour: null,
+      badgeLabel: item.stock_status ?? 'In Prep',
+      badgeClass: item.stock_status === 'Ready' ? badgeClass.ready : item.stock_status === 'Needs Work' ? badgeClass.needsWork : badgeClass.inPrep,
+    });
+  }
+
+  // Live "Cars" entries take priority when the same registration exists in both places.
+  for (const car of stockCars) {
+    const key = (car.registration || car.id).toUpperCase();
+    map.set(key, {
+      key,
+      registration: (car.registration ?? '').toUpperCase(),
+      make: car.make,
+      model: car.model,
+      year: car.year,
+      colour: car.colour,
+      badgeLabel: car.is_available ? 'Available' : 'Sold',
+      badgeClass: car.is_available ? badgeClass.available : badgeClass.sold,
+    });
+  }
+
+  return Array.from(map.values()).sort((a, b) => a.make.localeCompare(b.make));
+};
 
 const isMissingTableError = (err: any): boolean => {
   if (!err) return false;
@@ -201,14 +256,14 @@ const MigrationGuide: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
 
 interface CarFormModalProps {
   initial?: ShowroomCar | null;
-  stockCars: StockCar[];
+  pickerCars: PickerCar[];
   targetSlotLabel?: string | null;
   onSave: (data: Partial<ShowroomCar>) => void;
   onClose: () => void;
   saving: boolean;
 }
 
-const CarFormModal: React.FC<CarFormModalProps> = ({ initial, stockCars, targetSlotLabel, onSave, onClose, saving }) => {
+const CarFormModal: React.FC<CarFormModalProps> = ({ initial, pickerCars, targetSlotLabel, onSave, onClose, saving }) => {
   const [registration, setRegistration] = useState(initial?.registration ?? '');
   const [make, setMake] = useState(initial?.make ?? '');
   const [model, setModel] = useState(initial?.model ?? '');
@@ -217,18 +272,18 @@ const CarFormModal: React.FC<CarFormModalProps> = ({ initial, stockCars, targetS
   const [stockSearch, setStockSearch] = useState('');
   const [showStockPicker, setShowStockPicker] = useState(!initial);
 
-  const filteredStock = stockCars.filter(c => {
+  const filteredStock = pickerCars.filter(c => {
     if (!stockSearch.trim()) return true;
     const q = stockSearch.toLowerCase();
     return (
-      (c.registration ?? '').toLowerCase().includes(q) ||
+      c.registration.toLowerCase().includes(q) ||
       c.make.toLowerCase().includes(q) ||
       c.model.toLowerCase().includes(q)
     );
   });
 
-  const applyStockCar = (car: StockCar) => {
-    setRegistration((car.registration ?? '').toUpperCase());
+  const applyStockCar = (car: PickerCar) => {
+    setRegistration(car.registration.toUpperCase());
     setMake(car.make);
     setModel(car.model);
     setColor(car.colour ?? '');
@@ -288,21 +343,21 @@ const CarFormModal: React.FC<CarFormModalProps> = ({ initial, stockCars, targetS
                     ) : (
                       filteredStock.map(car => (
                         <button
-                          key={car.id}
+                          key={car.key}
                           type="button"
                           onClick={() => applyStockCar(car)}
                           className="w-full flex items-center justify-between px-4 py-3 hover:bg-fnt-red/5 dark:hover:bg-fnt-red/10 border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-left transition-colors group"
                         >
                           <div className="min-w-0">
                             <span className="block font-mono font-bold text-sm text-gray-900 dark:text-white tracking-widest group-hover:text-fnt-red transition-colors">
-                              {car.registration ?? '—'}
+                              {car.registration || '—'}
                             </span>
                             <span className="block text-xs text-gray-500 dark:text-gray-400 truncate">
-                              {car.year} {car.make} {car.model}{car.colour ? ` · ${car.colour}` : ''}
+                              {[car.year, car.make, car.model].filter(Boolean).join(' ')}{car.colour ? ` · ${car.colour}` : ''}
                             </span>
                           </div>
-                          <span className={`flex-shrink-0 ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${car.is_available ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>
-                            {car.is_available ? 'Available' : 'Sold'}
+                          <span className={`flex-shrink-0 ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${car.badgeClass}`}>
+                            {car.badgeLabel}
                           </span>
                         </button>
                       ))
@@ -656,6 +711,7 @@ const ShowroomManager: React.FC = () => {
   const [cars, setCars] = useState<ShowroomCar[]>([]);
   const [slots, setSlots] = useState<ShowroomSlot[]>([]);
   const [stockCars, setStockCars] = useState<StockCar[]>([]);
+  const [stockItems, setStockItems] = useState<StockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [migrationNeeded, setMigrationNeeded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -673,10 +729,11 @@ const ShowroomManager: React.FC = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [carsRes, slotsRes, stockRes] = await Promise.all([
+      const [carsRes, slotsRes, stockRes, stockItemsRes] = await Promise.all([
         supabase.from('showroom_cars').select('*'),
         supabase.from('showroom_slots').select('*').order('display_order', { ascending: true }),
         supabase.from('cars').select('id,make,model,year,registration,colour,is_available').order('make', { ascending: true }),
+        supabase.from('stock_inventory').select('id,make,model,registration,stock_status').order('make', { ascending: true }),
       ]);
 
       const tablesMissing = isMissingTableError(carsRes.error) || isMissingTableError(slotsRes.error);
@@ -691,8 +748,10 @@ const ShowroomManager: React.FC = () => {
 
       setCars(carsRes.data ?? []);
       setSlots(slotsRes.data ?? []);
-      const stock = (stockRes.data ?? []) as StockCar[];
-      setStockCars([...stock.filter(c => c.is_available), ...stock.filter(c => !c.is_available)]);
+      setStockCars((stockRes.data ?? []) as StockCar[]);
+      // stock_inventory failing to load shouldn't block the showroom — just means prep cars won't show in the picker.
+      if (stockItemsRes.error) console.error('Stock inventory fetch error:', stockItemsRes.error);
+      setStockItems((stockItemsRes.data ?? []) as StockItem[]);
       setMigrationNeeded(false);
     } catch (err: any) {
       if (isMissingTableError(err)) setMigrationNeeded(true);
@@ -707,6 +766,7 @@ const ShowroomManager: React.FC = () => {
   // ── Derived Data ──
 
   const carsById = useMemo(() => new Map(cars.map(c => [c.id, c])), [cars]);
+  const pickerCars = useMemo(() => buildPickerList(stockCars, stockItems), [stockCars, stockItems]);
 
   const leftLaneNumbers = useMemo(() => {
     const lanes = new Map<number, number>();
@@ -967,125 +1027,124 @@ const ShowroomManager: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Birds-eye Plot ── */}
+        {/* ── Birds-eye Plot — one shared plot: bays on the left, driveway gap, wall rows on the right ── */}
         <div className="admin-glass-card !rounded-xl p-4 sm:p-6">
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-            {/* LEFT ZONE */}
-            <div className="w-full lg:flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Wall Rows</h3>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Nose-to-tail · up to 2 deep per row</p>
-                </div>
-                <button
-                  onClick={addLane}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Row
-                </button>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm">Showroom Plot</h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Birds-eye view · driveway runs down the middle</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={addBay}
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> Bay
+              </button>
+              <button
+                onClick={addLane}
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> Row
+              </button>
+            </div>
+          </div>
 
-              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                {/* Wall hatch strip */}
-                <div
-                  className="h-3 bg-gray-200 dark:bg-gray-700"
-                  style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(100,100,110,0.35) 0 6px, transparent 6px 12px)' }}
-                  title="Wall"
-                />
-                <div className="p-3 space-y-2 max-h-[26rem] overflow-y-auto">
-                  {leftLaneNumbers.length === 0 ? (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No rows yet — click "Row" to add one.</p>
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="flex flex-col lg:flex-row">
+              {/* SINGLE ROW (left) — independent bays */}
+              <div className="w-full lg:w-56 flex-shrink-0 p-3 sm:p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Single Row · Independent Bays</p>
+                <div className="space-y-2 max-h-[28rem] overflow-y-auto">
+                  {rightBaySlots.length === 0 ? (
+                    <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No bays yet — click "Bay" to add one.</p>
                   ) : (
-                    leftLaneNumbers.map((lane, idx) => {
-                      const wallSlot = slots.find(s => s.zone === 'left' && s.lane === lane && s.depth === 2);
-                      const aisleSlot = slots.find(s => s.zone === 'left' && s.lane === lane && s.depth === 1);
-                      if (!wallSlot || !aisleSlot) return null;
-                      return (
-                        <div key={lane} className="flex items-center gap-2">
-                          <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
-                          <SlotCell
-                            slot={wallSlot}
-                            car={wallSlot.car_id ? carsById.get(wallSlot.car_id) ?? null : null}
-                            blocked={isSlotBlocked(wallSlot)}
-                            onQuickAdd={() => { setAddTargetSlotId(wallSlot.id); setShowAddCarModal(true); }}
-                            onClickCar={() => setDetailCarSlotId(wallSlot.id)}
-                          />
-                          <ArrowRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                          <SlotCell
-                            slot={aisleSlot}
-                            car={aisleSlot.car_id ? carsById.get(aisleSlot.car_id) ?? null : null}
-                            blocked={isSlotBlocked(aisleSlot)}
-                            onQuickAdd={() => { setAddTargetSlotId(aisleSlot.id); setShowAddCarModal(true); }}
-                            onClickCar={() => setDetailCarSlotId(aisleSlot.id)}
-                          />
-                          <button
-                            onClick={() => removeLane(lane)}
-                            title="Remove this row"
-                            className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })
+                    rightBaySlots.map((slot, idx) => (
+                      <div key={slot.id} className="flex items-center gap-2">
+                        <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                        <SlotCell
+                          slot={slot}
+                          car={slot.car_id ? carsById.get(slot.car_id) ?? null : null}
+                          blocked={false}
+                          onQuickAdd={() => { setAddTargetSlotId(slot.id); setShowAddCarModal(true); }}
+                          onClickCar={() => setDetailCarSlotId(slot.id)}
+                        />
+                        <button
+                          onClick={() => removeBay(slot.id)}
+                          title="Remove this bay"
+                          className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
-            </div>
 
-            {/* DRIVEWAY divider */}
-            <div className="hidden lg:flex flex-col items-center justify-center gap-2 self-stretch py-8 flex-shrink-0">
-              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
-              <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap px-2 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 [writing-mode:vertical-rl]">
-                <ArrowRight className="w-3 h-3 rotate-90" /> Driveway
+              {/* DRIVEWAY */}
+              <div className="hidden lg:flex flex-col items-center justify-center gap-2 flex-shrink-0 w-16 bg-gray-50 dark:bg-gray-900/40 border-x border-gray-200 dark:border-gray-700">
+                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap">
+                  Driveway
+                </span>
+                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
               </div>
-              <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
-            </div>
-            <div className="lg:hidden flex items-center gap-2 w-full text-gray-400 dark:text-gray-500">
-              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-              <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide"><ArrowRight className="w-3 h-3" /> Driveway</span>
-              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-            </div>
+              <div className="lg:hidden flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/40 border-y border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500">
+                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">Driveway</span>
+                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+              </div>
 
-            {/* RIGHT ZONE */}
-            <div className="w-full lg:w-56 flex-shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Single Row</h3>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Independent bays</p>
+              {/* WALL ROWS (right) — nose-to-tail, 2 deep */}
+              <div className="w-full flex-1 min-w-0 p-3 sm:p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Wall Rows · Aisle side → Wall side</p>
+                <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700/60">
+                  {/* Wall hatch strip */}
+                  <div
+                    className="h-2.5 bg-gray-200 dark:bg-gray-700"
+                    style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(100,100,110,0.35) 0 6px, transparent 6px 12px)' }}
+                    title="Wall"
+                  />
+                  <div className="p-2.5 space-y-2 max-h-[27rem] overflow-y-auto">
+                    {leftLaneNumbers.length === 0 ? (
+                      <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No rows yet — click "Row" to add one.</p>
+                    ) : (
+                      leftLaneNumbers.map((lane, idx) => {
+                        const wallSlot = slots.find(s => s.zone === 'left' && s.lane === lane && s.depth === 2);
+                        const aisleSlot = slots.find(s => s.zone === 'left' && s.lane === lane && s.depth === 1);
+                        if (!wallSlot || !aisleSlot) return null;
+                        return (
+                          <div key={lane} className="flex items-center gap-2">
+                            <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                            <SlotCell
+                              slot={aisleSlot}
+                              car={aisleSlot.car_id ? carsById.get(aisleSlot.car_id) ?? null : null}
+                              blocked={isSlotBlocked(aisleSlot)}
+                              onQuickAdd={() => { setAddTargetSlotId(aisleSlot.id); setShowAddCarModal(true); }}
+                              onClickCar={() => setDetailCarSlotId(aisleSlot.id)}
+                            />
+                            <ArrowRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                            <SlotCell
+                              slot={wallSlot}
+                              car={wallSlot.car_id ? carsById.get(wallSlot.car_id) ?? null : null}
+                              blocked={isSlotBlocked(wallSlot)}
+                              onQuickAdd={() => { setAddTargetSlotId(wallSlot.id); setShowAddCarModal(true); }}
+                              onClickCar={() => setDetailCarSlotId(wallSlot.id)}
+                            />
+                            <button
+                              onClick={() => removeLane(lane)}
+                              title="Remove this row"
+                              className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
-                <button
-                  onClick={addBay}
-                  className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Bay
-                </button>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-3 space-y-2 max-h-[26rem] overflow-y-auto">
-                {rightBaySlots.length === 0 ? (
-                  <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No bays yet — click "Bay" to add one.</p>
-                ) : (
-                  rightBaySlots.map((slot, idx) => (
-                    <div key={slot.id} className="flex items-center gap-2">
-                      <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
-                      <SlotCell
-                        slot={slot}
-                        car={slot.car_id ? carsById.get(slot.car_id) ?? null : null}
-                        blocked={false}
-                        onQuickAdd={() => { setAddTargetSlotId(slot.id); setShowAddCarModal(true); }}
-                        onClickCar={() => setDetailCarSlotId(slot.id)}
-                      />
-                      <button
-                        onClick={() => removeBay(slot.id)}
-                        title="Remove this bay"
-                        className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))
-                )}
               </div>
             </div>
           </div>
@@ -1136,7 +1195,7 @@ const ShowroomManager: React.FC = () => {
         {(showAddCarModal || editingCar) && (
           <CarFormModal
             initial={editingCar}
-            stockCars={stockCars}
+            pickerCars={pickerCars}
             targetSlotLabel={addTargetSlotId ? describeSlot(slots.find(s => s.id === addTargetSlotId)!) : null}
             onSave={handleSaveCar}
             onClose={() => { setShowAddCarModal(false); setAddTargetSlotId(null); setEditingCar(null); }}
