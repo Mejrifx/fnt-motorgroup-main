@@ -1051,18 +1051,19 @@ const ShowroomManager: React.FC = () => {
           </div>
 
           <div className="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="flex flex-col lg:flex-row">
-              {/* WALL ROWS (left) — nose-to-tail, 2 deep */}
-              <div className="w-full flex-1 min-w-0 p-3 sm:p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Wall Rows · Wall side → Aisle side</p>
-                <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700/60">
-                  {/* Wall hatch strip */}
-                  <div
-                    className="h-2.5 bg-gray-200 dark:bg-gray-700"
-                    style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(100,100,110,0.35) 0 6px, transparent 6px 12px)' }}
-                    title="Wall"
-                  />
-                  <div className="p-2.5 space-y-2 max-h-[27rem] overflow-y-auto">
+            {/* Wall hatch strip — spans the full plot, since it's the back wall of the whole showroom */}
+            <div
+              className="h-2.5 bg-gray-200 dark:bg-gray-700"
+              style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(100,100,110,0.35) 0 6px, transparent 6px 12px)' }}
+              title="Wall"
+            />
+
+            <div className="p-3 sm:p-4 max-h-[30rem] overflow-y-auto">
+              <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-0">
+                {/* WALL ROWS (left) — nose-to-tail, 2 deep */}
+                <div className="w-full flex-1 min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Wall Rows · Wall side → Aisle side</p>
+                  <div className="space-y-2">
                     {leftLaneNumbers.length === 0 ? (
                       <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No rows yet — click "Row" to add one.</p>
                     ) : (
@@ -1101,49 +1102,49 @@ const ShowroomManager: React.FC = () => {
                     )}
                   </div>
                 </div>
-              </div>
 
-              {/* DRIVEWAY */}
-              <div className="hidden lg:flex flex-col items-center justify-center gap-2 flex-shrink-0 w-16 bg-gray-50 dark:bg-gray-900/40 border-x border-gray-200 dark:border-gray-700">
-                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap">
-                  Driveway
-                </span>
-                <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
-              </div>
-              <div className="lg:hidden flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/40 border-y border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500">
-                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">Driveway</span>
-                <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-              </div>
+                {/* DRIVEWAY */}
+                <div className="hidden lg:flex flex-col items-center justify-center gap-2 flex-shrink-0 w-16 mx-4 bg-gray-50 dark:bg-gray-900/40 rounded-lg border-x border-gray-200 dark:border-gray-700">
+                  <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap">
+                    Driveway
+                  </span>
+                  <div className="w-px flex-1 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent" />
+                </div>
+                <div className="lg:hidden flex items-center gap-2 py-2 text-gray-400 dark:text-gray-500">
+                  <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap">Driveway</span>
+                  <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+                </div>
 
-              {/* SINGLE ROW (right) — independent bays */}
-              <div className="w-full lg:w-56 flex-shrink-0 p-3 sm:p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Single Row · Independent Bays</p>
-                <div className="space-y-2 max-h-[28rem] overflow-y-auto">
-                  {rightBaySlots.length === 0 ? (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No bays yet — click "Bay" to add one.</p>
-                  ) : (
-                    rightBaySlots.map((slot, idx) => (
-                      <div key={slot.id} className="flex items-center gap-2">
-                        <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
-                        <SlotCell
-                          slot={slot}
-                          car={slot.car_id ? carsById.get(slot.car_id) ?? null : null}
-                          blocked={false}
-                          onQuickAdd={() => { setAddTargetSlotId(slot.id); setShowAddCarModal(true); }}
-                          onClickCar={() => setDetailCarSlotId(slot.id)}
-                        />
-                        <button
-                          onClick={() => removeBay(slot.id)}
-                          title="Remove this bay"
-                          className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))
-                  )}
+                {/* SINGLE ROW (right) — independent bays */}
+                <div className="w-full lg:w-56 flex-shrink-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Single Row · Independent Bays</p>
+                  <div className="space-y-2">
+                    {rightBaySlots.length === 0 ? (
+                      <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-6">No bays yet — click "Bay" to add one.</p>
+                    ) : (
+                      rightBaySlots.map((slot, idx) => (
+                        <div key={slot.id} className="flex items-center gap-2">
+                          <span className="text-[11px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0">{idx + 1}</span>
+                          <SlotCell
+                            slot={slot}
+                            car={slot.car_id ? carsById.get(slot.car_id) ?? null : null}
+                            blocked={false}
+                            onQuickAdd={() => { setAddTargetSlotId(slot.id); setShowAddCarModal(true); }}
+                            onClickCar={() => setDetailCarSlotId(slot.id)}
+                          />
+                          <button
+                            onClick={() => removeBay(slot.id)}
+                            title="Remove this bay"
+                            className="ml-auto p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
