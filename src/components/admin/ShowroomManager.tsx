@@ -1058,7 +1058,7 @@ const ShowroomManager: React.FC = () => {
               title="Wall"
             />
 
-            <div className="p-3 sm:p-4 max-h-[30rem] overflow-y-auto">
+            <div className="p-3 sm:p-4">
               <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 lg:gap-0">
                 {/* WALL ROWS (left) — nose-to-tail, 2 deep */}
                 <div className="w-full lg:w-auto lg:flex-shrink-0">
