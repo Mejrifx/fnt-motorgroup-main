@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { supabase, type Car as StockCar, type StockItem, type ShowroomCar, type ShowroomSlot } from '../../lib/supabase';
 import { useToast } from '../ui/ToastContainer';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -721,6 +722,7 @@ const ShowroomManager: React.FC = () => {
   const [editingCar, setEditingCar] = useState<ShowroomCar | null>(null);
   const [detailCarSlotId, setDetailCarSlotId] = useState<string | null>(null);
   const [activeDragCarId, setActiveDragCarId] = useState<string | null>(null);
+  const [confirmState, setConfirmState] = useState<{ title: string; message: string; confirmText: string; onConfirm: () => void } | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -902,8 +904,17 @@ const ShowroomManager: React.FC = () => {
     }
   };
 
-  const handleDeleteCar = async (carId: string) => {
-    if (!window.confirm('Remove this car from the showroom entirely?')) return;
+  const handleDeleteCar = (carId: string) => {
+    const car = carsById.get(carId);
+    setConfirmState({
+      title: 'Remove from Showroom',
+      message: `This will remove ${car?.registration ?? 'this car'} from the showroom entirely. It will not affect your Stock or live listings.`,
+      confirmText: 'Remove Car',
+      onConfirm: () => performDeleteCar(carId),
+    });
+  };
+
+  const performDeleteCar = async (carId: string) => {
     try {
       await supabase.from('showroom_cars').delete().eq('id', carId);
       await fetchData();
@@ -926,15 +937,20 @@ const ShowroomManager: React.FC = () => {
     await fetchData();
   };
 
-  const removeLane = async (lane: number) => {
+  const removeLane = (lane: number) => {
     const laneSlots = slots.filter(s => s.zone === 'left' && s.lane === lane);
     const occupied = laneSlots.filter(s => s.car_id).length;
-    const msg = occupied > 0
-      ? `This row has ${occupied} car(s) parked. Removing it will send them back to Unassigned. Continue?`
-      : 'Remove this empty row?';
-    if (!window.confirm(msg)) return;
-    await supabase.from('showroom_slots').delete().in('id', laneSlots.map(s => s.id));
-    await fetchData();
+    setConfirmState({
+      title: 'Remove Row',
+      message: occupied > 0
+        ? `This row has ${occupied} car${occupied > 1 ? 's' : ''} parked. Removing it will send ${occupied > 1 ? 'them' : 'it'} back to Unassigned.`
+        : 'Remove this empty row from the plot?',
+      confirmText: 'Remove Row',
+      onConfirm: async () => {
+        await supabase.from('showroom_slots').delete().in('id', laneSlots.map(s => s.id));
+        await fetchData();
+      },
+    });
   };
 
   const addBay = async () => {
@@ -944,12 +960,19 @@ const ShowroomManager: React.FC = () => {
     await fetchData();
   };
 
-  const removeBay = async (slotId: string) => {
+  const removeBay = (slotId: string) => {
     const slot = slots.find(s => s.id === slotId);
-    const msg = slot?.car_id ? 'This bay has a car parked. Removing it will send the car back to Unassigned. Continue?' : 'Remove this empty bay?';
-    if (!window.confirm(msg)) return;
-    await supabase.from('showroom_slots').delete().eq('id', slotId);
-    await fetchData();
+    setConfirmState({
+      title: 'Remove Bay',
+      message: slot?.car_id
+        ? 'This bay has a car parked. Removing it will send the car back to Unassigned.'
+        : 'Remove this empty bay from the plot?',
+      confirmText: 'Remove Bay',
+      onConfirm: async () => {
+        await supabase.from('showroom_slots').delete().eq('id', slotId);
+        await fetchData();
+      },
+    });
   };
 
   // ── Detail modal derived data ──
@@ -1103,14 +1126,33 @@ const ShowroomManager: React.FC = () => {
                   </div>
                 </div>
 
-                {/* DRIVEWAY — fills the space between the two zones, pill centered in it */}
-                <div className="hidden lg:flex flex-col items-center justify-center flex-1 min-w-[5rem] mx-2 self-stretch">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 [writing-mode:vertical-rl] whitespace-nowrap bg-gray-50 dark:bg-gray-900/40 px-1.5 py-2 rounded-full border border-gray-200 dark:border-gray-700">
+                {/* DRIVEWAY — a road running down the middle of the plot */}
+                <div className="hidden lg:flex flex-1 min-w-[5rem] mx-3 self-stretch items-stretch justify-center">
+                  <div className="relative w-16 rounded-xl bg-gray-100 dark:bg-gray-800/80 flex items-center justify-center overflow-hidden">
+                    {/* Painted road edges */}
+                    <div className="absolute inset-y-2 left-2 w-0.5 rounded-full bg-gray-300/80 dark:bg-gray-600/70" />
+                    <div className="absolute inset-y-2 right-2 w-0.5 rounded-full bg-gray-300/80 dark:bg-gray-600/70" />
+                    {/* Dashed centre line */}
+                    <div
+                      className="absolute inset-y-3 left-1/2 -translate-x-1/2 w-[3px]"
+                      style={{ backgroundImage: 'repeating-linear-gradient(to bottom, rgba(148,155,168,0.9) 0 12px, transparent 12px 24px)' }}
+                    />
+                    {/* Label sits on the road, breaking the centre line */}
+                    <span className="relative z-10 [writing-mode:vertical-rl] text-[9px] font-semibold uppercase tracking-[0.25em] text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 py-3 rounded-full">
+                      Driveway
+                    </span>
+                  </div>
+                </div>
+                <div className="lg:hidden relative h-12 rounded-xl bg-gray-100 dark:bg-gray-800/80 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-x-2 top-2 h-0.5 rounded-full bg-gray-300/80 dark:bg-gray-600/70" />
+                  <div className="absolute inset-x-2 bottom-2 h-0.5 rounded-full bg-gray-300/80 dark:bg-gray-600/70" />
+                  <div
+                    className="absolute inset-x-3 top-1/2 -translate-y-1/2 h-[3px]"
+                    style={{ backgroundImage: 'repeating-linear-gradient(to right, rgba(148,155,168,0.9) 0 12px, transparent 12px 24px)' }}
+                  />
+                  <span className="relative z-10 text-[9px] font-semibold uppercase tracking-[0.25em] text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 rounded-full">
                     Driveway
                   </span>
-                </div>
-                <div className="lg:hidden flex items-center justify-center py-2 text-gray-400 dark:text-gray-500">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap bg-gray-50 dark:bg-gray-900/40 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700">Driveway</span>
                 </div>
 
                 {/* SINGLE ROW (right) — independent bays */}
@@ -1199,6 +1241,15 @@ const ShowroomManager: React.FC = () => {
             saving={saving}
           />
         )}
+
+        <ConfirmDialog
+          isOpen={!!confirmState}
+          title={confirmState?.title ?? ''}
+          message={confirmState?.message ?? ''}
+          confirmText={confirmState?.confirmText}
+          onConfirm={() => confirmState?.onConfirm()}
+          onCancel={() => setConfirmState(null)}
+        />
       </div>
 
       <DragOverlay>
