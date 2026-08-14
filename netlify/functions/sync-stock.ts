@@ -12,6 +12,13 @@
  * Manual trigger is safe because:
  * - Admins only trigger when needed (not daily)
  * - Webhooks keep inventory up-to-date automatically
+ *
+ * AUTH: the HTTP handler below requires a valid Supabase admin token, so this
+ * endpoint cannot be invoked by the public to drain the API budget. The
+ * dashboard path is unaffected because trigger-sync authenticates the admin and
+ * then calls syncStock() directly. If scheduled execution is ever re-enabled in
+ * netlify.toml, Netlify's scheduler sends no Authorization header and would be
+ * rejected — a schedule should call syncStock() from its own function instead.
  */
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
@@ -46,9 +53,39 @@ interface SyncResult {
 }
 
 /**
- * Main sync logic
+ * Verify the caller presents a valid Supabase session token.
+ *
+ * The sync burns AutoTrader API quota (each pagination page counts as a
+ * separate call against a 3-per-day budget) and writes to `cars` with the
+ * service role key, so this endpoint must never be publicly invokable.
  */
-async function syncStock(): Promise<SyncResult> {
+async function verifyAdminToken(authHeader?: string): Promise<boolean> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+
+  try {
+    const authClient = createClient(
+      process.env.VITE_SUPABASE_URL || '',
+      process.env.VITE_SUPABASE_ANON_KEY || ''
+    );
+    const { data: { user }, error } = await authClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+    return !error && !!user;
+  } catch (error) {
+    console.error('Admin verification error:', error);
+    return false;
+  }
+}
+
+/**
+ * Main sync logic
+ *
+ * Exported so trigger-sync can invoke it directly after it has authenticated
+ * the admin, rather than going through this file's HTTP handler.
+ */
+export async function syncStock(): Promise<SyncResult> {
   const startTime = Date.now();
   const result: SyncResult = {
     success: false,
@@ -356,7 +393,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
     // Set CORS headers
     const headers = {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Content-Type': 'application/json',
     };
     
@@ -375,6 +412,22 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         statusCode: 405,
         headers,
         body: JSON.stringify({ error: 'Method not allowed' }),
+      };
+    }
+
+    // Require an authenticated admin. The dashboard's manual sync goes through
+    // trigger-sync, which authenticates and then calls syncStock() directly, so
+    // this gate only ever applies to direct HTTP callers.
+    const authHeader = event.headers['authorization'] || event.headers['Authorization'];
+    if (!await verifyAdminToken(authHeader)) {
+      console.warn('🚫 [SYNC-STOCK] Rejected unauthenticated invocation');
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({
+          error: 'Unauthorized',
+          message: 'A valid admin session token is required to trigger a sync.',
+        }),
       };
     }
   

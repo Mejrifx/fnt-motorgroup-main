@@ -7,7 +7,7 @@
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
-import { handler as syncStockHandler } from './sync-stock';
+import { syncStock } from './sync-stock';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -34,57 +34,25 @@ async function verifyAdmin(authToken: string): Promise<boolean> {
 }
 
 /**
- * Call the sync-stock function directly (no HTTP request)
+ * Run the stock sync.
+ *
+ * The sync logic is called directly rather than through sync-stock's HTTP
+ * handler: the admin has already been authenticated above, and this avoids
+ * fabricating a fake request event just to satisfy that handler's signature.
  */
 async function triggerSyncFunction(): Promise<any> {
   try {
-    console.log('Triggering sync-stock handler directly...');
-    
-    // Call sync-stock handler directly (same as scheduled function does)
-    const mockEvent: HandlerEvent = {
-      httpMethod: 'POST',
-      headers: {},
-      body: null,
-      isBase64Encoded: false,
-      rawUrl: '/.netlify/functions/sync-stock',
-      rawQuery: '',
-      path: '/.netlify/functions/sync-stock',
-      queryStringParameters: null,
-      multiValueQueryStringParameters: null,
-    };
-    
-    const mockContext: HandlerContext = {
-      callbackWaitsForEmptyEventLoop: true,
-      functionName: 'sync-stock',
-      functionVersion: '1',
-      invokedFunctionArn: '',
-      memoryLimitInMB: '1024',
-      awsRequestId: '',
-      logGroupName: '',
-      logStreamName: '',
-      getRemainingTimeInMillis: () => 30000,
-      done: () => {},
-      fail: () => {},
-      succeed: () => {},
-    };
-    
-    // Invoke sync-stock handler directly
-    const response = await syncStockHandler(mockEvent, mockContext);
-    
-    console.log('Sync function response status:', response.statusCode);
-    
-    if (response.statusCode !== 200 && response.statusCode !== 207) {
-      console.error('Sync function error response:', response.body);
-      throw new Error(`Sync function returned ${response.statusCode}`);
-    }
-    
-    // Parse response body
-    const result = JSON.parse(response.body);
+    console.log('Running stock sync directly...');
+
+    const result = await syncStock();
+
+    // syncStock reports partial success via result.success === false while still
+    // returning counts, which mirrors the 207 the HTTP handler used to send.
     console.log('Sync completed:', result.message);
-    
+
     return result;
   } catch (error) {
-    console.error('Error triggering sync function:', error);
+    console.error('Error running stock sync:', error);
     throw error;
   }
 }
