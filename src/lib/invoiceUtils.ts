@@ -208,6 +208,67 @@ export async function generateInvoiceNumber(type: InvoiceType): Promise<string> 
   }
 }
 
+/** How long a signed invoice link stays valid, in seconds. */
+const SIGNED_URL_TTL_SECONDS = 300;
+
+/**
+ * Resolve the storage path for an invoice PDF from whatever is stored in
+ * invoices.pdf_url.
+ *
+ * Rows written while the bucket was public hold a full URL
+ * (.../object/public/invoices/fnt-sales/FNT-S-001.pdf), so the path is taken
+ * from everything after the bucket name. A bare path is also accepted so the
+ * stored format can change later without needing a data migration.
+ */
+function resolveInvoiceStoragePath(pdfUrl: string): string | null {
+  if (!pdfUrl) return null;
+
+  if (pdfUrl.includes('/invoices/')) {
+    // Drop any query string (e.g. an already-signed URL's ?token=...)
+    const path = pdfUrl.split('/invoices/')[1].split('?')[0];
+    return path || null;
+  }
+
+  // Not a storage URL we recognise — only usable if it's already a bare path
+  return pdfUrl.startsWith('http') ? null : pdfUrl;
+}
+
+/**
+ * Create a short-lived signed URL for an invoice PDF.
+ *
+ * The invoices bucket is private, so this is the only way to read a stored
+ * invoice. Signing goes through Supabase Storage, which enforces RLS, so it
+ * only succeeds for a signed-in admin.
+ *
+ * @param downloadAs when set, the link is served as an attachment with this filename
+ */
+export async function getSignedInvoiceUrl(
+  pdfUrl: string,
+  downloadAs?: string
+): Promise<string | null> {
+  const filePath = resolveInvoiceStoragePath(pdfUrl);
+
+  if (!filePath) {
+    console.error('Could not resolve an invoice storage path from:', pdfUrl);
+    return null;
+  }
+
+  const { data, error } = await supabase.storage
+    .from('invoices')
+    .createSignedUrl(
+      filePath,
+      SIGNED_URL_TTL_SECONDS,
+      downloadAs ? { download: downloadAs } : undefined
+    );
+
+  if (error || !data?.signedUrl) {
+    console.error('Failed to create signed invoice URL:', error);
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
 /**
  * Upload PDF to Supabase Storage
  */
@@ -239,7 +300,10 @@ export async function uploadInvoicePDF(
       return null;
     }
 
-    // Get the public URL
+    // The bucket is private, so this URL is not directly fetchable — it is kept
+    // purely so pdf_url stays in one consistent format across every row, old and
+    // new. Reads go through getSignedInvoiceUrl(), which derives the path back
+    // out of it.
     const { data: urlData } = supabase.storage
       .from('invoices')
       .getPublicUrl(filePath);
@@ -357,12 +421,11 @@ export async function searchInvoices(searchTerm: string, type?: InvoiceType) {
 export async function deleteInvoice(id: string, pdfUrl: string): Promise<boolean> {
   try {
     // Extract file path from URL
-    const urlParts = pdfUrl.split('/invoices/');
-    if (urlParts.length < 2) {
+    const filePath = resolveInvoiceStoragePath(pdfUrl);
+    if (!filePath) {
       console.error('Invalid PDF URL');
       return false;
     }
-    const filePath = urlParts[1];
 
     // Delete from storage
     const { error: storageError } = await supabase.storage

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit } from 'lucide-react';
-import { getInvoicesByType, deleteInvoice, type InvoiceType, type Invoice } from '../../lib/invoiceUtils';
+import { getInvoicesByType, deleteInvoice, getSignedInvoiceUrl, type InvoiceType, type Invoice } from '../../lib/invoiceUtils';
 import { useToast } from '../ui/ToastContainer';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
@@ -44,7 +44,36 @@ const InvoiceHistory: React.FC = () => {
     tnt_service: 0
   });
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [pendingPdfId, setPendingPdfId] = useState<string | null>(null);
   const { showToast } = useToast();
+
+  // Stored invoices live in a private bucket, so opening one means asking
+  // Supabase for a short-lived signed link first.
+  const openInvoicePdf = async (invoice: Invoice, mode: 'preview' | 'download') => {
+    setPendingPdfId(invoice.id);
+    const signedUrl = await getSignedInvoiceUrl(
+      invoice.pdf_url,
+      mode === 'download' ? `${invoice.invoice_number}.pdf` : undefined
+    );
+    setPendingPdfId(null);
+
+    if (!signedUrl) {
+      showToast(`Could not open the PDF for ${invoice.invoice_number}. Please try again.`, 'error');
+      return;
+    }
+
+    if (mode === 'download') {
+      // The signed link is served as an attachment, so navigating starts the
+      // download without taking the admin off this page.
+      const link = document.createElement('a');
+      link.href = signedUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      window.open(signedUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   // Load invoices for the active tab
   const loadInvoices = async () => {
@@ -400,25 +429,24 @@ const InvoiceHistory: React.FC = () => {
                           </button>
                           
                           {/* Preview */}
-                          <a
-                            href={invoice.pdf_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 rounded-lg transition-colors"
+                          <button
+                            onClick={() => openInvoicePdf(invoice, 'preview')}
+                            disabled={pendingPdfId === invoice.id}
+                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-wait"
                             title="Preview invoice"
                           >
                             <ExternalLink className="w-4 h-4" />
-                          </a>
+                          </button>
                           
                           {/* Download */}
-                          <a
-                            href={invoice.pdf_url}
-                            download={`${invoice.invoice_number}.pdf`}
-                            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-lg transition-colors"
+                          <button
+                            onClick={() => openInvoicePdf(invoice, 'download')}
+                            disabled={pendingPdfId === invoice.id}
+                            className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-wait"
                             title="Download invoice"
                           >
                             <Download className="w-4 h-4" />
-                          </a>
+                          </button>
                           
                           {/* Delete */}
                           <button
