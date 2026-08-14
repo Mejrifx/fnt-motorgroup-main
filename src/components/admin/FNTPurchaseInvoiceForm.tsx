@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, secureFlattenPDF, type Invoice } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, type Invoice } from '../../lib/invoiceUtils';
+import { buildFNTPurchaseInvoice } from '../../lib/pdf/fntPurchaseInvoice';
+import { loadBrandLogo } from '../../lib/pdf/invoiceSections';
+import { FNT_BRAND } from '../../lib/pdf/invoiceTheme';
 import { useToast } from '../ui/ToastContainer';
 
 interface FNTPurchaseInvoiceFormProps {
@@ -69,7 +71,7 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
 
   const [formData, setFormData] = useState(getInitialFormData());
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -111,76 +113,33 @@ const FNTPurchaseInvoiceForm: React.FC<FNTPurchaseInvoiceFormProps> = ({ onClose
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
-      // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Purchase Invoice Template.pdf').then(res => res.arrayBuffer());
-      
-      // Load the PDF
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
-      
-      // Get all field names (for debugging)
-      const fields = form.getFields();
-      console.log('Available PDF fields:', fields.map(f => f.getName()));
-      
-      // Fill the form fields - matching the exact field names from the PDF
-      try {
-        const fieldMapping: { [key: string]: string } = {
-          // Invoice Details
-          'invoice_no': formData.invoiceNumber,
-          'invoice_date': formData.invoiceDate,
-          
-          // Seller Details (customer selling to us)
-          'bill_full_name': formData.sellerName,
-          'bill_phone': formData.sellerPhone,
-          'bill_email': formData.sellerEmail,
-          'bill_address': formData.sellerAddress,
-          
-          // Vehicle Details
-          'veh_make': formData.vehMake,
-          'veh_model': formData.vehModel,
-          'veh_reg': formData.vehReg,
-          'veh_colour': formData.vehColour,
-          'veh_vin': formData.vehVin,
-          'veh_mileage': formData.vehMileage,
-          
-          // Financial Details (with £ symbol)
-          'retail_price': formData.retailPrice ? `£${formData.retailPrice}` : '',
-          'delivery_cost': formData.deliveryCost ? `£${formData.deliveryCost}` : '',
-          'warranty': formData.warranty ? `£${formData.warranty}` : '',
-          'warranty_type': formData.warrantyType,
-          'deposit_paid': formData.depositPaid ? `£${formData.depositPaid}` : '',
-          'total_due': formData.totalDue ? `£${formData.totalDue}` : '',
-          
-          // Signatures
-          'seller_signature': formData.sellerSignature,
-          'buyer_signature': 'FNT MOTOR GROUP' // Auto-filled (we're buying)
-        };
-
-        // Fill fields - exact same approach as TNT invoice
-        Object.entries(fieldMapping).forEach(([fieldName, value]) => {
-          if (value) {
-            try {
-              const field = form.getTextField(fieldName);
-              field.setText(value);
-            } catch (err) {
-              console.warn(`Field "${fieldName}" not found or not a text field`);
-            }
-          }
-        });
-
-        console.log('PDF fields filled successfully!');
-      } catch (err) {
-        console.error('Error filling form fields:', err);
-      }
-
-      // Securely flatten the PDF to make it completely non-editable
-      await secureFlattenPDF(pdfDoc);
-
-      // Serialize the PDF with additional security options
-      const pdfBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        addDefaultPage: false,
-      });
+      // The invoice is drawn from scratch rather than filled into a template, so
+      // the output carries no form fields and cannot be edited or come out blank.
+      const logo = await loadBrandLogo(FNT_BRAND);
+      const pdfBytes = await buildFNTPurchaseInvoice(
+        {
+          invoiceNumber: formData.invoiceNumber,
+          invoiceDate: formData.invoiceDate,
+          sellerName: formData.sellerName,
+          sellerPhone: formData.sellerPhone,
+          sellerEmail: formData.sellerEmail,
+          sellerAddress: formData.sellerAddress,
+          vehMake: formData.vehMake,
+          vehModel: formData.vehModel,
+          vehReg: formData.vehReg,
+          vehColour: formData.vehColour,
+          vehVin: formData.vehVin,
+          vehMileage: formData.vehMileage,
+          retailPrice: formData.retailPrice,
+          deliveryCost: formData.deliveryCost,
+          warranty: formData.warranty,
+          warrantyType: formData.warrantyType,
+          depositPaid: formData.depositPaid,
+          totalDue: formData.totalDue,
+          sellerSignature: formData.sellerSignature,
+        },
+        { logo },
+      );
 
       // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });

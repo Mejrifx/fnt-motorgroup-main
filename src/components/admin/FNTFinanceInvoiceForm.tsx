@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, secureFlattenPDF, type Invoice } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, type Invoice } from '../../lib/invoiceUtils';
+import { buildFNTFinanceInvoice } from '../../lib/pdf/fntFinanceInvoice';
+import { loadBrandLogo } from '../../lib/pdf/invoiceSections';
+import { FNT_BRAND } from '../../lib/pdf/invoiceTheme';
 import { useToast } from '../ui/ToastContainer';
 
 interface FNTFinanceInvoiceFormProps {
@@ -27,6 +29,7 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
         financeCompanyEmail: editInvoice.customer_email || '',
         financeCompanyAddress: meta.finance_company_address || '',
         endCustomerName: meta.end_customer_name || '',
+        endCustomerAddress: meta.end_customer_address || '',
         vehMake: editInvoice.vehicle_make || '',
         vehModel: editInvoice.vehicle_model || '',
         vehReg: editInvoice.vehicle_reg || '',
@@ -52,6 +55,7 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
       financeCompanyEmail: '',
       financeCompanyAddress: '',
       endCustomerName: '',
+      endCustomerAddress: '',
       vehMake: '',
       vehModel: '',
       vehReg: '',
@@ -71,7 +75,7 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
 
   const [formData, setFormData] = useState(getInitialFormData());
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -114,88 +118,35 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
-      // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Sales Invoice - FINANCE.pdf').then(res => res.arrayBuffer());
-      
-      // Load the PDF
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
-      
-      // Get all field names (for debugging)
-      const fields = form.getFields();
-      const availableFieldNames = fields.map(f => f.getName());
-      console.log('📋 Available PDF fields:', availableFieldNames);
-      console.log('📊 Total fields in PDF:', availableFieldNames.length);
-      
-      // Fill the form fields - matching the exact field names from the PDF
-      try {
-        const fieldMapping: { [key: string]: string } = {
-          // Invoice Details
-          'invoice_no': formData.invoiceNumber,
-          'invoice_date': formData.invoiceDate,
-          
-          // Finance Company Details (Bill To)
-          'bill_full_name': formData.financeCompanyName,
-          'bill_phone': formData.financeCompanyPhone,
-          'bill_email': formData.financeCompanyEmail,
-          'bill_address': formData.financeCompanyAddress,
-          
-          // Vehicle Details
-          'veh_make': formData.vehMake,
-          'veh_model': formData.vehModel,
-          'veh_reg': formData.vehReg,
-          'veh_colour': formData.vehColour,
-          'veh_vin': formData.vehVin,
-          'veh_mileage': formData.vehMileage,
-          
-          // Financial Details (with £ symbol)
-          'retail_price': formData.retailPrice ? `£${formData.retailPrice}` : '',
-          'delivery_cost': formData.deliveryCost ? `£${formData.deliveryCost}` : '',
-          'warranty': formData.warranty ? `£${formData.warranty}` : '',
-          'warranty_type': formData.warrantyType,
-          'deposit_paid': formData.depositPaid ? `£${formData.depositPaid}` : '',
-          'total_due': formData.totalDue ? `£${formData.totalDue}` : '',
-          
-          // Signatures
-          'seller_signature': 'FNT MOTOR GROUP', // Auto-filled
-          'buyer_signature': formData.buyerSignature
-        };
-
-        let filledCount = 0;
-        let skippedCount = 0;
-        let errorCount = 0;
-
-        // Fill fields
-        Object.entries(fieldMapping).forEach(([fieldName, value]) => {
-          if (value) {
-            try {
-              const field = form.getTextField(fieldName);
-              field.setText(value);
-              console.log(`✅ Filled "${fieldName}" with: "${value}"`);
-              filledCount++;
-            } catch (err) {
-              console.warn(`❌ Field "${fieldName}" not found or error:`, err);
-              errorCount++;
-            }
-          } else {
-            console.log(`⏭️ Skipped "${fieldName}" (empty value)`);
-            skippedCount++;
-          }
-        });
-
-        console.log(`📝 Summary: ${filledCount} filled, ${skippedCount} skipped (empty), ${errorCount} errors`);
-      } catch (err) {
-        console.error('Error filling form fields:', err);
-      }
-
-      // Securely flatten the PDF to make it completely non-editable
-      await secureFlattenPDF(pdfDoc);
-
-      // Serialize the PDF with additional security options
-      const pdfBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        addDefaultPage: false,
-      });
+      // The invoice is drawn from scratch rather than filled into a template, so
+      // the output carries no form fields and cannot be edited or come out blank.
+      const logo = await loadBrandLogo(FNT_BRAND);
+      const pdfBytes = await buildFNTFinanceInvoice(
+        {
+          invoiceNumber: formData.invoiceNumber,
+          invoiceDate: formData.invoiceDate,
+          financeCompanyName: formData.financeCompanyName,
+          financeCompanyPhone: formData.financeCompanyPhone,
+          financeCompanyEmail: formData.financeCompanyEmail,
+          financeCompanyAddress: formData.financeCompanyAddress,
+          endCustomerName: formData.endCustomerName,
+          endCustomerAddress: formData.endCustomerAddress,
+          vehMake: formData.vehMake,
+          vehModel: formData.vehModel,
+          vehReg: formData.vehReg,
+          vehColour: formData.vehColour,
+          vehVin: formData.vehVin,
+          vehMileage: formData.vehMileage,
+          retailPrice: formData.retailPrice,
+          deliveryCost: formData.deliveryCost,
+          warranty: formData.warranty,
+          warrantyType: formData.warrantyType,
+          depositPaid: formData.depositPaid,
+          totalDue: formData.totalDue,
+          buyerSignature: formData.buyerSignature,
+        },
+        { logo },
+      );
 
       // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -227,6 +178,7 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
         metadata: {
           finance_company_address: formData.financeCompanyAddress,
           end_customer_name: formData.endCustomerName,
+          end_customer_address: formData.endCustomerAddress,
           vehicle_colour: formData.vehColour,
           vehicle_vin: formData.vehVin,
           vehicle_mileage: formData.vehMileage,
@@ -428,26 +380,44 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
               </div>
             </div>
 
-            {/* End Customer Reference (Optional) */}
+            {/* Deliver To - the customer taking the vehicle */}
             <div className="mb-6">
-              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">End Customer (Optional)</h4>
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Deliver To (End Customer)</h4>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-blue-800">
-                  <strong>Optional:</strong> Enter the end customer's name for your internal reference. This won't appear on the invoice.
+                  The finance company is invoiced, but the vehicle goes to this customer. These
+                  details appear in the <strong>Deliver To</strong> block on the invoice.
                 </p>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  End Customer Name
-                </label>
-                <input
-                  type="text"
-                  name="endCustomerName"
-                  value={formData.endCustomerName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
-                  placeholder="John Smith (for your reference only)"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Customer Name
+                  </label>
+                  <input
+                    type="text"
+                    name="endCustomerName"
+                    value={formData.endCustomerName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="John Smith"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Customer Address
+                  </label>
+                  <input
+                    type="text"
+                    name="endCustomerAddress"
+                    value={formData.endCustomerAddress}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="170 Lockbridge Way, Huddersfield, HD3 4NJ"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Separate each line with a comma</p>
+                </div>
               </div>
             </div>
 

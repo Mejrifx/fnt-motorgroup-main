@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, secureFlattenPDF, type Invoice } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, type Invoice } from '../../lib/invoiceUtils';
+import { buildTNTServiceInvoice } from '../../lib/pdf/tntServiceInvoice';
+import { loadBrandLogo } from '../../lib/pdf/invoiceSections';
+import { TNT_BRAND } from '../../lib/pdf/invoiceTheme';
 import { useToast } from '../ui/ToastContainer';
 
 interface LineItem {
@@ -74,7 +76,7 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
   const [formData, setFormData] = useState(getInitialFormData());
   const [lineItems, setLineItems] = useState<LineItem[]>(getInitialLineItems());
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -141,107 +143,25 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
-      // Fetch the PDF template
-      const existingPdfBytes = await fetch('/TNT Services Invoice Template.pdf').then(res => res.arrayBuffer());
-      
-      // Load the PDF
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
-      
-      // Get all field names (for debugging)
-      const fields = form.getFields();
-      console.log('Available PDF fields:', fields.map(f => f.getName()));
-      
-      // Fill the form fields with correct field names
-      try {
-        // Invoice/Vehicle Details
-        const invoiceFields: { [key: string]: string } = {
-          'invoice_no': formData.invoiceNumber,
-          'invoice_date': formData.invoiceDate,
-          'vehicle_reg': formData.vehicleReg,
-          'mileage': formData.mileage
-        };
-
-        // Customer Details (Bill To)
-        const customerFields: { [key: string]: string } = {
-          'bill_0': formData.customerName,
-          'bill_1': formData.customerPhone,
-          'bill_2': formData.customerEmail
-        };
-
-        // Fill invoice and customer fields
-        Object.entries({ ...invoiceFields, ...customerFields }).forEach(([fieldName, value]) => {
-          if (value) {
-            try {
-              const field = form.getTextField(fieldName);
-              field.setText(value);
-            } catch (err) {
-              console.warn(`Field "${fieldName}" not found or not a text field`);
-            }
-          }
-        });
-
-        // Fill line items (rows 0-4)
-        lineItems.forEach((item, rowIndex) => {
-          if (item.description || item.qty || item.labour || item.parts) {
-            try {
-              if (item.description) {
-                const descField = form.getTextField(`row${rowIndex}_0`);
-                descField.setText(item.description);
-              }
-              if (item.qty) {
-                const qtyField = form.getTextField(`row${rowIndex}_1`);
-                qtyField.setText(item.qty);
-              }
-              if (item.labour) {
-                const labourField = form.getTextField(`row${rowIndex}_2`);
-                labourField.setText(item.labour);
-              }
-              if (item.parts) {
-                const partsField = form.getTextField(`row${rowIndex}_3`);
-                partsField.setText(item.parts);
-              }
-              if (item.lineTotal) {
-                const totalField = form.getTextField(`row${rowIndex}_4`);
-                totalField.setText(item.lineTotal);
-              }
-            } catch (err) {
-              console.warn(`Error filling row ${rowIndex}:`, err);
-            }
-          }
-        });
-
-        // Fill totals (VAT removed, fields renumbered)
-        const totalFields: { [key: string]: string } = {
-          'total_0': formData.subtotal,
-          'total_1': formData.discount,
-          'total_2': formData.grandTotal
-        };
-
-        Object.entries(totalFields).forEach(([fieldName, value]) => {
-          if (value) {
-            try {
-              const field = form.getTextField(fieldName);
-              field.setText(value);
-            } catch (err) {
-              console.warn(`Field "${fieldName}" not found or not a text field`);
-            }
-          }
-        });
-
-        console.log('PDF fields filled successfully!');
-      } catch (err) {
-        console.error('Error filling form fields:', err);
-      }
-
-      // Securely flatten the PDF to make it completely non-editable
-      await secureFlattenPDF(pdfDoc);
-
-      // Serialize the PDF with additional security options
-      const pdfBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        addDefaultPage: false,
-      });
+      // The invoice is drawn from scratch rather than filled into a template, so
+      // the output carries no form fields and cannot be edited or come out blank.
+      const logo = await loadBrandLogo(TNT_BRAND);
+      const pdfBytes = await buildTNTServiceInvoice(
+        {
+          invoiceNumber: formData.invoiceNumber,
+          invoiceDate: formData.invoiceDate,
+          vehicleReg: formData.vehicleReg,
+          mileage: formData.mileage,
+          customerName: formData.customerName,
+          customerPhone: formData.customerPhone,
+          customerEmail: formData.customerEmail,
+          lineItems,
+          subtotal: formData.subtotal,
+          discount: formData.discount,
+          grandTotal: formData.grandTotal,
+        },
+        { logo },
+      );
 
       // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });

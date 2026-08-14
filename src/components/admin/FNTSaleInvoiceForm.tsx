@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, XCircle } from 'lucide-react';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, secureFlattenPDF, type Invoice } from '../../lib/invoiceUtils';
+import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, type Invoice } from '../../lib/invoiceUtils';
+import { buildFNTSaleInvoice } from '../../lib/pdf/fntSaleInvoice';
+import { loadBrandLogo } from '../../lib/pdf/invoiceSections';
+import { FNT_BRAND } from '../../lib/pdf/invoiceTheme';
 import { useToast } from '../ui/ToastContainer';
 
 interface FNTSaleInvoiceFormProps {
@@ -32,6 +34,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
         vehColour: meta.vehicle_colour || '',
         vehVin: meta.vehicle_vin || '',
         vehMileage: meta.vehicle_mileage || '',
+        // Records created before the toggle existed are inferred from their fields.
+        hasPartExchange: meta.has_part_exchange ?? Boolean(meta.px_vehicle),
         pxMake: meta.px_vehicle?.make || '',
         pxModel: meta.px_vehicle?.model || '',
         pxReg: meta.px_vehicle?.reg || '',
@@ -63,6 +67,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
       vehColour: '',
       vehVin: '',
       vehMileage: '',
+      hasPartExchange: false,
       pxMake: '',
       pxModel: '',
       pxReg: '',
@@ -83,29 +88,38 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
 
   const [formData, setFormData] = useState(getInitialFormData());
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  type SaleFormData = ReturnType<typeof getInitialFormData>;
+
+  const FINANCIAL_FIELDS = ['retailPrice', 'deliveryCost', 'warranty', 'depositPaid', 'pxPrice'];
+
+  /** Total Due = Retail + Delivery + Warranty - Deposit - Part Exchange. */
+  const recalculateTotal = (data: SaleFormData) => {
+    const retail = parseFloat(data.retailPrice) || 0;
+    const delivery = parseFloat(data.deliveryCost) || 0;
+    const warranty = parseFloat(data.warranty) || 0;
+    const deposit = parseFloat(data.depositPaid) || 0;
+    const partExchange = data.hasPartExchange ? parseFloat(data.pxPrice) || 0 : 0;
+
+    return (retail + delivery + warranty - deposit - partExchange).toFixed(2);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      if (FINANCIAL_FIELDS.includes(name)) {
+        next.totalDue = recalculateTotal(next);
+      }
+      return next;
+    });
+  };
 
-    // Auto-calculate totals if financial fields change
-    if (['retailPrice', 'deliveryCost', 'warranty', 'depositPaid', 'pxPrice'].includes(name)) {
-      const retail = parseFloat(name === 'retailPrice' ? value : formData.retailPrice) || 0;
-      const delivery = parseFloat(name === 'deliveryCost' ? value : formData.deliveryCost) || 0;
-      const warranty = parseFloat(name === 'warranty' ? value : formData.warranty) || 0;
-      const deposit = parseFloat(name === 'depositPaid' ? value : formData.depositPaid) || 0;
-      const pxPrice = parseFloat(name === 'pxPrice' ? value : formData.pxPrice) || 0;
-      
-      // Total Due = Retail + Delivery + Warranty - Deposit - Part Exchange Price
-      const totalDue = retail + delivery + warranty - deposit - pxPrice;
-
-      setFormData(prev => ({
-        ...prev,
-        totalDue: totalDue.toFixed(2)
-      }));
-    }
+  const setPartExchange = (enabled: boolean) => {
+    setFormData(prev => {
+      const next = { ...prev, hasPartExchange: enabled };
+      next.totalDue = recalculateTotal(next);
+      return next;
+    });
   };
 
   // Auto-generate invoice number on mount (only if not editing)
@@ -127,97 +141,41 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
-      // Fetch the PDF template
-      const existingPdfBytes = await fetch('/FNT Sales Invoice + Terms FINAL.pdf').then(res => res.arrayBuffer());
-      
-      // Load the PDF
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
-      
-      // Get all field names (for debugging)
-      const fields = form.getFields();
-      const availableFieldNames = fields.map(f => f.getName());
-      console.log('📋 Available PDF fields:', availableFieldNames);
-      console.log('📊 Total fields in PDF:', availableFieldNames.length);
-      
-      // Fill the form fields - matching the exact field names from the PDF
-      try {
-        const fieldMapping: { [key: string]: string } = {
-          // Invoice Details
-          'invoice_no': formData.invoiceNumber,
-          'invoice_date': formData.invoiceDate,
-          
-          // Buyer Details
-          'bill_full_name': formData.buyerName,
-          'bill_phone': formData.buyerPhone,
-          'bill_email': formData.buyerEmail,
-          'bill_address': formData.buyerAddress,
-          
-          // Vehicle Details
-          'veh_make': formData.vehMake,
-          'veh_model': formData.vehModel,
-          'veh_reg': formData.vehReg,
-          'veh_colour': formData.vehColour,
-          'veh_vin': formData.vehVin,
-          'veh_mileage': formData.vehMileage,
-          
-          // Part Exchange Vehicle (optional)
-          'px_make': formData.pxMake,
-          'px_model': formData.pxModel,
-          'px_reg': formData.pxReg,
-          'px_colour': formData.pxColour,
-          'px_vin': formData.pxVin,
-          'px_mileage': formData.pxMileage,
-          'partex_price': formData.pxPrice ? `£${formData.pxPrice}` : '', // Part exchange price
-          
-          // Financial Details (with £ symbol)
-          'retail_price': formData.retailPrice ? `£${formData.retailPrice}` : '',
-          'delivery_cost': formData.deliveryCost ? `£${formData.deliveryCost}` : '',
-          'warranty': formData.warranty ? `£${formData.warranty}` : '',
-          'warranty_type': formData.warrantyType,
-          'deposit_paid': formData.depositPaid ? `£${formData.depositPaid}` : '',
-          'total_due': formData.totalDue ? `£${formData.totalDue}` : '',
-          
-          // Signatures
-          'seller_signature': 'FNT MOTOR GROUP', // Auto-filled
-          'buyer_signature': formData.buyerSignature
-        };
-
-        let filledCount = 0;
-        let skippedCount = 0;
-        let errorCount = 0;
-
-        // Fill fields - exact same approach as TNT invoice
-        Object.entries(fieldMapping).forEach(([fieldName, value]) => {
-          if (value) {
-            try {
-              const field = form.getTextField(fieldName);
-              field.setText(value);
-              console.log(`✅ Filled "${fieldName}" with: "${value}"`);
-              filledCount++;
-            } catch (err) {
-              console.warn(`❌ Field "${fieldName}" not found or error:`, err);
-              errorCount++;
-            }
-          } else {
-            console.log(`⏭️ Skipped "${fieldName}" (empty value)`);
-            skippedCount++;
-          }
-        });
-
-        console.log(`📝 Summary: ${filledCount} filled, ${skippedCount} skipped (empty), ${errorCount} errors`);
-      } catch (err) {
-        console.error('Error filling form fields:', err);
-      }
-
-      // Securely flatten the PDF to make it completely non-editable
-      await secureFlattenPDF(pdfDoc);
-
-      // Serialize the PDF with additional security options
-      const pdfBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        addDefaultPage: false,
-      });
+      // The invoice is drawn from scratch rather than filled into a template, so
+      // the output carries no form fields and cannot be edited or come out blank.
+      const logo = await loadBrandLogo(FNT_BRAND);
+      const pdfBytes = await buildFNTSaleInvoice(
+        {
+          invoiceNumber: formData.invoiceNumber,
+          invoiceDate: formData.invoiceDate,
+          buyerName: formData.buyerName,
+          buyerPhone: formData.buyerPhone,
+          buyerEmail: formData.buyerEmail,
+          buyerAddress: formData.buyerAddress,
+          vehMake: formData.vehMake,
+          vehModel: formData.vehModel,
+          vehReg: formData.vehReg,
+          vehColour: formData.vehColour,
+          vehVin: formData.vehVin,
+          vehMileage: formData.vehMileage,
+          hasPartExchange: formData.hasPartExchange,
+          pxMake: formData.pxMake,
+          pxModel: formData.pxModel,
+          pxReg: formData.pxReg,
+          pxColour: formData.pxColour,
+          pxVin: formData.pxVin,
+          pxMileage: formData.pxMileage,
+          pxPrice: formData.pxPrice,
+          retailPrice: formData.retailPrice,
+          deliveryCost: formData.deliveryCost,
+          warranty: formData.warranty,
+          warrantyType: formData.warrantyType,
+          depositPaid: formData.depositPaid,
+          totalDue: formData.totalDue,
+          buyerSignature: formData.buyerSignature,
+        },
+        { logo },
+      );
 
       // Create a blob
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -251,7 +209,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
           vehicle_colour: formData.vehColour,
           vehicle_vin: formData.vehVin,
           vehicle_mileage: formData.vehMileage,
-          px_vehicle: formData.pxMake ? {
+          has_part_exchange: formData.hasPartExchange,
+          px_vehicle: formData.hasPartExchange ? {
             make: formData.pxMake,
             model: formData.pxModel,
             reg: formData.pxReg,
@@ -265,7 +224,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
           warranty: formData.warranty,
           warranty_type: formData.warrantyType,
           deposit_paid: formData.depositPaid,
-          px_price: formData.pxPrice,
+          px_price: formData.hasPartExchange ? formData.pxPrice : '',
           buyer_signature: formData.buyerSignature,
           payment_method: formData.paymentMethod
         }
@@ -546,15 +505,44 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
               </div>
             </div>
 
-            {/* Part Exchange Vehicle (Optional) */}
+            {/* Part Exchange Vehicle */}
             <div className="mb-6">
-              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Part Exchange Vehicle (Optional)</h4>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Optional:</strong> Fill in these fields only if the customer is trading in a vehicle.
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Part Exchange</h4>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-3">
+                  Is the customer trading a vehicle in?
+                </p>
+                <div className="inline-flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setPartExchange(false)}
+                    className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      !formData.hasPartExchange
+                        ? 'bg-fnt-red text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    No Part Exchange
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPartExchange(true)}
+                    className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      formData.hasPartExchange
+                        ? 'bg-fnt-red text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Part Exchange
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {formData.hasPartExchange
+                    ? 'The part exchange section will appear on the invoice and the allowance is deducted from the total.'
+                    : 'The part exchange section is left off the invoice entirely.'}
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${formData.hasPartExchange ? '' : 'hidden'}`}>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Make
