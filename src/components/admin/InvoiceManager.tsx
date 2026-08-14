@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, FileText, ExternalLink, XCircle } from 'lucide-react';
+import { Plus, FileText, XCircle } from 'lucide-react';
 import TNTInvoiceForm from './TNTInvoiceForm';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
+import { createSampleInvoiceURL, type SampleInvoiceType } from '../../lib/pdf/sampleInvoices';
 import type { Invoice } from '../../lib/invoiceUtils';
 
 // SimplePDF type declaration
@@ -28,6 +29,7 @@ const InvoiceManager = () => {
   const [showFNTPurchaseForm, setShowFNTPurchaseForm] = useState(false);
   const [showFNTFinanceForm, setShowFNTFinanceForm] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [buildingSample, setBuildingSample] = useState<SampleInvoiceType | null>(null);
 
   // Template URLs
   const TEMPLATES = {
@@ -65,6 +67,38 @@ const InvoiceManager = () => {
   const closeSimplePDFEditor = () => {
     setShowSimplePDFEditor(false);
     setCurrentTemplate(null);
+  };
+
+  /**
+   * Builds a sample with the same code that produces real invoices, so what is
+   * shown here always matches the current design.
+   */
+  const viewSample = async (type: SampleInvoiceType) => {
+    if (buildingSample) return;
+    setBuildingSample(type);
+
+    // Claimed before the await so the browser still credits the click and does
+    // not treat the result as an unsolicited popup.
+    const tab = window.open('', '_blank');
+    try {
+      const url = await createSampleInvoiceURL(type);
+      if (tab) {
+        tab.location.href = url;
+      } else {
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.click();
+      }
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (error) {
+      tab?.close();
+      console.error('Failed to build sample invoice:', error);
+      alert('Could not build the sample invoice. Please try again.');
+    } finally {
+      setBuildingSample(null);
+    }
   };
 
   const handleEdit = (invoice: Invoice) => {
@@ -233,15 +267,14 @@ const InvoiceManager = () => {
               <span>Create Invoice</span>
             </button>
             
-            <a
-              href="/FNT_Sale_Invoice_v28_TNTStyleFields.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            <button
+              onClick={() => viewSample('selling')}
+              disabled={buildingSample !== null}
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
-              <span>View Template</span>
-            </a>
+              <span>{buildingSample === 'selling' ? 'Building...' : 'View Sample'}</span>
+            </button>
           </div>
         </div>
 
@@ -293,15 +326,14 @@ const InvoiceManager = () => {
               <span>Create Invoice</span>
             </button>
             
-            <a
-              href="/FNT Purchase Invoice Template.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            <button
+              onClick={() => viewSample('purchase')}
+              disabled={buildingSample !== null}
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
-              <span>View Template</span>
-            </a>
+              <span>{buildingSample === 'purchase' ? 'Building...' : 'View Sample'}</span>
+            </button>
           </div>
         </div>
 
@@ -353,15 +385,14 @@ const InvoiceManager = () => {
               <span>Create Invoice</span>
             </button>
             
-            <a
-              href="/FNT Sales Invoice - FINANCE.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            <button
+              onClick={() => viewSample('finance')}
+              disabled={buildingSample !== null}
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
-              <span>View Template</span>
-            </a>
+              <span>{buildingSample === 'finance' ? 'Building...' : 'View Sample'}</span>
+            </button>
           </div>
         </div>
 
@@ -413,15 +444,14 @@ const InvoiceManager = () => {
               <span>Create Invoice</span>
             </button>
             
-            <a
-              href="/TNT Services Invoice Template.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            <button
+              onClick={() => viewSample('tnt')}
+              disabled={buildingSample !== null}
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg transition-colors font-semibold"
             >
               <FileText className="w-4 h-4" />
-              <span>View Template</span>
-            </a>
+              <span>{buildingSample === 'tnt' ? 'Building...' : 'View Sample'}</span>
+            </button>
           </div>
         </div>
       </div>
