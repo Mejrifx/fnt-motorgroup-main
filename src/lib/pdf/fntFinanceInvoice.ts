@@ -2,6 +2,8 @@ import { PDFDocument, type PDFImage } from 'pdf-lib';
 import { COL_WIDTH, FNT_BRAND, MARGIN, PAGE, formatMoney, hasAmount } from './invoiceTheme';
 import { drawFooter, drawHeader, invoiceMeta } from './invoiceChrome';
 import {
+  PAIR_ROW_HEIGHT,
+  PAIR_ROW_HEIGHT_TIGHT,
   balanceLayout,
   brandParty,
   createCtx,
@@ -9,6 +11,7 @@ import {
   drawPartyPair,
   drawSignaturePair,
   drawSummary,
+  drawVehiclePair,
   drawVehicleSection,
   embedLogo,
   splitAddress,
@@ -35,6 +38,15 @@ export interface FinanceInvoiceInput {
   vehColour?: string;
   vehVin?: string;
   vehMileage?: string;
+  /** When false the part exchange section is omitted regardless of the fields. */
+  hasPartExchange?: boolean;
+  pxMake?: string;
+  pxModel?: string;
+  pxReg?: string;
+  pxColour?: string;
+  pxVin?: string;
+  pxMileage?: string;
+  pxPrice?: string;
   retailPrice: string;
   deliveryCost?: string;
   warranty?: string;
@@ -50,10 +62,17 @@ const INVOICE_NOTES = [
   'Please quote the vehicle registration as the payment reference',
 ];
 
-function summaryRows(input: FinanceInvoiceInput): SummaryRow[] {
+function includesPartExchange(input: FinanceInvoiceInput): boolean {
+  if (input.hasPartExchange === false) return false;
+  if (input.hasPartExchange === true) return true;
+  // Older records predate the explicit toggle, so fall back to the fields.
+  return Boolean(input.pxMake || input.pxModel || input.pxReg || input.pxVin || hasAmount(input.pxPrice));
+}
+
+function summaryRows(input: FinanceInvoiceInput, withPartExchange: boolean): SummaryRow[] {
   const deduction = (value?: string) => (hasAmount(value) ? `-${formatMoney(value)}` : formatMoney(0));
 
-  return [
+  const rows: SummaryRow[] = [
     { label: 'Vehicle Sale Price', value: formatMoney(input.retailPrice) || formatMoney(0) },
     { label: 'Delivery', value: formatMoney(input.deliveryCost) || formatMoney(0) },
     {
@@ -65,11 +84,23 @@ function summaryRows(input: FinanceInvoiceInput): SummaryRow[] {
           : formatMoney(0),
       sublabel: input.warrantyType || undefined,
     },
-    { label: 'Less Deposit Paid', value: deduction(input.depositPaid) },
   ];
+
+  if (withPartExchange) {
+    rows.push({ label: 'Part Exchange Allowance', value: deduction(input.pxPrice) });
+  }
+  rows.push({ label: 'Less Deposit Paid', value: deduction(input.depositPaid) });
+
+  return rows;
 }
 
-function drawBody(ctx: Ctx, input: FinanceInvoiceInput, logo: PDFImage | null, gap: number): number {
+function drawBody(
+  ctx: Ctx,
+  input: FinanceInvoiceInput,
+  logo: PDFImage | null,
+  gap: number,
+  pairRowHeight: number,
+): number {
   let y = drawHeader(ctx, {
     title: 'Finance Invoice',
     logo,
@@ -114,20 +145,48 @@ function drawBody(ctx: Ctx, input: FinanceInvoiceInput, logo: PDFImage | null, g
     gap,
   );
 
-  y = drawVehicleSection(ctx, 'Vehicle Details', {
+  const vehicle = {
     make: input.vehMake,
     model: input.vehModel,
     reg: input.vehReg,
     colour: input.vehColour,
     vin: input.vehVin,
     mileage: input.vehMileage,
-  }, y, gap);
+  };
+
+  const withPartExchange = includesPartExchange(input);
+  if (withPartExchange) {
+    // This invoice already carries two party blocks, so a second full-width
+    // vehicle section would not fit. Side by side also reads as a comparison.
+    // The allowance is not repeated here; it appears in the payment summary
+    // where it forms part of the arithmetic.
+    y = drawVehiclePair(
+      ctx,
+      { heading: 'Vehicle Details', vehicle },
+      {
+        heading: 'Part Exchange',
+        vehicle: {
+          make: input.pxMake,
+          model: input.pxModel,
+          reg: input.pxReg,
+          colour: input.pxColour,
+          vin: input.pxVin,
+          mileage: input.pxMileage,
+        },
+      },
+      y,
+      gap,
+      { rowHeight: pairRowHeight },
+    );
+  } else {
+    y = drawVehicleSection(ctx, 'Vehicle Details', vehicle, y, gap);
+  }
 
   const notesBottom = drawBulletedBlock(ctx, 'Invoice Notes', INVOICE_NOTES, MARGIN.left, y, COL_WIDTH);
   const summaryBottom = drawSummary(
     ctx,
     'Payment Summary',
-    summaryRows(input),
+    summaryRows(input, withPartExchange),
     { label: 'Balance to Finance', value: formatMoney(input.totalDue) },
     y,
   );
@@ -140,12 +199,25 @@ export async function buildFNTFinanceInvoice(
   assets: InvoiceAssets = {},
 ): Promise<Uint8Array> {
   const brand = FNT_BRAND;
-  const layout = await balanceLayout({
-    brand,
-    assets,
-    gapCount: 4,
-    render: (ctx, logo, gap) => drawBody(ctx, input, logo, gap),
-  });
+  const balance = (pairRowHeight: number) =>
+    balanceLayout({
+      brand,
+      assets,
+      // Part exchange shares the vehicle row rather than adding a band, so the
+      // number of gaps does not change with the toggle.
+      gapCount: 4,
+      render: (ctx, logo, gap) => drawBody(ctx, input, logo, gap, pairRowHeight),
+    });
+
+  // A part exchange alongside two long addresses is the one combination that can
+  // outgrow the page. The vehicle rows give up the height when that happens,
+  // which is enough for the longest addresses seen in practice.
+  let pairRowHeight = PAIR_ROW_HEIGHT;
+  let layout = await balance(pairRowHeight);
+  if (layout.overflow > 0) {
+    pairRowHeight = PAIR_ROW_HEIGHT_TIGHT;
+    layout = await balance(pairRowHeight);
+  }
 
   const doc = await PDFDocument.create();
   doc.setTitle(`Finance Invoice ${input.invoiceNumber}`);
@@ -158,7 +230,7 @@ export async function buildFNTFinanceInvoice(
   const ctx = await createCtx(doc, brand);
   const logo = await embedLogo(doc, assets);
 
-  drawBody(ctx, input, logo, layout.gap);
+  drawBody(ctx, input, logo, layout.gap, pairRowHeight);
   drawSignaturePair(
     ctx,
     { caption: `Seller \u00B7 On behalf of ${brand.name}`, signed: brand.name },

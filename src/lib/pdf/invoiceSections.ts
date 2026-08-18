@@ -33,8 +33,18 @@ export const BASE_SECTION_GAP = 22;
  * vertical space is shared between the sections instead of pooling at the bottom.
  */
 export const MAX_SECTION_GAP_BONUS = 34;
-/** Signatures are pinned near the bottom so short and long invoices both balance. */
-export const SIGNATURES_TOP = MARGIN.bottom + 105;
+/** Dense invoices tighten instead of running into the signatures and footer. */
+export const MIN_SECTION_GAP = 12;
+/**
+ * The lowest the signature block can sit and still clear the footer rule. Short
+ * invoices float their signatures above this, so lowering it only buys room for
+ * the dense ones.
+ */
+export const SIGNATURES_TOP = MARGIN.bottom + 90;
+/** Row height for the paired vehicle columns, which run six rows deep. */
+export const PAIR_ROW_HEIGHT = 16;
+/** Used when a part exchange plus long addresses would otherwise not fit. */
+export const PAIR_ROW_HEIGHT_TIGHT = 14;
 
 export async function createCtx(doc: PDFDocument, brand: Brand): Promise<Ctx> {
   return {
@@ -148,6 +158,17 @@ export interface VehicleFields {
   mileage?: string;
 }
 
+function vehicleRows(vehicle: VehicleFields): Array<[string, string]> {
+  return [
+    ['Make', vehicle.make || ''],
+    ['Model', vehicle.model || ''],
+    ['Registration', upper(vehicle.reg)],
+    ['Colour', vehicle.colour || ''],
+    ['VIN', upper(vehicle.vin)],
+    ['Mileage', formatMileage(vehicle.mileage)],
+  ];
+}
+
 export function drawVehicleSection(
   ctx: Ctx,
   heading: string,
@@ -156,15 +177,39 @@ export function drawVehicleSection(
   gap: number,
 ): number {
   const contentTop = sectionHeading(ctx, heading, MARGIN.left, top, CONTENT_WIDTH);
-  const bottom = twoUpRows(ctx, [
-    ['Make', vehicle.make || ''],
-    ['Model', vehicle.model || ''],
-    ['Registration', upper(vehicle.reg)],
-    ['Colour', vehicle.colour || ''],
-    ['VIN', upper(vehicle.vin)],
-    ['Mileage', formatMileage(vehicle.mileage)],
-  ], contentTop);
-  return bottom - gap;
+  return twoUpRows(ctx, vehicleRows(vehicle), contentTop) - gap;
+}
+
+/**
+ * Two vehicles side by side, one per column, each field on its own line. Taller
+ * per vehicle than drawVehicleSection but shorter than two of them stacked, which
+ * is what keeps a part exchange on the same page as everything else.
+ */
+export function drawVehiclePair(
+  ctx: Ctx,
+  left: { heading: string; vehicle: VehicleFields },
+  right: { heading: string; vehicle: VehicleFields },
+  top: number,
+  gap: number,
+  options: { rowHeight?: number } = {},
+): number {
+  const rowHeight = options.rowHeight ?? PAIR_ROW_HEIGHT;
+
+  const column = (heading: string, vehicle: VehicleFields, x: number): number => {
+    let y = sectionHeading(ctx, heading, x, top, COL_WIDTH);
+    const rows = vehicleRows(vehicle);
+    rows.forEach(([label, value], index) => {
+      y = labelValueRow(ctx, label, value, x, y, COL_WIDTH, {
+        showRule: index < rows.length - 1,
+        rowHeight,
+      });
+    });
+    return y;
+  };
+
+  const leftBottom = column(left.heading, left.vehicle, MARGIN.left);
+  const rightBottom = column(right.heading, right.vehicle, COL_RIGHT_X);
+  return Math.min(leftBottom, rightBottom) - gap;
 }
 
 export interface SummaryRow {
@@ -297,6 +342,12 @@ export interface BalancedLayout {
   gap: number;
   /** Where the signature block should sit, given that gap. */
   signaturesTop: number;
+  /**
+   * How far past the floor the body runs once the gaps have tightened as far as
+   * they go. Zero or less means it fits; positive means the caller needs to give
+   * up some height of its own.
+   */
+  overflow: number;
 }
 
 /**
@@ -307,7 +358,8 @@ export interface BalancedLayout {
  *
  * Spare space is spread between the sections up to a limit. Anything still left
  * over after that stays below the signatures rather than opening a void above
- * them, so a sparse invoice reads as short rather than broken.
+ * them, so a sparse invoice reads as short rather than broken. A body that runs
+ * long tightens its gaps instead, down to MIN_SECTION_GAP.
  */
 export async function balanceLayout(options: {
   brand: Brand;
@@ -327,11 +379,20 @@ export async function balanceLayout(options: {
 
   const floor = options.floorY ?? SIGNATURES_TOP;
   const naturalBottom = await measure(BASE_SECTION_GAP);
-  const bonus = Math.max(0, Math.min(MAX_SECTION_GAP_BONUS, (naturalBottom - floor) / options.gapCount));
+  const slackPerGap = (naturalBottom - floor) / options.gapCount;
+  const bonus = Math.min(
+    MAX_SECTION_GAP_BONUS,
+    Math.max(MIN_SECTION_GAP - BASE_SECTION_GAP, slackPerGap),
+  );
   const gap = BASE_SECTION_GAP + bonus;
 
-  const balancedBottom = bonus > 0 ? await measure(gap) : naturalBottom;
-  return { gap, signaturesTop: Math.max(SIGNATURES_TOP, balancedBottom) };
+  const bodyBottom = bonus === 0 ? naturalBottom : await measure(gap);
+
+  return {
+    gap,
+    signaturesTop: Math.max(SIGNATURES_TOP, bodyBottom),
+    overflow: floor - bodyBottom,
+  };
 }
 
 export { FOOTER_RULE_Y };

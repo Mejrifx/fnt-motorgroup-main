@@ -91,8 +91,41 @@ const finance: FinanceInvoiceInput = {
   vehColour: 'Nevada White',
   vehVin: 'VSSZZZ5FZH6507609',
   vehMileage: '88500',
+  hasPartExchange: false,
   retailPrice: '8090',
   totalDue: '8090',
+};
+
+/** The densest finance case: every optional block and row present. */
+const financeWithPartExchange: FinanceInvoiceInput = {
+  invoiceNumber: 'FNT-F-028',
+  invoiceDate: '2026-08-14',
+  financeCompanyName: 'Blue Motor Finance Limited',
+  financeCompanyPhone: '0203 005 5555',
+  financeCompanyEmail: 'payouts@bluemotorfinance.co.uk',
+  financeCompanyAddress: 'Cantium House, Railway Approach, Wallington, Surrey, SM6 0DZ',
+  endCustomerName: 'Priya Raghunathan',
+  endCustomerAddress: 'Flat 9, Corporation Mill, 21 Bengal Street, Manchester, M4 6LN',
+  vehMake: 'Land Rover',
+  vehModel: 'Discovery Sport HSE Black Edition',
+  vehReg: 'YE19WKL',
+  vehColour: 'Santorini Black Metallic',
+  vehVin: 'SALCA2BN8KH123456',
+  vehMileage: '42780',
+  hasPartExchange: true,
+  pxMake: 'Nissan',
+  pxModel: 'Qashqai 1.5 dCi Tekna',
+  pxReg: 'PO16HRV',
+  pxColour: 'Gun Metallic',
+  pxVin: 'SJNFAAJ11U1234567',
+  pxMileage: '96410',
+  pxPrice: '4750',
+  retailPrice: '24995',
+  deliveryCost: '199',
+  warranty: '699',
+  warrantyType: '24 Month Extended Warranty',
+  depositPaid: '2000',
+  totalDue: '19143',
 };
 
 const tnt: TNTInvoiceInput = {
@@ -125,6 +158,7 @@ async function main() {
     ['sale-minimal', () => buildFNTSaleInvoice(saleMinimal, { logo: fntLogo })],
     ['purchase', () => buildFNTPurchaseInvoice(purchase, { logo: fntLogo })],
     ['finance', () => buildFNTFinanceInvoice(finance, { logo: fntLogo })],
+    ['finance-with-part-exchange', () => buildFNTFinanceInvoice(financeWithPartExchange, { logo: fntLogo })],
     ['tnt-service', () => buildTNTServiceInvoice(tnt, { logo: tntLogo })],
   ];
 

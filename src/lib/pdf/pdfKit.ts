@@ -143,7 +143,7 @@ export function labelValueRow(
   x: number,
   top: number,
   width: number,
-  options: { emphasise?: boolean; showRule?: boolean; sublabel?: string } = {},
+  options: { emphasise?: boolean; showRule?: boolean; sublabel?: string; rowHeight?: number } = {},
 ): number {
   const baseline = top - TYPE.value;
 
@@ -177,9 +177,11 @@ export function labelValueRow(
     });
   }
 
-  const bottom = top - ROW_HEIGHT - extra;
+  const bottom = top - (options.rowHeight ?? ROW_HEIGHT) - extra;
   if (options.showRule !== false) {
-    rule(ctx, x, bottom + 5.5, width, 0.6, COLOR.hairline);
+    // Placed relative to the last baseline rather than the row bottom, so a
+    // tighter row height cannot pull the hairline up through the text.
+    rule(ctx, x, baseline - extra - 3.5, width, 0.6, COLOR.hairline);
   }
   return bottom;
 }

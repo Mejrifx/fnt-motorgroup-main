@@ -36,6 +36,15 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
         vehColour: meta.vehicle_colour || '',
         vehVin: meta.vehicle_vin || '',
         vehMileage: meta.vehicle_mileage || '',
+        // Records created before the toggle existed are inferred from their fields.
+        hasPartExchange: meta.has_part_exchange ?? Boolean(meta.px_vehicle),
+        pxMake: meta.px_vehicle?.make || '',
+        pxModel: meta.px_vehicle?.model || '',
+        pxReg: meta.px_vehicle?.reg || '',
+        pxColour: meta.px_vehicle?.colour || '',
+        pxVin: meta.px_vehicle?.vin || '',
+        pxMileage: meta.px_vehicle?.mileage || '',
+        pxPrice: meta.px_price || meta.px_vehicle?.price || '',
         retailPrice: meta.retail_price || '',
         deliveryCost: meta.delivery_cost || '',
         warranty: meta.warranty || '',
@@ -62,6 +71,14 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
       vehColour: '',
       vehVin: '',
       vehMileage: '',
+      hasPartExchange: false,
+      pxMake: '',
+      pxModel: '',
+      pxReg: '',
+      pxColour: '',
+      pxVin: '',
+      pxMileage: '',
+      pxPrice: '',
       retailPrice: '',
       deliveryCost: '',
       warranty: '',
@@ -75,28 +92,38 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
 
   const [formData, setFormData] = useState(getInitialFormData());
 
+  type FinanceFormData = ReturnType<typeof getInitialFormData>;
+
+  const FINANCIAL_FIELDS = ['retailPrice', 'deliveryCost', 'warranty', 'depositPaid', 'pxPrice'];
+
+  /** Total Due = Retail + Delivery + Warranty - Deposit - Part Exchange. */
+  const recalculateTotal = (data: FinanceFormData) => {
+    const retail = parseFloat(data.retailPrice) || 0;
+    const delivery = parseFloat(data.deliveryCost) || 0;
+    const warranty = parseFloat(data.warranty) || 0;
+    const deposit = parseFloat(data.depositPaid) || 0;
+    const partExchange = data.hasPartExchange ? parseFloat(data.pxPrice) || 0 : 0;
+
+    return (retail + delivery + warranty - deposit - partExchange).toFixed(2);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: value };
+      if (FINANCIAL_FIELDS.includes(name)) {
+        next.totalDue = recalculateTotal(next);
+      }
+      return next;
+    });
+  };
 
-    // Auto-calculate totals if financial fields change
-    if (['retailPrice', 'deliveryCost', 'warranty', 'depositPaid'].includes(name)) {
-      const retail = parseFloat(name === 'retailPrice' ? value : formData.retailPrice) || 0;
-      const delivery = parseFloat(name === 'deliveryCost' ? value : formData.deliveryCost) || 0;
-      const warranty = parseFloat(name === 'warranty' ? value : formData.warranty) || 0;
-      const deposit = parseFloat(name === 'depositPaid' ? value : formData.depositPaid) || 0;
-      
-      // Total Due = Retail + Delivery + Warranty - Deposit
-      const totalDue = retail + delivery + warranty - deposit;
-
-      setFormData(prev => ({
-        ...prev,
-        totalDue: totalDue.toFixed(2)
-      }));
-    }
+  const setPartExchange = (enabled: boolean) => {
+    setFormData(prev => {
+      const next = { ...prev, hasPartExchange: enabled };
+      next.totalDue = recalculateTotal(next);
+      return next;
+    });
   };
 
   // Auto-generate invoice number on mount (only if not editing)
@@ -137,6 +164,14 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
           vehColour: formData.vehColour,
           vehVin: formData.vehVin,
           vehMileage: formData.vehMileage,
+          hasPartExchange: formData.hasPartExchange,
+          pxMake: formData.pxMake,
+          pxModel: formData.pxModel,
+          pxReg: formData.pxReg,
+          pxColour: formData.pxColour,
+          pxVin: formData.pxVin,
+          pxMileage: formData.pxMileage,
+          pxPrice: formData.pxPrice,
           retailPrice: formData.retailPrice,
           deliveryCost: formData.deliveryCost,
           warranty: formData.warranty,
@@ -182,6 +217,17 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
           vehicle_colour: formData.vehColour,
           vehicle_vin: formData.vehVin,
           vehicle_mileage: formData.vehMileage,
+          has_part_exchange: formData.hasPartExchange,
+          px_vehicle: formData.hasPartExchange ? {
+            make: formData.pxMake,
+            model: formData.pxModel,
+            reg: formData.pxReg,
+            colour: formData.pxColour,
+            vin: formData.pxVin,
+            mileage: formData.pxMileage,
+            price: formData.pxPrice
+          } : null,
+          px_price: formData.hasPartExchange ? formData.pxPrice : '',
           retail_price: formData.retailPrice,
           delivery_cost: formData.deliveryCost,
           warranty: formData.warranty,
@@ -509,6 +555,149 @@ const FNTFinanceInvoiceForm: React.FC<FNTFinanceInvoiceFormProps> = ({ onClose, 
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
                     placeholder="50000"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Part Exchange Vehicle */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">Part Exchange</h4>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-3">
+                  Is the customer trading a vehicle in?
+                </p>
+                <div className="inline-flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setPartExchange(false)}
+                    className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      !formData.hasPartExchange
+                        ? 'bg-fnt-red text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    No Part Exchange
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPartExchange(true)}
+                    className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      formData.hasPartExchange
+                        ? 'bg-fnt-red text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Part Exchange
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {formData.hasPartExchange
+                    ? 'The part exchange appears beside the vehicle on the invoice and the allowance is deducted from the balance to finance.'
+                    : 'The part exchange section is left off the invoice entirely.'}
+                </p>
+              </div>
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${formData.hasPartExchange ? '' : 'hidden'}`}>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Make
+                  </label>
+                  <input
+                    type="text"
+                    name="pxMake"
+                    value={formData.pxMake}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="Audi"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Model
+                  </label>
+                  <input
+                    type="text"
+                    name="pxModel"
+                    value={formData.pxModel}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="A4"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Registration
+                  </label>
+                  <input
+                    type="text"
+                    name="pxReg"
+                    value={formData.pxReg}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="XY34 ZAB"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Colour
+                  </label>
+                  <input
+                    type="text"
+                    name="pxColour"
+                    value={formData.pxColour}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="Silver"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    VIN
+                  </label>
+                  <input
+                    type="text"
+                    name="pxVin"
+                    value={formData.pxVin}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="WAUZZZ8E8AA123456"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Mileage
+                  </label>
+                  <input
+                    type="text"
+                    name="pxMileage"
+                    value={formData.pxMileage}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                    placeholder="75000"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Part Exchange Price
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold">£</span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      name="pxPrice"
+                      value={formData.pxPrice}
+                      onChange={handleInputChange}
+                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                      placeholder="5000"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">This amount will be deducted from the total due</p>
                 </div>
               </div>
             </div>
