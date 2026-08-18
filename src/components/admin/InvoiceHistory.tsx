@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit } from 'lucide-react';
+import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit, Paperclip } from 'lucide-react';
 import { getInvoicesByType, deleteInvoice, getSignedInvoiceUrl, type InvoiceType, type Invoice } from '../../lib/invoiceUtils';
+import { deleteSignedTerms, listSignedTerms, type SignedTermsRecord } from '../../lib/signedTerms';
 import { useToast } from '../ui/ToastContainer';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import SignedTermsDialog from './SignedTermsDialog';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
@@ -45,6 +47,8 @@ const InvoiceHistory: React.FC = () => {
   });
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [pendingPdfId, setPendingPdfId] = useState<string | null>(null);
+  const [signedTerms, setSignedTerms] = useState<Map<string, SignedTermsRecord>>(new Map());
+  const [termsFor, setTermsFor] = useState<Invoice | null>(null);
   const { showToast } = useToast();
 
   // Stored invoices live in a private bucket, so opening one means asking
@@ -73,6 +77,10 @@ const InvoiceHistory: React.FC = () => {
     } else {
       window.open(signedUrl, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  const loadSignedTerms = async () => {
+    setSignedTerms(await listSignedTerms());
   };
 
   // Load invoices for the active tab
@@ -177,9 +185,15 @@ const InvoiceHistory: React.FC = () => {
 
     const success = await deleteInvoice(deleteConfirm.invoice.id, deleteConfirm.invoice.pdf_url);
     if (success) {
+      // The signed terms carry a signature and a home address, so they go with
+      // the invoice rather than being left behind in storage.
+      if (signedTerms.has(deleteConfirm.invoice.invoice_number)) {
+        await deleteSignedTerms(deleteConfirm.invoice.invoice_number);
+      }
       showToast(`Invoice ${deleteConfirm.invoice.invoice_number} deleted successfully`, 'success');
       loadInvoices(); // Reload current tab invoices
       loadAllCounts(); // Reload all counts to update all tab badges
+      loadSignedTerms();
     } else {
       showToast('Failed to delete invoice. Please try again.', 'error');
     }
@@ -188,6 +202,7 @@ const InvoiceHistory: React.FC = () => {
   // Load all counts on mount
   useEffect(() => {
     loadAllCounts();
+    loadSignedTerms();
   }, []);
 
   // Load invoices when tab changes
@@ -249,6 +264,7 @@ const InvoiceHistory: React.FC = () => {
             onClick={() => {
               loadInvoices();
               loadAllCounts();
+              loadSignedTerms();
             }}
             className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
           >
@@ -332,22 +348,22 @@ const InvoiceHistory: React.FC = () => {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Invoice #
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Vehicle
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Total
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -382,25 +398,34 @@ const InvoiceHistory: React.FC = () => {
                   
                   // Regular invoice row
                   const invoice = item.data;
+                  const terms = signedTerms.get(invoice.invoice_number);
                   return (
                     <tr key={invoice.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTabColor(invoice.invoice_type)}`}>
                             {invoice.invoice_number}
                           </span>
                         </div>
+                        <div className="sm:hidden mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(invoice.invoice_date)}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                      <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                         {formatDate(invoice.invoice_date)}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 sm:px-6 py-4">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{invoice.customer_name}</div>
                         {invoice.customer_phone && (
                           <div className="text-xs text-gray-500 dark:text-gray-400">{invoice.customer_phone}</div>
                         )}
+                        {(invoice.vehicle_reg || invoice.vehicle_make || invoice.vehicle_model) && (
+                          <div className="lg:hidden text-xs text-gray-500 dark:text-gray-400">
+                            {invoice.vehicle_reg || [invoice.vehicle_make, invoice.vehicle_model].filter(Boolean).join(' ')}
+                          </div>
+                        )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="hidden lg:table-cell px-6 py-4">
                         {invoice.vehicle_make || invoice.vehicle_model ? (
                           <div>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -414,11 +439,24 @@ const InvoiceHistory: React.FC = () => {
                           <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
+                      <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
                         {formatCurrency(invoice.total_amount)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <div className="flex items-center justify-end space-x-2">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm">
+                        <div className="flex items-center justify-end space-x-1 sm:space-x-2">
+                          {/* Signed terms — a filled chip marks the ones on file */}
+                          <button
+                            onClick={() => setTermsFor(invoice)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              terms
+                                ? 'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/60 hover:bg-green-200 dark:hover:bg-green-900'
+                                : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                            title={terms ? 'Signed terms attached' : 'Attach signed terms'}
+                          >
+                            <Paperclip className="w-4 h-4" />
+                          </button>
+
                           {/* Edit */}
                           <button
                             onClick={() => setEditingInvoice(invoice)}
@@ -478,6 +516,11 @@ const InvoiceHistory: React.FC = () => {
               <span className="font-semibold text-gray-900 dark:text-white">{allInvoices.length}</span>
               {' '}invoice{allInvoices.length !== 1 ? 's' : ''}
               {searchTerm.trim() ? ' (filtered)' : ''}
+              <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {filteredInvoices.filter((inv) => signedTerms.has(inv.invoice_number)).length}
+              </span>
+              {' '}with signed terms
             </div>
             <div>
               Total value{searchTerm.trim() ? ' (visible)' : ''}:{' '}
@@ -500,6 +543,17 @@ const InvoiceHistory: React.FC = () => {
         onConfirm={confirmDelete}
         onCancel={() => setDeleteConfirm({ isOpen: false, invoice: null })}
       />
+
+      {/* Signed Terms */}
+      {termsFor && (
+        <SignedTermsDialog
+          invoiceNumber={termsFor.invoice_number}
+          customerName={termsFor.customer_name}
+          existing={signedTerms.get(termsFor.invoice_number)}
+          onClose={() => setTermsFor(null)}
+          onChanged={loadSignedTerms}
+        />
+      )}
 
       {/* Edit Forms */}
       {editingInvoice && editingInvoice.invoice_type === 'fnt_sale' && (
