@@ -19,6 +19,7 @@ import {
   sectionHeading,
   signatureLine,
   textBlock,
+  wrapText,
   type Ctx,
 } from './pdfKit';
 
@@ -210,6 +211,29 @@ export function drawVehiclePair(
   const leftBottom = column(left.heading, left.vehicle, MARGIN.left);
   const rightBottom = column(right.heading, right.vehicle, COL_RIGHT_X);
   return Math.min(leftBottom, rightBottom) - gap;
+}
+
+/**
+ * A short free-text note across the full width, for anything that has to be
+ * stated on the invoice itself — most often a fault disclosed at the point of
+ * sale. Set a little darker than body copy so it is not skimmed past.
+ */
+export function drawNoteSection(
+  ctx: Ctx,
+  heading: string,
+  note: string,
+  top: number,
+  gap: number,
+): number {
+  const size = TYPE.value;
+  let y = sectionHeading(ctx, heading, MARGIN.left, top, CONTENT_WIDTH);
+
+  for (const line of wrapText(ctx.regular, note, size, CONTENT_WIDTH)) {
+    drawText(ctx, line, { x: MARGIN.left, y: y - size, size, font: ctx.regular, color: COLOR.heading });
+    y -= size + 4.6;
+  }
+
+  return y - gap;
 }
 
 export interface SummaryRow {

@@ -50,7 +50,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
         depositPaid: meta.deposit_paid || '',
         totalDue: editInvoice.total_amount?.toString() || '',
         buyerSignature: meta.buyer_signature || '',
-        paymentMethod: meta.payment_method || ''
+        paymentMethod: meta.payment_method || '',
+        notes: meta.notes || ''
       };
     }
     
@@ -82,7 +83,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
       depositPaid: '',
       totalDue: '',
       buyerSignature: '',
-      paymentMethod: ''
+      paymentMethod: '',
+      notes: ''
     };
   };
 
@@ -173,6 +175,7 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
           depositPaid: formData.depositPaid,
           totalDue: formData.totalDue,
           buyerSignature: formData.buyerSignature,
+          notes: formData.notes,
         },
         { logo },
       );
@@ -226,7 +229,8 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
           deposit_paid: formData.depositPaid,
           px_price: formData.hasPartExchange ? formData.pxPrice : '',
           buyer_signature: formData.buyerSignature,
-          payment_method: formData.paymentMethod
+          payment_method: formData.paymentMethod,
+          notes: formData.notes
         }
       };
 
@@ -503,6 +507,26 @@ const FNTSaleInvoiceForm: React.FC<FNTSaleInvoiceFormProps> = ({ onClose, editIn
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Notes */}
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b">
+                Notes <span className="text-sm font-normal text-gray-500">(optional, shown on the invoice)</span>
+              </h4>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows={2}
+                maxLength={200}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent"
+                placeholder="e.g. Sold with a known engine fault, which has been explained to the buyer."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Use this to record a fault or anything else agreed about the vehicle. Keep it to a
+                sentence or two &mdash; it appears under the vehicle details on the invoice.
+              </p>
             </div>
 
             {/* Part Exchange Vehicle */}

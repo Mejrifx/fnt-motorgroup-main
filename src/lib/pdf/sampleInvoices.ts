@@ -49,6 +49,7 @@ async function buildSelling(): Promise<Uint8Array> {
       warrantyType: '12 Month Extended Warranty',
       depositPaid: '1000',
       totalDue: '13744',
+      notes: 'Sold with a known engine management fault, which has been explained to and accepted by the buyer.',
     },
     { logo: await loadBrandLogo(FNT_BRAND) },
   );

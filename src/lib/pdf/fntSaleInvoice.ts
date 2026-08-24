@@ -6,6 +6,7 @@ import {
   brandParty,
   createCtx,
   drawBankDetails,
+  drawNoteSection,
   drawPartyPair,
   drawSignaturePair,
   drawSummary,
@@ -47,6 +48,12 @@ export interface SaleInvoiceInput {
   depositPaid?: string;
   totalDue: string;
   buyerSignature?: string;
+  /** Stated on the invoice, typically a fault disclosed at the point of sale. */
+  notes?: string;
+}
+
+function noteText(input: SaleInvoiceInput): string {
+  return (input.notes || '').trim();
 }
 
 function includesPartExchange(input: SaleInvoiceInput): boolean {
@@ -126,6 +133,13 @@ function drawBody(ctx: Ctx, input: SaleInvoiceInput, logo: PDFImage | null, gap:
     }, y, gap);
   }
 
+  // Directly under the vehicle, so a disclosed fault reads as being about the car
+  // rather than as a footnote to the payment.
+  const note = noteText(input);
+  if (note) {
+    y = drawNoteSection(ctx, 'Notes', note, y, gap);
+  }
+
   const bankBottom = drawBankDetails(ctx, y);
   const summaryBottom = drawSummary(
     ctx,
@@ -146,7 +160,7 @@ export async function buildFNTSaleInvoice(
   const layout = await balanceLayout({
     brand,
     assets,
-    gapCount: includesPartExchange(input) ? 4 : 3,
+    gapCount: 3 + (includesPartExchange(input) ? 1 : 0) + (noteText(input) ? 1 : 0),
     render: (ctx, logo, gap) => drawBody(ctx, input, logo, gap),
   });
 
