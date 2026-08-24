@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, FileText, XCircle } from 'lucide-react';
+import { Plus, FileText, Mail, XCircle } from 'lucide-react';
 import TNTInvoiceForm from './TNTInvoiceForm';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
+import FNTLetterForm from './FNTLetterForm';
 import { createSampleInvoiceURL, type SampleInvoiceType } from '../../lib/pdf/sampleInvoices';
 import type { Invoice } from '../../lib/invoiceUtils';
 
@@ -28,6 +29,7 @@ const InvoiceManager = () => {
   const [showFNTSaleForm, setShowFNTSaleForm] = useState(false);
   const [showFNTPurchaseForm, setShowFNTPurchaseForm] = useState(false);
   const [showFNTFinanceForm, setShowFNTFinanceForm] = useState(false);
+  const [showFNTLetterForm, setShowFNTLetterForm] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [buildingSample, setBuildingSample] = useState<SampleInvoiceType | null>(null);
 
@@ -117,6 +119,9 @@ const InvoiceManager = () => {
       case 'tnt_service':
         setShowTNTForm(true);
         break;
+      case 'fnt_letter':
+        setShowFNTLetterForm(true);
+        break;
     }
   };
 
@@ -155,6 +160,14 @@ const InvoiceManager = () => {
       {showFNTFinanceForm && (
         <FNTFinanceInvoiceForm 
           onClose={() => handleCloseForm(setShowFNTFinanceForm)} 
+          editInvoice={editingInvoice}
+        />
+      )}
+
+      {/* FNT Letter Form */}
+      {showFNTLetterForm && (
+        <FNTLetterForm
+          onClose={() => handleCloseForm(setShowFNTLetterForm)}
           editInvoice={editingInvoice}
         />
       )}
@@ -456,6 +469,47 @@ const InvoiceManager = () => {
         </div>
       </div>
 
+      {/* Letters — not an invoice, so it sits in its own section */}
+      <div className="admin-glass-card !rounded-xl p-6 mb-6 hover:!border-fnt-red transition-all">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+          <div className="flex items-center space-x-3 flex-1">
+            <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              <Mail className="w-8 h-8 text-fnt-red" />
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-gray-900 dark:text-white">FNT Letter</h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Put agreements and confirmations in writing on FNT letterhead
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Work agreed after a sale, goodwill repairs, deposits, collection arrangements, or
+                anything a customer asks for in writing. Templates to start from, with an optional
+                signature block for both parties.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 lg:w-auto">
+            <button
+              onClick={() => setShowFNTLetterForm(true)}
+              className="flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2.5 rounded-lg transition-all font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Write Letter</span>
+            </button>
+
+            <button
+              onClick={() => viewSample('letter')}
+              disabled={buildingSample !== null}
+              className="flex items-center justify-center space-x-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed px-4 py-2.5 rounded-lg transition-colors font-semibold"
+            >
+              <FileText className="w-4 h-4" />
+              <span>{buildingSample === 'letter' ? 'Building...' : 'View Sample'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Info */}
       <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div className="flex items-start space-x-3">
@@ -472,6 +526,8 @@ const InvoiceManager = () => {
               <strong>Finance Invoice:</strong> Use when billing finance companies (e.g., Santander, Black Horse). Includes finance company details and settlement amount.
               <br />
               <strong>TNT Services Invoice:</strong> Use for TNT Services business operations. Includes service details and pricing.
+              <br />
+              <strong>FNT Letter:</strong> Use when something needs to be confirmed in writing rather than invoiced, such as work agreed after a sale.
             </p>
           </div>
         </div>

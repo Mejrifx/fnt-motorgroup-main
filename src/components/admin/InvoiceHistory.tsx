@@ -9,6 +9,7 @@ import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
 import TNTInvoiceForm from './TNTInvoiceForm';
+import FNTLetterForm from './FNTLetterForm';
 
 // Invoice interface now imported from invoiceUtils
 
@@ -43,7 +44,8 @@ const InvoiceHistory: React.FC = () => {
     fnt_sale: 0,
     fnt_purchase: 0,
     fnt_finance: 0,
-    tnt_service: 0
+    tnt_service: 0,
+    fnt_letter: 0
   });
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [pendingPdfId, setPendingPdfId] = useState<string | null>(null);
@@ -98,12 +100,13 @@ const InvoiceHistory: React.FC = () => {
 
   // Load counts for all invoice types
   const loadAllCounts = async () => {
-    const types: InvoiceType[] = ['fnt_sale', 'fnt_purchase', 'fnt_finance', 'tnt_service'];
+    const types: InvoiceType[] = ['fnt_sale', 'fnt_purchase', 'fnt_finance', 'tnt_service', 'fnt_letter'];
     const counts: Record<InvoiceType, number> = {
       fnt_sale: 0,
       fnt_purchase: 0,
       fnt_finance: 0,
-      tnt_service: 0
+      tnt_service: 0,
+      fnt_letter: 0
     };
 
     for (const type of types) {
@@ -113,6 +116,11 @@ const InvoiceHistory: React.FC = () => {
 
     setInvoiceCounts(counts);
   };
+
+  // Letters carry no money, so the money column and total would only ever read
+  // as zero on that tab.
+  const showTotals = activeTab !== 'fnt_letter';
+  const columnCount = showTotals ? 6 : 5;
 
   const filteredInvoices = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
@@ -233,6 +241,7 @@ const InvoiceHistory: React.FC = () => {
       case 'fnt_purchase': return 'FNT Purchases';
       case 'fnt_finance': return 'FNT Finance';
       case 'tnt_service': return 'TNT Services';
+      case 'fnt_letter': return 'FNT Letters';
     }
   };
 
@@ -243,6 +252,7 @@ const InvoiceHistory: React.FC = () => {
       case 'fnt_purchase': return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'fnt_finance': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'tnt_service': return 'bg-purple-100 text-purple-800 border-purple-300';
+      case 'fnt_letter': return 'bg-red-100 text-red-800 border-red-300';
     }
   };
 
@@ -275,12 +285,12 @@ const InvoiceHistory: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700">
-        {(['fnt_sale', 'fnt_purchase', 'fnt_finance', 'tnt_service'] as InvoiceType[]).map((type) => (
+      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        {(['fnt_sale', 'fnt_purchase', 'fnt_finance', 'tnt_service', 'fnt_letter'] as InvoiceType[]).map((type) => (
           <button
             key={type}
             onClick={() => setActiveTab(type)}
-            className={`px-6 py-3 font-semibold transition-all ${
+            className={`px-4 sm:px-6 py-3 font-semibold transition-all whitespace-nowrap ${
               activeTab === type
                 ? 'border-b-2 border-fnt-red text-fnt-red'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -360,9 +370,11 @@ const InvoiceHistory: React.FC = () => {
                   <th className="hidden lg:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Vehicle
                   </th>
-                  <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Total
-                  </th>
+                  {showTotals && (
+                    <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      Total
+                    </th>
+                  )}
                   <th className="px-3 sm:px-6 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
@@ -374,7 +386,7 @@ const InvoiceHistory: React.FC = () => {
                     // Month separator row
                     return (
                       <tr key={`month-${item.data.monthYear}`} className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-t-2 border-b-2 border-gray-300 dark:border-gray-600">
-                        <td colSpan={6} className="px-6 py-3">
+                        <td colSpan={columnCount} className="px-6 py-3">
                           <div className="flex items-center space-x-3">
                             <div className="flex-shrink-0 w-1 h-6 bg-fnt-red rounded-full"></div>
                             <div className="flex items-center space-x-3">
@@ -439,9 +451,11 @@ const InvoiceHistory: React.FC = () => {
                           <span className="text-sm text-gray-400 dark:text-gray-500">—</span>
                         )}
                       </td>
-                      <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
-                        {formatCurrency(invoice.total_amount)}
-                      </td>
+                      {showTotals && (
+                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
+                          {formatCurrency(invoice.total_amount)}
+                        </td>
+                      )}
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm">
                         <div className="flex items-center justify-end space-x-1 sm:space-x-2">
                           {/* Signed terms — a filled chip marks the ones on file */}
@@ -514,7 +528,7 @@ const InvoiceHistory: React.FC = () => {
               <span className="font-semibold text-gray-900 dark:text-white">{filteredInvoices.length}</span>
               {' '}of{' '}
               <span className="font-semibold text-gray-900 dark:text-white">{allInvoices.length}</span>
-              {' '}invoice{allInvoices.length !== 1 ? 's' : ''}
+              {' '}{showTotals ? 'invoice' : 'letter'}{allInvoices.length !== 1 ? 's' : ''}
               {searchTerm.trim() ? ' (filtered)' : ''}
               <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
               <span className="font-semibold text-gray-900 dark:text-white">
@@ -522,12 +536,14 @@ const InvoiceHistory: React.FC = () => {
               </span>
               {' '}with signed terms
             </div>
-            <div>
-              Total value{searchTerm.trim() ? ' (visible)' : ''}:{' '}
-              <span className="font-semibold text-gray-900 dark:text-white">
-                {formatCurrency(filteredInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0))}
-              </span>
-            </div>
+            {showTotals && (
+              <div>
+                Total value{searchTerm.trim() ? ' (visible)' : ''}:{' '}
+                <span className="font-semibold text-gray-900 dark:text-white">
+                  {formatCurrency(filteredInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0))}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -596,6 +612,17 @@ const InvoiceHistory: React.FC = () => {
             loadInvoices();
             loadAllCounts();
           }} 
+          editInvoice={editingInvoice}
+        />
+      )}
+
+      {editingInvoice && editingInvoice.invoice_type === 'fnt_letter' && (
+        <FNTLetterForm
+          onClose={() => {
+            setEditingInvoice(null);
+            loadInvoices();
+            loadAllCounts();
+          }}
           editInvoice={editingInvoice}
         />
       )}

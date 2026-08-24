@@ -4,8 +4,10 @@ import { buildFNTSaleInvoice } from './fntSaleInvoice';
 import { buildFNTPurchaseInvoice } from './fntPurchaseInvoice';
 import { buildFNTFinanceInvoice } from './fntFinanceInvoice';
 import { buildTNTServiceInvoice } from './tntServiceInvoice';
+import { buildFNTLetter } from './fntLetter';
+import { letterTemplate } from './letterTemplates';
 
-export type SampleInvoiceType = 'selling' | 'purchase' | 'finance' | 'tnt';
+export type SampleInvoiceType = 'selling' | 'purchase' | 'finance' | 'tnt' | 'letter';
 
 /**
  * Samples are built by the same functions that produce real invoices, so the
@@ -141,11 +143,36 @@ async function buildTNT(): Promise<Uint8Array> {
   );
 }
 
+async function buildLetter(): Promise<Uint8Array> {
+  const template = letterTemplate('agreed_works');
+  return buildFNTLetter(
+    {
+      letterNumber: 'FNT-L-SAMPLE',
+      letterDate: SAMPLE_DATE,
+      recipientName: 'Sample Customer',
+      recipientAddress: '1 Sample Street, Manchester, M1 1AA',
+      subject: template.subject,
+      vehMake: SAMPLE_VEHICLE.vehMake,
+      vehModel: SAMPLE_VEHICLE.vehModel,
+      vehReg: SAMPLE_VEHICLE.vehReg,
+      body: template.body,
+      itemsHeading: template.itemsHeading,
+      items: template.items,
+      closing: template.closing,
+      signedByName: 'Sample Signatory',
+      signedByRole: 'FNT Motor Group',
+      requireCustomerSignature: template.requireCustomerSignature,
+    },
+    { logo: await loadBrandLogo(FNT_BRAND) },
+  );
+}
+
 const BUILDERS: Record<SampleInvoiceType, () => Promise<Uint8Array>> = {
   selling: buildSelling,
   purchase: buildPurchase,
   finance: buildFinance,
   tnt: buildTNT,
+  letter: buildLetter,
 };
 
 /** A blob URL for a sample of the given invoice type. Callers must revoke it. */

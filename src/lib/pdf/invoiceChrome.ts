@@ -9,7 +9,7 @@ import {
 } from './invoiceTheme';
 import { drawText, rule, type Ctx } from './pdfKit';
 
-const ACCENT_BAR_HEIGHT = 5;
+export const ACCENT_BAR_HEIGHT = 5;
 const LOGO_WIDTH = 116;
 /** Square marks (the TNT logo) are held back so they don't dominate the header. */
 const SQUARE_LOGO_WIDTH = 74;
@@ -26,7 +26,7 @@ export function drawAccentBar(ctx: Ctx): void {
 }
 
 /** Logo top-right, aligned with the document title. Returns its bottom edge. */
-function drawLogo(ctx: Ctx, logo: PDFImage | null, top: number): number {
+export function drawBrandMark(ctx: Ctx, logo: PDFImage | null, top: number): number {
   if (!logo) return top;
   const isSquarish = logo.width / logo.height < 1.2;
   const targetWidth = isSquarish ? SQUARE_LOGO_WIDTH : LOGO_WIDTH;
@@ -56,7 +56,7 @@ export function drawHeader(ctx: Ctx, options: HeaderOptions): number {
   drawAccentBar(ctx);
 
   const top = PAGE.height - ACCENT_BAR_HEIGHT - MARGIN.top;
-  const logoBottom = drawLogo(ctx, options.logo, top);
+  const logoBottom = drawBrandMark(ctx, options.logo, top);
 
   const titleBaseline = top - TYPE.title;
   drawText(ctx, options.title.toUpperCase(), {

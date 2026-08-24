@@ -7,6 +7,8 @@ import { buildFNTSaleInvoice, type SaleInvoiceInput } from '../src/lib/pdf/fntSa
 import { buildFNTPurchaseInvoice, type PurchaseInvoiceInput } from '../src/lib/pdf/fntPurchaseInvoice';
 import { buildFNTFinanceInvoice, type FinanceInvoiceInput } from '../src/lib/pdf/fntFinanceInvoice';
 import { buildTNTServiceInvoice, type TNTInvoiceInput } from '../src/lib/pdf/tntServiceInvoice';
+import { buildFNTLetter, type LetterInput } from '../src/lib/pdf/fntLetter';
+import { letterTemplate } from '../src/lib/pdf/letterTemplates';
 
 const OUT_DIR = '/tmp/invoice-preview';
 
@@ -148,6 +150,46 @@ const tnt: TNTInvoiceInput = {
   grandTotal: '550',
 };
 
+const agreedWorks = letterTemplate('agreed_works');
+
+const letter: LetterInput = {
+  letterNumber: 'FNT-L-007',
+  letterDate: '2026-08-22',
+  recipientName: 'Christopher Gelder',
+  recipientAddress: '170 Lockbridge Way, Huddersfield, HD3 4NJ',
+  subject: agreedWorks.subject,
+  vehMake: 'BMW',
+  vehModel: '3 Series 320d M Sport Touring',
+  vehReg: 'FD17CCO',
+  body: agreedWorks.body,
+  itemsHeading: agreedWorks.itemsHeading,
+  items: agreedWorks.items,
+  closing: agreedWorks.closing,
+  signedByName: 'Faisal Mejri',
+  signedByRole: 'FNT Motor Group',
+  requireCustomerSignature: true,
+};
+
+/** A letter long enough to need a second page, to check the break and the sign-off. */
+const letterLong: LetterInput = {
+  ...letter,
+  letterNumber: 'FNT-L-008',
+  subject: 'Confirmation of Agreed Rectification Work and Contribution Towards Repair Costs',
+  body: Array.from({ length: 6 })
+    .map(
+      (_, index) =>
+        `Paragraph ${index + 1}. Thank you for taking the time to speak with us about the vehicle detailed above. We want to be certain that everything we discussed is recorded properly, so this letter sets out the position in full and confirms what happens next, including who is responsible for each item and the timescales we expect to work to.`,
+    )
+    .join('\n\n'),
+  items: [
+    "Replace the driver's side wing mirror, including the indicator lens and the painted cover",
+    'Supply a spare tyre of the correct size, together with a jack and wheel brace',
+    'Investigate and rectify the intermittent noise reported from the front suspension',
+    'Carry out a full service, including oil, filters and a brake fluid change',
+    'Provide a courtesy vehicle for the duration of the work where one is available',
+  ],
+};
+
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   const fntLogo = readFileSync('public/FNT Invoice Logo.png');
@@ -160,6 +202,8 @@ async function main() {
     ['finance', () => buildFNTFinanceInvoice(finance, { logo: fntLogo })],
     ['finance-with-part-exchange', () => buildFNTFinanceInvoice(financeWithPartExchange, { logo: fntLogo })],
     ['tnt-service', () => buildTNTServiceInvoice(tnt, { logo: tntLogo })],
+    ['letter-agreed-works', () => buildFNTLetter(letter, { logo: fntLogo })],
+    ['letter-two-page', () => buildFNTLetter(letterLong, { logo: fntLogo })],
   ];
 
   for (const [name, build] of jobs) {

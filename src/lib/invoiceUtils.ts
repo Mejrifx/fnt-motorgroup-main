@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-export type InvoiceType = 'fnt_sale' | 'fnt_purchase' | 'fnt_finance' | 'tnt_service';
+export type InvoiceType = 'fnt_sale' | 'fnt_purchase' | 'fnt_finance' | 'tnt_service' | 'fnt_letter';
 
 export interface InvoiceData {
   invoice_number: string;
@@ -32,6 +32,7 @@ export async function generateInvoiceNumber(type: InvoiceType): Promise<string> 
     const prefix = type === 'fnt_sale' ? 'FNT-S-' : 
                    type === 'fnt_purchase' ? 'FNT-P-' : 
                    type === 'fnt_finance' ? 'FNT-F-' :
+                   type === 'fnt_letter' ? 'FNT-L-' :
                    'TNT-';
 
     // Query the last invoice of this type
@@ -64,6 +65,7 @@ export async function generateInvoiceNumber(type: InvoiceType): Promise<string> 
     return type === 'fnt_sale' ? 'FNT-S-001' : 
            type === 'fnt_purchase' ? 'FNT-P-001' : 
            type === 'fnt_finance' ? 'FNT-F-001' :
+           type === 'fnt_letter' ? 'FNT-L-001' :
            'TNT-001';
   }
 }
@@ -142,6 +144,7 @@ export async function uploadInvoicePDF(
     const folder = type === 'fnt_sale' ? 'fnt-sales' : 
                    type === 'fnt_purchase' ? 'fnt-purchases' : 
                    type === 'fnt_finance' ? 'fnt-finance' :
+                   type === 'fnt_letter' ? 'fnt-letters' :
                    'tnt-services';
 
     const fileName = `${invoiceNumber}.pdf`;
