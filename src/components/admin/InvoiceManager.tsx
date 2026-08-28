@@ -446,6 +446,12 @@ const InvoiceManager = () => {
               </svg>
               <span>Service price & terms</span>
             </div>
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Optional proof of work photos</span>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">
@@ -525,7 +531,7 @@ const InvoiceManager = () => {
               <br />
               <strong>Finance Invoice:</strong> Use when billing finance companies (e.g., Santander, Black Horse). Includes finance company details and settlement amount.
               <br />
-              <strong>TNT Services Invoice:</strong> Use for TNT Services business operations. Includes service details and pricing.
+              <strong>TNT Services Invoice:</strong> Use for TNT Services business operations. Includes service details and pricing, and can carry a proof of work page of job photos.
               <br />
               <strong>FNT Letter:</strong> Use when something needs to be confirmed in writing rather than invoiced, such as work agreed after a sale.
             </p>

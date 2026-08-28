@@ -1,5 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import { supabase } from './supabase';
+import { imageToJpeg } from './imagePrep';
 import { PAGE } from './pdf/invoiceTheme';
 
 /**
@@ -18,9 +19,9 @@ const BUCKET = 'invoices';
 const FOLDER = 'signed-terms';
 const SIGNED_URL_TTL_SECONDS = 300;
 
-/** Photos are downscaled to keep a multi-page scan a sensible size. */
-const MAX_IMAGE_EDGE = 2200;
-const JPEG_QUALITY = 0.82;
+/** Photos are downscaled to keep a multi-page scan a sensible size, but stay
+ * legible enough to read a handwritten signature and any pen amendments. */
+const JPEG_OPTIONS = { maxEdge: 2200, quality: 0.82 };
 /** Whitespace around a photo placed on an A4 page. */
 const PAGE_PADDING = 24;
 
@@ -116,32 +117,6 @@ function isPdf(file: File): boolean {
 }
 
 /**
- * Re-encodes a picked image as a modest JPEG. Going via a canvas also applies
- * the EXIF rotation and converts formats the PDF writer cannot embed directly,
- * such as the HEIC an iPhone may hand over.
- */
-async function toJpeg(file: File): Promise<Uint8Array> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-
-  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('Could not prepare the image for conversion.');
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY),
-  );
-  if (!blob) throw new Error('Could not convert the image.');
-
-  return new Uint8Array(await blob.arrayBuffer());
-}
-
-/**
  * Turns the picked files into one PDF. A single PDF is passed through untouched
  * so a scan made by the phone's own document scanner keeps its quality; images
  * are laid out one per A4 page in the order they were added.
@@ -164,7 +139,7 @@ export async function filesToPdf(files: File[]): Promise<Blob> {
   for (const file of files) {
     let jpeg: Uint8Array;
     try {
-      jpeg = await toJpeg(file);
+      jpeg = await imageToJpeg(file, JPEG_OPTIONS);
     } catch (error) {
       console.error('Could not read the picked image:', error);
       // Most often a HEIC taken on an iPhone being attached from a browser that

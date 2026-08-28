@@ -103,7 +103,56 @@ async function buildFinance(): Promise<Uint8Array> {
   );
 }
 
+/**
+ * Stand-in photographs for the sample proof-of-work page. Drawn here and plainly
+ * marked as samples, rather than shipping real job photos in the bundle, so the
+ * sample can never be mistaken for a genuine record of work.
+ */
+async function samplePhoto(label: string, portrait: boolean): Promise<Uint8Array> {
+  const canvas = document.createElement('canvas');
+  canvas.width = portrait ? 900 : 1200;
+  canvas.height = portrait ? 1200 : 900;
+
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Could not draw the sample photo.');
+
+  const backdrop = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+  backdrop.addColorStop(0, '#4b5563');
+  backdrop.addColorStop(1, '#1f2937');
+  context.fillStyle = backdrop;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  context.textAlign = 'center';
+  context.fillStyle = 'rgba(255,255,255,0.92)';
+  context.font = `bold ${Math.round(canvas.width / 12)}px Helvetica, Arial, sans-serif`;
+  context.fillText('SAMPLE', canvas.width / 2, canvas.height / 2);
+  context.fillStyle = 'rgba(255,255,255,0.6)';
+  context.font = `${Math.round(canvas.width / 26)}px Helvetica, Arial, sans-serif`;
+  context.fillText(label, canvas.width / 2, canvas.height / 2 + canvas.width / 13);
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/jpeg', 0.7),
+  );
+  if (!blob) throw new Error('Could not draw the sample photo.');
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+const SAMPLE_PROOF = [
+  { caption: 'Front discs and pads removed', takenAt: `${SAMPLE_DATE}T09:42:00`, portrait: false },
+  { caption: 'New discs fitted and torqued', takenAt: `${SAMPLE_DATE}T10:15:00`, portrait: false },
+  { caption: 'Tyres fitted and balanced', takenAt: `${SAMPLE_DATE}T11:03:00`, portrait: true },
+  { caption: 'Vehicle finished and valeted', takenAt: `${SAMPLE_DATE}T12:30:00`, portrait: false },
+];
+
 async function buildTNT(): Promise<Uint8Array> {
+  const proofPhotos = await Promise.all(
+    SAMPLE_PROOF.map(async (photo, index) => ({
+      bytes: await samplePhoto(`PHOTOGRAPH ${index + 1}`, photo.portrait),
+      caption: photo.caption,
+      takenAt: photo.takenAt,
+    })),
+  );
+
   return buildTNTServiceInvoice(
     {
       invoiceNumber: 'TNT-SAMPLE',
@@ -139,6 +188,7 @@ async function buildTNT(): Promise<Uint8Array> {
       subtotal: '535',
       discount: '35',
       grandTotal: '500',
+      proofPhotos,
     },
     { logo: await loadBrandLogo(TNT_BRAND) },
   );

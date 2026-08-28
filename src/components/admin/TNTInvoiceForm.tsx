@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Download, FileText, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera, Download, FileText, XCircle } from 'lucide-react';
 import { generateInvoiceNumber, uploadInvoicePDF, saveInvoiceToDatabase, updateInvoiceInDatabase, type Invoice } from '../../lib/invoiceUtils';
 import { buildTNTServiceInvoice } from '../../lib/pdf/tntServiceInvoice';
 import { loadBrandLogo } from '../../lib/pdf/invoiceSections';
 import { TNT_BRAND } from '../../lib/pdf/invoiceTheme';
+import {
+  downloadProofPhoto,
+  proofMetadata,
+  readStoredProofPhotos,
+  saveProofPhotos,
+} from '../../lib/proofPhotos';
+import ProofOfWorkPhotos, { type EditableProofPhoto } from './ProofOfWorkPhotos';
 import { useToast } from '../ui/ToastContainer';
 
 interface LineItem {
@@ -75,6 +82,18 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
 
   const [formData, setFormData] = useState(getInitialFormData());
   const [lineItems, setLineItems] = useState<LineItem[]>(getInitialLineItems());
+  const [proofEnabled, setProofEnabled] = useState(
+    () => readStoredProofPhotos(editInvoice?.metadata).length > 0,
+  );
+  const [proofPhotos, setProofPhotos] = useState<EditableProofPhoto[]>([]);
+  const [loadingProof, setLoadingProof] = useState(false);
+
+  // Thumbnails are blob URLs, so they are released when the form goes away.
+  const proofPhotosRef = useRef(proofPhotos);
+  proofPhotosRef.current = proofPhotos;
+  useEffect(() => () => {
+    proofPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -140,9 +159,59 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
     }
   }, [isEditMode]);
 
+  // Editing rebuilds the PDF from scratch, so the photos behind an existing
+  // proof of work are pulled back out of storage rather than being lost.
+  useEffect(() => {
+    const stored = readStoredProofPhotos(editInvoice?.metadata);
+    if (stored.length === 0) return;
+
+    let cancelled = false;
+    const urls: string[] = [];
+
+    const loadStoredPhotos = async () => {
+      setLoadingProof(true);
+      const loaded: EditableProofPhoto[] = [];
+
+      for (const photo of stored) {
+        const bytes = await downloadProofPhoto(photo.path);
+        if (!bytes) continue;
+        const previewUrl = URL.createObjectURL(
+          new Blob([bytes as unknown as BlobPart], { type: 'image/jpeg' }),
+        );
+        urls.push(previewUrl);
+        loaded.push({ id: photo.path, bytes, caption: photo.caption, takenAt: photo.takenAt, previewUrl });
+      }
+
+      if (cancelled) {
+        urls.forEach((url) => URL.revokeObjectURL(url));
+        return;
+      }
+
+      setProofPhotos(loaded);
+      setLoadingProof(false);
+
+      if (loaded.length < stored.length) {
+        showToast('Some proof-of-work photos could not be loaded. Check them before saving.', 'error');
+      }
+    };
+
+    loadStoredPhotos();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editInvoice?.id]);
+
+  const attachedPhotos = proofEnabled ? proofPhotos : [];
+
   const fillPDFForm = async () => {
     setIsGenerating(true);
     try {
+      // The photos are stored before the PDF is built, so the reference printed on
+      // the proof page always has the images it was derived from sitting on file.
+      // Saving an empty set also clears out anything a previous version attached.
+      const storedPhotos = await saveProofPhotos(formData.invoiceNumber, attachedPhotos);
+
       // The invoice is drawn from scratch rather than filled into a template, so
       // the output carries no form fields and cannot be edited or come out blank.
       const logo = await loadBrandLogo(TNT_BRAND);
@@ -159,6 +228,11 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
           subtotal: formData.subtotal,
           discount: formData.discount,
           grandTotal: formData.grandTotal,
+          proofPhotos: attachedPhotos.map((photo) => ({
+            bytes: photo.bytes,
+            caption: photo.caption,
+            takenAt: photo.takenAt,
+          })),
         },
         { logo },
       );
@@ -194,7 +268,8 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
           subtotal: formData.subtotal,
           discount: formData.discount,
           grand_total: formData.grandTotal,
-          payment_method: formData.paymentMethod
+          payment_method: formData.paymentMethod,
+          proof_of_work: storedPhotos.length ? proofMetadata(storedPhotos) : undefined
         }
       };
 
@@ -232,7 +307,10 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
       }, 500);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Error generating invoice. Please check the console for details.');
+      showToast(
+        error instanceof Error ? error.message : 'Error generating invoice. Please try again.',
+        'error',
+      );
       setIsGenerating(false);
     }
   };
@@ -468,6 +546,60 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* Proof of Work */}
+            <div className="mb-6">
+              <h4 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-4 pb-2 border-b">
+                <Camera className="w-5 h-5 text-fnt-red" />
+                Proof of Work
+              </h4>
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-3">
+                  Attach photos of the job to this invoice?
+                </p>
+                <div className="inline-flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setProofEnabled(false)}
+                    className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      !proofEnabled ? 'bg-fnt-red text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    No Proof of Work
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProofEnabled(true)}
+                    className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      proofEnabled ? 'bg-fnt-red text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Proof of Work
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  {proofEnabled
+                    ? 'The photos are added on their own page after the invoice, each labelled and stamped with the time it was taken.'
+                    : 'The invoice is a single page with no photos attached.'}
+                </p>
+              </div>
+
+              {proofEnabled && (
+                loadingProof ? (
+                  <div className="flex items-center gap-3 text-sm text-gray-600 py-6">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-fnt-red" />
+                    Loading the photos already on this invoice...
+                  </div>
+                ) : (
+                  <ProofOfWorkPhotos
+                    photos={proofPhotos}
+                    onChange={setProofPhotos}
+                    captionSuggestions={lineItems.map((item) => item.description)}
+                    disabled={isGenerating}
+                  />
+                )
+              )}
             </div>
 
             {/* Totals */}

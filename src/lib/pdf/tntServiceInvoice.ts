@@ -25,6 +25,13 @@ import {
   type SummaryRow,
 } from './invoiceSections';
 import { drawText, rule, sectionHeading, wrapText, type Ctx } from './pdfKit';
+import {
+  MAX_PROOF_PHOTOS,
+  appendProofOfWorkPages,
+  proofPageCount,
+  proofReference,
+  type ProofPhoto,
+} from './proofOfWork';
 
 export interface TNTLineItem {
   description: string;
@@ -46,6 +53,8 @@ export interface TNTInvoiceInput {
   subtotal: string;
   discount?: string;
   grandTotal: string;
+  /** Photographs of the work, appended as proof-of-work pages. */
+  proofPhotos?: ProofPhoto[];
 }
 
 /** Carried over verbatim from the original TNT Services template. */
@@ -75,11 +84,15 @@ function hasContent(item: TNTLineItem): boolean {
   return Boolean(item.description?.trim() || hasAmount(item.labour) || hasAmount(item.parts) || hasAmount(item.lineTotal));
 }
 
+function proofPhotos(input: TNTInvoiceInput): ProofPhoto[] {
+  return (input.proofPhotos ?? []).slice(0, MAX_PROOF_PHOTOS);
+}
+
 /**
  * Work table: a ruled header then one row per completed line item. Blank rows from
  * the form are dropped rather than printed as empty boxes.
  */
-function drawLineItems(ctx: Ctx, items: TNTLineItem[], top: number, gap: number): number {
+function drawLineItems(ctx: Ctx, items: TNTLineItem[], top: number, gap: number, proofNote: string): number {
   const contentTop = sectionHeading(ctx, 'Work Carried Out', MARGIN.left, top, CONTENT_WIDTH);
 
   COLUMNS.forEach((column, index) => {
@@ -141,6 +154,19 @@ function drawLineItems(ctx: Ctx, items: TNTLineItem[], top: number, gap: number)
     rule(ctx, MARGIN.left, y + 5, CONTENT_WIDTH, 0.6, COLOR.hairline);
   }
 
+  // Points at the photographs from the invoice itself, so the two halves of the
+  // document are tied together rather than the pages merely arriving stapled.
+  if (proofNote) {
+    drawText(ctx, proofNote, {
+      x: MARGIN.left,
+      y: y - TYPE.small - 2,
+      size: TYPE.small,
+      font: ctx.bold,
+      color: ctx.brand.accent,
+    });
+    y -= TYPE.small + 8;
+  }
+
   return y - gap;
 }
 
@@ -150,6 +176,13 @@ function summaryRows(input: TNTInvoiceInput): SummaryRow[] {
     rows.push({ label: 'Discount', value: `-${formatMoney(input.discount)}` });
   }
   return rows;
+}
+
+function proofNote(input: TNTInvoiceInput): string {
+  const count = proofPhotos(input).length;
+  if (count === 0) return '';
+  const photographs = count === 1 ? '1 photograph' : `${count} photographs`;
+  return `Proof of work attached \u2014 ${photographs} from this job, see page 2.`;
 }
 
 function drawBody(ctx: Ctx, input: TNTInvoiceInput, logo: PDFImage | null, gap: number): number {
@@ -178,7 +211,7 @@ function drawBody(ctx: Ctx, input: TNTInvoiceInput, logo: PDFImage | null, gap: 
     ['Mileage', formatMileage(input.mileage)],
   ], vehicleTop) - gap;
 
-  y = drawLineItems(ctx, input.lineItems, y, gap);
+  y = drawLineItems(ctx, input.lineItems, y, gap, proofNote(input));
 
   const termsBottom = drawBulletedBlock(ctx, 'Terms of Service', TNT_TERMS, MARGIN.left, y, COL_WIDTH);
   const summaryBottom = drawSummary(
@@ -206,10 +239,13 @@ export async function buildTNTServiceInvoice(
     render: (ctx, logo, gap) => drawBody(ctx, input, logo, gap),
   });
 
+  const photos = proofPhotos(input);
+  const totalPages = 1 + proofPageCount(photos.length);
+
   const doc = await PDFDocument.create();
   doc.setTitle(`Service Invoice ${input.invoiceNumber}`);
   doc.setAuthor(brand.legalName);
-  doc.setSubject('Vehicle Service Invoice');
+  doc.setSubject(photos.length ? 'Vehicle Service Invoice with Proof of Work' : 'Vehicle Service Invoice');
   doc.setCreator(brand.name);
   doc.setProducer(brand.name);
   doc.setCreationDate(new Date());
@@ -218,7 +254,25 @@ export async function buildTNTServiceInvoice(
   const logo = await embedLogo(doc, assets);
 
   drawBody(ctx, input, logo, layout.gap);
-  drawFooter(ctx, { note: FOOTER_NOTE, pageLabel: 'Page 1 of 1' });
+  drawFooter(ctx, { note: FOOTER_NOTE, pageLabel: `Page 1 of ${totalPages}` });
+
+  if (photos.length) {
+    const reference = await proofReference(input.invoiceNumber, input.invoiceDate, photos);
+    doc.setKeywords([`Proof of work reference ${reference}`]);
+    await appendProofOfWorkPages(
+      doc,
+      ctx,
+      logo,
+      {
+        invoiceNumber: input.invoiceNumber,
+        invoiceDate: input.invoiceDate,
+        vehicleReg: input.vehicleReg,
+        photos,
+        reference,
+      },
+      { firstPageNumber: 2, totalPages },
+    );
+  }
 
   return doc.save({ useObjectStreams: false, addDefaultPage: false });
 }

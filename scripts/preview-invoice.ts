@@ -2,6 +2,7 @@
  * Renders every redesigned invoice to /tmp/invoice-preview so the layouts can be
  * reviewed without going through the admin UI. Run via scripts/preview.sh.
  */
+import { execFileSync } from 'child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { buildFNTSaleInvoice, type SaleInvoiceInput } from '../src/lib/pdf/fntSaleInvoice';
 import { buildFNTPurchaseInvoice, type PurchaseInvoiceInput } from '../src/lib/pdf/fntPurchaseInvoice';
@@ -151,6 +152,53 @@ const tnt: TNTInvoiceInput = {
   grandTotal: '550',
 };
 
+/**
+ * Stand-in job photos at real photo dimensions, so the proof-of-work grid can be
+ * checked in both orientations. Made with sips, which every Mac has, rather than
+ * committing sample images.
+ */
+const samplePhotos = new Map<string, Uint8Array>();
+
+function samplePhoto(width: number, height: number): Uint8Array {
+  const key = `${width}x${height}`;
+  const cached = samplePhotos.get(key);
+  if (cached) return cached;
+
+  const out = `${OUT_DIR}/sample-${key}.jpg`;
+  execFileSync('sips', [
+    '-s', 'format', 'jpeg',
+    '--resampleHeightWidth', String(height), String(width),
+    'public/TNT Logo.png',
+    '--out', out,
+  ]);
+
+  const bytes = new Uint8Array(readFileSync(out));
+  samplePhotos.set(key, bytes);
+  return bytes;
+}
+
+const PROOF_CAPTIONS = [
+  'Gearbox oil drained and pan removed',
+  'Old filter, showing the debris found',
+  'New filter and pan gasket fitted',
+  'Refilled to level with the correct spec fluid',
+  'Road test completed, no fault codes present',
+  'A caption long enough to run onto a second line, which is what a thorough note looks like',
+];
+
+/** A proof-of-work set of the given size, alternating orientation. */
+function proofSet(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    bytes: index % 3 === 2 ? samplePhoto(1200, 1600) : samplePhoto(1600, 1200),
+    caption: PROOF_CAPTIONS[index % PROOF_CAPTIONS.length],
+    // Every other photo has no capture time, to check the caption block holds up.
+    takenAt:
+      index % 2 === 0
+        ? `2026-08-14T${`${9 + index}`.padStart(2, '0')}:${`${(index * 7) % 60}`.padStart(2, '0')}:00`
+        : undefined,
+  }));
+}
+
 const agreedWorks = letterTemplate('agreed_works');
 
 const letter: LetterInput = {
@@ -203,6 +251,12 @@ async function main() {
     ['finance', () => buildFNTFinanceInvoice(finance, { logo: fntLogo })],
     ['finance-with-part-exchange', () => buildFNTFinanceInvoice(financeWithPartExchange, { logo: fntLogo })],
     ['tnt-service', () => buildTNTServiceInvoice(tnt, { logo: tntLogo })],
+    ...([1, 2, 3, 6, 12] as const).map(
+      (count): [string, () => Promise<Uint8Array>] => [
+        `tnt-proof-${count}`,
+        () => buildTNTServiceInvoice({ ...tnt, proofPhotos: proofSet(count) }, { logo: tntLogo }),
+      ],
+    ),
     ['letter-agreed-works', () => buildFNTLetter(letter, { logo: fntLogo })],
     ['letter-two-page', () => buildFNTLetter(letterLong, { logo: fntLogo })],
   ];

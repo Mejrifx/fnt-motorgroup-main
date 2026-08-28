@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit, Paperclip } from 'lucide-react';
+import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit, Paperclip, Camera } from 'lucide-react';
 import { getInvoicesByType, deleteInvoice, getSignedInvoiceUrl, type InvoiceType, type Invoice } from '../../lib/invoiceUtils';
 import { deleteSignedTerms, listSignedTerms, type SignedTermsRecord } from '../../lib/signedTerms';
+import { deleteProofPhotos, readStoredProofPhotos } from '../../lib/proofPhotos';
 import { useToast } from '../ui/ToastContainer';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import SignedTermsDialog from './SignedTermsDialog';
@@ -197,6 +198,9 @@ const InvoiceHistory: React.FC = () => {
       // the invoice rather than being left behind in storage.
       if (signedTerms.has(deleteConfirm.invoice.invoice_number)) {
         await deleteSignedTerms(deleteConfirm.invoice.invoice_number);
+      }
+      if (readStoredProofPhotos(deleteConfirm.invoice.metadata).length > 0) {
+        await deleteProofPhotos(deleteConfirm.invoice.invoice_number);
       }
       showToast(`Invoice ${deleteConfirm.invoice.invoice_number} deleted successfully`, 'success');
       loadInvoices(); // Reload current tab invoices
@@ -411,6 +415,7 @@ const InvoiceHistory: React.FC = () => {
                   // Regular invoice row
                   const invoice = item.data;
                   const terms = signedTerms.get(invoice.invoice_number);
+                  const proofCount = readStoredProofPhotos(invoice.metadata).length;
                   return (
                     <tr key={invoice.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
@@ -418,6 +423,15 @@ const InvoiceHistory: React.FC = () => {
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTabColor(invoice.invoice_type)}`}>
                             {invoice.invoice_number}
                           </span>
+                          {proofCount > 0 && (
+                            <span
+                              className="ml-2 inline-flex items-center gap-1 text-xs font-semibold text-orange-700 dark:text-orange-400"
+                              title={`Proof of work attached: ${proofCount} ${proofCount === 1 ? 'photo' : 'photos'}`}
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                              {proofCount}
+                            </span>
+                          )}
                         </div>
                         <div className="sm:hidden mt-1 text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(invoice.invoice_date)}

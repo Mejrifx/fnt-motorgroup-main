@@ -7,7 +7,7 @@ import {
   TYPE,
   formatInvoiceDate,
 } from './invoiceTheme';
-import { drawText, rule, type Ctx } from './pdfKit';
+import { drawText, measure, rule, type Ctx } from './pdfKit';
 
 export const ACCENT_BAR_HEIGHT = 5;
 const LOGO_WIDTH = 116;
@@ -68,6 +68,13 @@ export function drawHeader(ctx: Ctx, options: HeaderOptions): number {
     tracking: 1.1,
   });
 
+  // The value column clears the longest label rather than sitting at a fixed
+  // offset, so a header with a wider label than "Invoice No" still lines up.
+  const labelColumn = Math.max(
+    66,
+    ...(options.meta ?? []).map(([label]) => measure(ctx.regular, label.toUpperCase(), TYPE.small, 0.6) + 12),
+  );
+
   let metaBaseline = titleBaseline - 18;
   for (const [label, value] of options.meta ?? []) {
     drawText(ctx, label.toUpperCase(), {
@@ -79,7 +86,7 @@ export function drawHeader(ctx: Ctx, options: HeaderOptions): number {
       tracking: 0.6,
     });
     drawText(ctx, value, {
-      x: MARGIN.left + 66,
+      x: MARGIN.left + labelColumn,
       y: metaBaseline,
       size: TYPE.value,
       font: ctx.bold,
