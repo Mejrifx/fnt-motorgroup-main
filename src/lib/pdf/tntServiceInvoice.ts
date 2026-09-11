@@ -199,11 +199,19 @@ function drawWorkTable(ctx: Ctx, items: TNTLineItem[], top: number, proofNote: s
   const rows = items.filter(hasContent);
   const blanks = Math.max(0, minRows - rows.length);
 
+  // A light header with a heavy rule beneath reads as a table header without
+  // laying down a bar of solid ink on every printed copy.
   ctx.page.drawRectangle({
     x: TNT_MARGIN,
     y: top - TABLE_HEADER_HEIGHT,
     width: TNT_CONTENT_WIDTH,
     height: TABLE_HEADER_HEIGHT,
+    color: TNT_PANEL,
+  });
+  ctx.page.drawLine({
+    start: { x: TNT_MARGIN, y: top - TABLE_HEADER_HEIGHT },
+    end: { x: TNT_MARGIN + TNT_CONTENT_WIDTH, y: top - TABLE_HEADER_HEIGHT },
+    thickness: 1.2,
     color: TNT_INK,
   });
   COLUMNS.forEach((column, index) => {
@@ -212,7 +220,7 @@ function drawWorkTable(ctx: Ctx, items: TNTLineItem[], top: number, proofNote: s
       y: top - TABLE_HEADER_HEIGHT + 6.5,
       size: 7,
       font: ctx.bold,
-      color: TNT_WHITE,
+      color: TNT_INK,
       tracking: 0.7,
       align: column.align,
       width: column.align === 'left' ? undefined : column.width - (column.align === 'right' ? CELL_PAD : 0),
@@ -438,17 +446,23 @@ function drawBody(ctx: Ctx, input: TNTInvoiceInput, logo: PDFImage | null, table
 }
 
 /**
- * Lays the body out on a scratch page to see how much room is left above the
- * acknowledgement, and turns some of it into extra ruled rows in the work table.
+ * Decides how deep the work table should be. The body is laid out on a scratch
+ * page with no blank rows to see how much room is left above the acknowledgement;
+ * blank rows are then added only as far as they fit, up to the job-sheet depth.
+ * A dense invoice therefore gives up its ruled padding before it gives up the
+ * customer sign-off.
  */
-async function fillerRows(input: TNTInvoiceInput, brand: typeof TNT_BRAND, assets: InvoiceAssets): Promise<number> {
+async function tableRows(input: TNTInvoiceInput, brand: typeof TNT_BRAND, assets: InvoiceAssets): Promise<number> {
+  const filled = input.lineItems.filter(hasContent).length;
+
   const scratch = await PDFDocument.create();
   const ctx = await createCtx(scratch, brand);
   const logo = await embedLogo(scratch, assets);
-  const bottom = drawBody(ctx, input, logo, MIN_TABLE_ROWS);
+  const bottom = drawBody(ctx, input, logo, filled);
 
   const spare = bottom - (ACKNOWLEDGEMENT_TOP + SECTION_GAP);
-  return Math.max(0, Math.min(MAX_FILLER_ROWS, Math.floor(spare / ROW_MIN_HEIGHT)));
+  const fit = Math.max(0, Math.floor(spare / ROW_MIN_HEIGHT));
+  return Math.max(filled, Math.min(MIN_TABLE_ROWS + MAX_FILLER_ROWS, filled + fit));
 }
 
 export async function buildTNTServiceInvoice(
@@ -470,7 +484,7 @@ export async function buildTNTServiceInvoice(
   const ctx = await createCtx(doc, brand);
   const logo = await embedLogo(doc, assets);
 
-  const bottom = drawBody(ctx, input, logo, MIN_TABLE_ROWS + (await fillerRows(input, brand, assets)));
+  const bottom = drawBody(ctx, input, logo, await tableRows(input, brand, assets));
   if (bottom < TNT_FOOTER_TOP) {
     // The form caps the work table at five lines, so this is a safety net for
     // unusually long descriptions rather than something expected in practice.
