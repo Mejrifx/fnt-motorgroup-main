@@ -31,7 +31,6 @@ export const TNT_MUTED = rgb(0.43, 0.45, 0.49);
 /** Clear of the edge a typical office printer cannot reach. */
 const TOP_MARGIN = 32;
 const MASTHEAD_MIN_HEIGHT = 74;
-const STRIPE_HEIGHT = 2.5;
 const LOGO_SIZE = 62;
 /** Height of the footer rule and the two text lines beneath it. */
 const FOOTER_RULE_Y = 40;
@@ -50,7 +49,7 @@ interface MastheadOptions {
 
 /**
  * Masthead: logo and business identity on the left, document title and its
- * reference rows on the right, closed off with a heavy rule and an orange stripe.
+ * reference rows on the right, closed off with a single heavy rule.
  * Returns the y where body content should start.
  */
 export function drawMasthead(ctx: Ctx, options: MastheadOptions): number {
@@ -64,13 +63,6 @@ export function drawMasthead(ctx: Ctx, options: MastheadOptions): number {
     end: { x: TNT_MARGIN + TNT_CONTENT_WIDTH, y: bandBottom },
     thickness: 1.4,
     color: TNT_INK,
-  });
-  ctx.page.drawRectangle({
-    x: TNT_MARGIN,
-    y: bandBottom - 3 - STRIPE_HEIGHT,
-    width: TNT_CONTENT_WIDTH,
-    height: STRIPE_HEIGHT,
-    color: brand.accent,
   });
 
   const logoTop = top;
@@ -163,7 +155,7 @@ export function drawMasthead(ctx: Ctx, options: MastheadOptions): number {
     rowBaseline -= 13;
   }
 
-  return bandBottom - 3 - STRIPE_HEIGHT - 20;
+  return bandBottom - 24;
 }
 
 /**
