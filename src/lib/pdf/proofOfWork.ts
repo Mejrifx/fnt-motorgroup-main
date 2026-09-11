@@ -1,15 +1,21 @@
 import { rgb, type PDFDocument, type PDFImage } from 'pdf-lib';
+import { PAGE, TYPE, formatInvoiceDate } from './invoiceTheme';
 import {
-  COLOR,
-  CONTENT_WIDTH,
-  GUTTER,
-  MARGIN,
-  PAGE,
-  TYPE,
-  formatInvoiceDate,
-} from './invoiceTheme';
-import { FOOTER_RULE_Y, drawFooter, drawHeader } from './invoiceChrome';
-import { drawText, rule, wrapText, type Ctx } from './pdfKit';
+  TNT_CONTENT_WIDTH as CONTENT_WIDTH,
+  TNT_FOOTER_TOP,
+  TNT_GRID,
+  TNT_GUTTER as GUTTER,
+  TNT_INK,
+  TNT_MARGIN,
+  TNT_MUTED,
+  TNT_PANEL,
+  TNT_TEXT,
+  drawFooterBand,
+  drawMasthead,
+} from './tntChrome';
+import { drawText, wrapText, type Ctx } from './pdfKit';
+
+const MARGIN = { left: TNT_MARGIN };
 
 /**
  * The photographic record attached to a service invoice.
@@ -51,9 +57,9 @@ const CAPTION_INDENT = BADGE + 7;
 /** Spare height is shared out above and between the rows, up to this much each. */
 const MAX_EXTRA_GAP = 44;
 const FRAME_INSET = 4;
-const GRID_FLOOR = FOOTER_RULE_Y + 18;
+const GRID_FLOOR = TNT_FOOTER_TOP + 10;
 
-const FRAME_FILL = rgb(0.965, 0.968, 0.973);
+const FRAME_FILL = TNT_PANEL;
 
 export function proofPageCount(photoCount: number): number {
   return Math.ceil(Math.min(photoCount, MAX_PROOF_PHOTOS) / PHOTOS_PER_PAGE);
@@ -253,8 +259,8 @@ function drawTile(ctx: Ctx, tile: Tile, layout: Layout, x: number, top: number, 
     width: layout.frameWidth,
     height: layout.frameHeight,
     color: FRAME_FILL,
-    borderColor: COLOR.hairline,
-    borderWidth: 0.7,
+    borderColor: TNT_GRID,
+    borderWidth: 0.8,
   });
 
   const { width, height } = fittedSize(tile.image, layout.frameWidth, layout.frameHeight);
@@ -271,7 +277,7 @@ function drawTile(ctx: Ctx, tile: Tile, layout: Layout, x: number, top: number, 
     y: badgeTop - BADGE,
     width: BADGE,
     height: BADGE,
-    color: ctx.brand.accent,
+    color: TNT_INK,
   });
   drawText(ctx, `${tile.number}`.padStart(2, '0'), {
     x,
@@ -290,7 +296,7 @@ function drawTile(ctx: Ctx, tile: Tile, layout: Layout, x: number, top: number, 
       y: baseline,
       size: index === 0 ? TYPE.value : TYPE.footer,
       font: index === 0 ? ctx.bold : ctx.regular,
-      color: index === 0 ? COLOR.heading : COLOR.muted,
+      color: index === 0 ? TNT_INK : TNT_MUTED,
     });
     baseline -= CAPTION_LEADING;
   });
@@ -311,19 +317,30 @@ function attestation(ctx: Ctx, input: ProofOfWorkInput): string[] {
   ];
 }
 
+/** The attestation sits in a light panel with an accent edge, like a stamped note. */
 function drawAttestation(ctx: Ctx, input: ProofOfWorkInput, top: number): number {
-  let y = top;
-  for (const paragraph of attestation(ctx, input)) {
-    for (const line of wrapText(ctx.regular, paragraph, TYPE.body, CONTENT_WIDTH)) {
-      drawText(ctx, line, { x: MARGIN.left, y: y - TYPE.body, size: TYPE.body, font: ctx.regular, color: COLOR.body });
-      y -= TYPE.body + 4.2;
+  const size = TYPE.body;
+  const leading = size + 4.2;
+  const pad = 12;
+  const textX = MARGIN.left + pad + 4;
+  const paragraphs = attestation(ctx, input).map((paragraph) =>
+    wrapText(ctx.regular, paragraph, size, CONTENT_WIDTH - pad * 2 - 4),
+  );
+  const height = paragraphs.reduce((sum, lines) => sum + lines.length * leading, 0) + (paragraphs.length - 1) * 3 + pad * 2 - 4;
+
+  ctx.page.drawRectangle({ x: MARGIN.left, y: top - height, width: CONTENT_WIDTH, height, color: TNT_PANEL });
+  ctx.page.drawRectangle({ x: MARGIN.left, y: top - height, width: 3, height, color: ctx.brand.accent });
+
+  let y = top - pad;
+  paragraphs.forEach((lines, index) => {
+    for (const line of lines) {
+      drawText(ctx, line, { x: textX, y: y - size, size, font: index === 1 ? ctx.bold : ctx.regular, color: TNT_TEXT });
+      y -= leading;
     }
     y -= 3;
-  }
+  });
 
-  y -= 5;
-  rule(ctx, MARGIN.left, y, CONTENT_WIDTH, 0.7, COLOR.hairline);
-  return y - 20;
+  return top - height - 22;
 }
 
 /**
@@ -351,10 +368,10 @@ export async function appendProofOfWorkPages(
     const slice = tiles.slice(pageIndex * PHOTOS_PER_PAGE, (pageIndex + 1) * PHOTOS_PER_PAGE);
     const ctx: Ctx = { ...base, page: doc.addPage([PAGE.width, PAGE.height]) };
 
-    let y = drawHeader(ctx, {
-      title: pageIndex === 0 ? 'Proof of Work' : 'Proof of Work \u2014 continued',
+    let y = drawMasthead(ctx, {
+      title: pageIndex === 0 ? 'Proof of Work' : 'Proof of Work (cont.)',
       logo,
-      meta: [
+      rows: [
         ['Invoice No', input.invoiceNumber],
         ['Date', formatInvoiceDate(input.invoiceDate)],
         ['Registration', (input.vehicleReg || '\u2014').toUpperCase()],
@@ -382,7 +399,7 @@ export async function appendProofOfWorkPages(
       );
     });
 
-    drawFooter(ctx, {
+    drawFooterBand(ctx, {
       note: `Photographic record held on file \u00B7 Ref ${input.reference}`,
       pageLabel: `Page ${options.firstPageNumber + pageIndex} of ${options.totalPages}`,
     });
