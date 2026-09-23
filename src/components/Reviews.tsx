@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Star, Quotes, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { supabase, type Review } from '../lib/supabase';
 
+// AutoTrader total. The carousel only shows featured quotes, so the
+// summary must not use that shorter list as the review count.
+const TOTAL_REVIEW_COUNT = 78;
+
 const Reviews: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [currentReview, setCurrentReview] = useState(0);
@@ -106,7 +110,7 @@ const Reviews: React.FC = () => {
             <div className="text-center">
               <div className="text-5xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{averageRating.toFixed(1)}</div>
               <div className="flex justify-center mb-2">{renderStars(5)}</div>
-              <div className="text-sm text-gray-400 mb-3">Based on {reviews.length}+ reviews</div>
+              <div className="text-sm text-gray-400 mb-3">Based on {TOTAL_REVIEW_COUNT} reviews</div>
               <div className="inline-block bg-white rounded-lg px-3 py-1.5">
                 <img 
                   src="/autotrader-logo.jpg" 
