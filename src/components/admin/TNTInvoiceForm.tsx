@@ -580,7 +580,7 @@ const TNTInvoiceForm: React.FC<TNTInvoiceFormProps> = ({ onClose, editInvoice })
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
                   {proofEnabled
-                    ? 'The photos are added on their own page after the invoice, each labelled and stamped with the time it was taken.'
+                    ? 'The photos are added on their own page after the invoice. Each one is labelled and stamped with the date and time set on the photo.'
                     : 'The invoice is a single page with no photos attached.'}
                 </p>
               </div>

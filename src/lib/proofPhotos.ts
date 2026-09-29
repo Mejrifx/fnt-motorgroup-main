@@ -27,7 +27,10 @@ const JPEG_OPTIONS = { maxEdge: 1600, quality: 0.76 };
 export interface StoredProofPhoto {
   path: string;
   caption: string;
-  /** ISO capture time from the photo's metadata, when it carried one. */
+  /**
+   * ISO time printed under the photo. Read from the file when it carries one,
+   * otherwise entered or corrected by staff on the invoice.
+   */
   takenAt?: string;
 }
 
