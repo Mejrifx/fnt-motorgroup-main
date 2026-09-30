@@ -135,7 +135,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             <div className="p-8 border-t border-white/10">
               <div className="text-center space-y-3">
                 <p className="text-lg font-semibold text-white">FNT Motor Group</p>
-                <p className="text-gray-400">Unit 1, Clayton Court, 5 Welcomb Street<br />Manchester M11 2NB</p>
+                <p className="text-gray-400">Clayton Compound<br />Clayton Court<br />City Works<br />Openshaw<br />Manchester<br />M11 2NB</p>
                 <a 
                   href="tel:07735770031"
                   className="block text-lg font-bold text-fnt-red hover:text-red-400 transition-colors duration-300"
@@ -166,7 +166,7 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           style={{ left: '80px', pointerEvents: 'auto' }}
         >
           <a 
-            href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7" 
+            href="https://www.google.com/maps/search/?api=1&query=Clayton%20Compound%2C%20Clayton%20Court%2C%20City%20Works%2C%20Openshaw%2C%20Manchester%2C%20M11%202NB" 
             target="_blank" 
             rel="noopener noreferrer"
             className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"

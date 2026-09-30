@@ -180,7 +180,7 @@ const CarDetails: React.FC = () => {
               telephone: '+447735770031',
               address: {
                 '@type': 'PostalAddress',
-                streetAddress: 'Unit 1, Clayton Court, 5 Welcomb Street',
+                streetAddress: 'Clayton Compound, Clayton Court, City Works, Openshaw',
                 addressLocality: 'Manchester',
                 postalCode: 'M11 2NB',
                 addressCountry: 'GB',
@@ -467,7 +467,7 @@ const CarDetails: React.FC = () => {
                   <span>Email Inquiry</span>
                 </a>
                 <a
-                  href="https://maps.app.goo.gl/BzPwtnE6sKif93Rm7"
+                  href="https://www.google.com/maps/search/?api=1&query=Clayton%20Compound%2C%20Clayton%20Court%2C%20City%20Works%2C%20Openshaw%2C%20Manchester%2C%20M11%202NB"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-glass flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"

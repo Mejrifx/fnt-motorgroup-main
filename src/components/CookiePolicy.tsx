@@ -411,7 +411,7 @@ const CookiePolicy: React.FC = () => {
                     <p className="font-semibold text-white mb-2">FNT Motor Group</p>
                     <p className="text-gray-300">Email: fntgroupltd@gmail.com</p>
                     <p className="text-gray-300">Phone: 07735770031</p>
-                    <p className="text-gray-300">Address: Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB</p>
+                    <p className="text-gray-300">Address: Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB</p>
                   </div>
                   
                   <p className="mt-4">

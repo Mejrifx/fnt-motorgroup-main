@@ -59,7 +59,7 @@ const PrivacyPolicy: React.FC = () => {
               <div className="text-gray-300 leading-relaxed space-y-4">
                 <p>
                   For the purposes of this Notice, the data controller is FNT Motor Group (trading as FNT Motor Group) 
-                  and whose registered office address is at Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB.
+                  and whose registered office address is at Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB.
                 </p>
                 <p>
                   FNT Motor Group is committed to protecting your privacy and ensuring that your personal data is handled 
@@ -74,7 +74,7 @@ const PrivacyPolicy: React.FC = () => {
                   <p className="font-semibold text-white mb-2">Contact our Data Protection team:</p>
                   <p className="text-gray-300">Email: fntgroupltd@gmail.com</p>
                   <p className="text-gray-300">Phone: 07735770031</p>
-                  <p className="text-gray-300">Address: Unit 1, Clayton Court, 5 Welcomb Street, Manchester, M11 2NB</p>
+                  <p className="text-gray-300">Address: Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB</p>
                 </div>
               </div>
             </div>

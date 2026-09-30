@@ -307,7 +307,7 @@ const WarrantyFinancing: React.FC = () => {
                   <MapPin className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-white mb-2">Visit Us</h3>
-                <p className="text-gray-400">Unit 1, Clayton Court, 5 Welcomb Street<br />Manchester M11 2NB</p>
+                <p className="text-gray-400">Clayton Compound<br />Clayton Court<br />City Works<br />Openshaw<br />Manchester<br />M11 2NB</p>
               </div>
             </div>
 

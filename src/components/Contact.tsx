@@ -25,8 +25,12 @@ const Contact = () => {
                   <div>
                     <h4 className="font-semibold text-white mb-1">Location</h4>
                     <p className="text-gray-400">
-                      Unit 1, Clayton Court, 5 Welcomb Street<br />
-                      Manchester M11 2NB<br />
+                      Clayton Compound<br />
+                      Clayton Court<br />
+                      City Works<br />
+                      Openshaw<br />
+                      Manchester<br />
+                      M11 2NB<br />
                       United Kingdom
                     </p>
                   </div>

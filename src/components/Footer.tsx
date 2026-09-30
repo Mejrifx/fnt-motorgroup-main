@@ -89,8 +89,12 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <MapPin weight="duotone" className="w-5 h-5 text-fnt-red mt-1 flex-shrink-0" />
                 <div className="text-gray-400">
-                  Unit 1, Clayton Court, 5 Welcomb Street<br />
-                  Manchester M11 2NB<br />
+                  Clayton Compound<br />
+                  Clayton Court<br />
+                  City Works<br />
+                  Openshaw<br />
+                  Manchester<br />
+                  M11 2NB<br />
                   United Kingdom
                 </div>
               </div>

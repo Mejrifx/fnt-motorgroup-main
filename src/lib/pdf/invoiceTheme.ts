@@ -67,7 +67,7 @@ export const FNT_BRAND: Brand = {
   accent: rgb(1, 0.286, 0.263),
   name: 'FNT Motor Group',
   legalName: 'Mauii Ltd T/A FNT Motor Group',
-  addressLines: ['Unit 1, Clayton Court', '5 Welcomb Street', 'Manchester', 'M11 2NB'],
+  addressLines: ['Clayton Compound', 'Clayton Court', 'City Works', 'Openshaw', 'Manchester', 'M11 2NB'],
   phone: '+44 773 577 0031',
   email: 'fntgroupltd@gmail.com',
   website: 'fntmotorgroup.co.uk',
