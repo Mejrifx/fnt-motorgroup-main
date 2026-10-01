@@ -32,7 +32,7 @@ export interface ProofPhoto {
   /** JPEG bytes, as stored, so the reference stays reproducible. */
   bytes: Uint8Array;
   caption?: string;
-  /** Capture time from the photo's own metadata. Omitted when it had none. */
+  /** Time printed under the photo. Omitted when none was found or entered. */
   takenAt?: string;
 }
 
@@ -110,8 +110,8 @@ async function shortDigest(payload: Uint8Array): Promise<string> {
   return hash.toString(16).padStart(8, '0').toUpperCase();
 }
 
-/** "14 August 2026 at 14:32", from the ISO capture time. */
-function formatTakenAt(iso?: string): string {
+/** "14 August 2026 at 14:32", from the ISO time stored with the photo. */
+export function formatProofTakenAt(iso?: string): string {
   if (!iso) return '';
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
@@ -135,7 +135,7 @@ function captionLines(ctx: Ctx, tile: Tile, width: number): string[] {
   const caption = (tile.photo.caption || '').trim() || `Photograph ${tile.number}`;
   const lines = wrapText(ctx.bold, caption, TYPE.value, textWidth).slice(0, 2);
 
-  const taken = formatTakenAt(tile.photo.takenAt);
+  const taken = formatProofTakenAt(tile.photo.takenAt);
   if (taken) {
     lines.push(...wrapText(ctx.regular, `Photographed ${taken}`, TYPE.footer, textWidth).slice(0, 1));
   }

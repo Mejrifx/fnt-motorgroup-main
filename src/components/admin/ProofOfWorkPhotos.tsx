@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { Camera, ChevronLeft, ChevronRight, Clock, Images, Upload, X } from 'lucide-react';
 import { prepareProofPhoto } from '../../lib/proofPhotos';
-import { MAX_PROOF_PHOTOS } from '../../lib/pdf/proofOfWork';
+import { fromDatetimeLocalValue, toDatetimeLocalValue } from '../../lib/proofTimestamp';
+import { formatProofTakenAt, MAX_PROOF_PHOTOS } from '../../lib/pdf/proofOfWork';
 import { useToast } from '../ui/ToastContainer';
 
 /** A photo held in the form, whether just picked or loaded from a saved invoice. */
@@ -9,7 +10,7 @@ export interface EditableProofPhoto {
   id: string;
   bytes: Uint8Array;
   caption: string;
-  /** Capture time from the photo's own metadata, when it carried one. */
+  /** Time printed on the proof page. From the photo, or entered by staff. */
   takenAt?: string;
   previewUrl: string;
 }
@@ -23,15 +24,6 @@ interface ProofOfWorkPhotosProps {
 }
 
 const CAPTION_LIST_ID = 'proof-caption-suggestions';
-
-function formatTakenAt(iso: string): string {
-  return new Date(iso).toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 const ProofOfWorkPhotos: React.FC<ProofOfWorkPhotosProps> = ({
   photos,
@@ -84,8 +76,14 @@ const ProofOfWorkPhotos: React.FC<ProofOfWorkPhotosProps> = ({
     if (added.length) onChange([...photos, ...added]);
   };
 
-  const update = (id: string, caption: string) => {
+  const updateCaption = (id: string, caption: string) => {
     onChange(photos.map((photo) => (photo.id === id ? { ...photo, caption } : photo)));
+  };
+
+  const updateTakenAt = (id: string, value: string) => {
+    const takenAt = value === '' ? undefined : fromDatetimeLocalValue(value);
+    if (value !== '' && !takenAt) return;
+    onChange(photos.map((photo) => (photo.id === id ? { ...photo, takenAt } : photo)));
   };
 
   const remove = (id: string) => {
@@ -114,7 +112,7 @@ const ProofOfWorkPhotos: React.FC<ProofOfWorkPhotosProps> = ({
           </p>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Add the photos you took during the job. They appear on their own page after the invoice,
-            in the order shown here.
+            in the order shown here. Set the date and time on each photo if it is missing or wrong.
           </p>
         </div>
       ) : (
@@ -148,24 +146,48 @@ const ProofOfWorkPhotos: React.FC<ProofOfWorkPhotosProps> = ({
                 <input
                   type="text"
                   value={photo.caption}
-                  onChange={(event) => update(photo.id, event.target.value)}
+                  onChange={(event) => updateCaption(photo.id, event.target.value)}
                   list={CAPTION_LIST_ID}
                   maxLength={70}
                   disabled={disabled}
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent dark:bg-gray-700 dark:text-white"
                   placeholder="What this photo shows"
                 />
-                <div className="flex items-center justify-between gap-2">
-                  <p className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 min-w-0">
-                    {photo.takenAt ? (
-                      <>
-                        <Clock className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{formatTakenAt(photo.takenAt)}</span>
-                      </>
-                    ) : (
-                      <span className="truncate">No capture time</span>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <label
+                      htmlFor={`proof-taken-${index}`}
+                      className="flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300"
+                    >
+                      <Clock className="w-3 h-3 shrink-0" />
+                      Date and time
+                    </label>
+                    {photo.takenAt && (
+                      <button
+                        type="button"
+                        onClick={() => updateTakenAt(photo.id, '')}
+                        disabled={disabled}
+                        className="text-xs font-semibold text-gray-500 hover:text-fnt-red disabled:opacity-50"
+                      >
+                        Clear
+                      </button>
                     )}
+                  </div>
+                  <input
+                    id={`proof-taken-${index}`}
+                    type="datetime-local"
+                    value={toDatetimeLocalValue(photo.takenAt)}
+                    onChange={(event) => updateTakenAt(photo.id, event.target.value)}
+                    disabled={disabled}
+                    className="w-full min-w-0 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-fnt-red focus:border-transparent dark:bg-gray-700 dark:text-white disabled:opacity-50"
+                  />
+                  <p className="text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+                    {photo.takenAt
+                      ? `Prints as Photographed ${formatProofTakenAt(photo.takenAt)}`
+                      : 'No time was found on this photo. Enter when it was taken.'}
                   </p>
+                </div>
+                <div className="flex items-center justify-end">
                   <div className="flex items-center shrink-0">
                     <button
                       type="button"
