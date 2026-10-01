@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, FileText, Mail, XCircle } from 'lucide-react';
+import { Plus, FileText, Mail, XCircle, ClipboardCheck, Printer } from 'lucide-react';
 import TNTInvoiceForm from './TNTInvoiceForm';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
@@ -7,6 +7,7 @@ import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
 import FNTLetterForm from './FNTLetterForm';
 import { createSampleInvoiceURL, type SampleInvoiceType } from '../../lib/pdf/sampleInvoices';
 import type { Invoice } from '../../lib/invoiceUtils';
+import { openPdiChecklist } from '../../lib/pdiChecklistPrint';
 
 // SimplePDF type declaration
 declare global {
@@ -32,6 +33,20 @@ const InvoiceManager = () => {
   const [showFNTLetterForm, setShowFNTLetterForm] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [buildingSample, setBuildingSample] = useState<SampleInvoiceType | null>(null);
+  const [printingPdi, setPrintingPdi] = useState(false);
+
+  const printBlankPdi = async () => {
+    if (printingPdi) return;
+    setPrintingPdi(true);
+    try {
+      await openPdiChecklist();
+    } catch (error) {
+      console.error('Failed to build the PDI checklist:', error);
+      alert('Could not build the PDI checklist. Please try again.');
+    } finally {
+      setPrintingPdi(false);
+    }
+  };
 
   // Template URLs
   const TEMPLATES = {
@@ -516,6 +531,39 @@ const InvoiceManager = () => {
         </div>
       </div>
 
+      {/* PDI Checklist — completed before every sale, so it is available before an invoice exists */}
+      <div className="admin-glass-card !rounded-xl p-6 mb-6 hover:!border-fnt-red transition-all">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+          <div className="flex items-center space-x-3 flex-1">
+            <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              <ClipboardCheck className="w-8 h-8 text-fnt-red" />
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-gray-900 dark:text-white">Vehicle PDI Checklist</h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Pre-delivery inspection, completed by the salesperson before every sale
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Print a blank checklist here, or open a sale in Invoice History and use the checklist
+                button to print one pre-filled with the customer and vehicle. Once ticked and signed by
+                the customer, scan it back in from the same button.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 lg:w-auto">
+            <button
+              onClick={printBlankPdi}
+              disabled={printingPdi}
+              className="flex items-center justify-center space-x-2 btn-glass-red text-white px-4 py-2.5 rounded-lg transition-all font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Printer className="w-4 h-4" />
+              <span>{printingPdi ? 'Building...' : 'Print Blank Checklist'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Info */}
       <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <div className="flex items-start space-x-3">
@@ -534,6 +582,8 @@ const InvoiceManager = () => {
               <strong>TNT Services Invoice:</strong> Use for TNT Services business operations. Includes service details and pricing, and can carry a proof of work page of job photos.
               <br />
               <strong>FNT Letter:</strong> Use when something needs to be confirmed in writing rather than invoiced, such as work agreed after a sale.
+              <br />
+              <strong>PDI Checklist:</strong> Complete before every sale. The customer signs, prints their name and dates it at handover, then the scan is attached to the sale invoice.
             </p>
           </div>
         </div>

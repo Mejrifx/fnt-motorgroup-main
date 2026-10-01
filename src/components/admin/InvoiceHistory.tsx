@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit, Paperclip, Camera } from 'lucide-react';
+import { FileText, Download, ExternalLink, Search, Trash2, RefreshCw, X, Edit, Paperclip, Camera, ClipboardCheck, Printer } from 'lucide-react';
 import { getInvoicesByType, deleteInvoice, getSignedInvoiceUrl, type InvoiceType, type Invoice } from '../../lib/invoiceUtils';
-import { deleteSignedTerms, listSignedTerms, type SignedTermsRecord } from '../../lib/signedTerms';
+import { deleteScannedDocument, listScannedDocuments, type ScannedDocumentRecord } from '../../lib/scannedDocuments';
+import { invoiceHasPdi, openPdiChecklist, pdiInputFromInvoice } from '../../lib/pdiChecklistPrint';
 import { deleteProofPhotos, readStoredProofPhotos } from '../../lib/proofPhotos';
 import { useToast } from '../ui/ToastContainer';
 import ConfirmDialog from '../ui/ConfirmDialog';
-import SignedTermsDialog from './SignedTermsDialog';
+import ScannedDocumentDialog from './ScannedDocumentDialog';
 import FNTSaleInvoiceForm from './FNTSaleInvoiceForm';
 import FNTPurchaseInvoiceForm from './FNTPurchaseInvoiceForm';
 import FNTFinanceInvoiceForm from './FNTFinanceInvoiceForm';
@@ -50,8 +51,11 @@ const InvoiceHistory: React.FC = () => {
   });
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [pendingPdfId, setPendingPdfId] = useState<string | null>(null);
-  const [signedTerms, setSignedTerms] = useState<Map<string, SignedTermsRecord>>(new Map());
+  const [signedTerms, setSignedTerms] = useState<Map<string, ScannedDocumentRecord>>(new Map());
   const [termsFor, setTermsFor] = useState<Invoice | null>(null);
+  const [pdiScans, setPdiScans] = useState<Map<string, ScannedDocumentRecord>>(new Map());
+  const [pdiFor, setPdiFor] = useState<Invoice | null>(null);
+  const [printingPdi, setPrintingPdi] = useState(false);
   const { showToast } = useToast();
 
   // Stored invoices live in a private bucket, so opening one means asking
@@ -82,8 +86,25 @@ const InvoiceHistory: React.FC = () => {
     }
   };
 
-  const loadSignedTerms = async () => {
-    setSignedTerms(await listSignedTerms());
+  const loadScans = async () => {
+    const [terms, pdi] = await Promise.all([
+      listScannedDocuments('signed_terms'),
+      listScannedDocuments('pdi_checklist'),
+    ]);
+    setSignedTerms(terms);
+    setPdiScans(pdi);
+  };
+
+  const printPdi = async (invoice: Invoice) => {
+    setPrintingPdi(true);
+    try {
+      await openPdiChecklist(pdiInputFromInvoice(invoice));
+    } catch (error) {
+      console.error('Failed to build the PDI checklist:', error);
+      showToast('Could not build the PDI checklist. Please try again.', 'error');
+    } finally {
+      setPrintingPdi(false);
+    }
   };
 
   // Load invoices for the active tab
@@ -194,10 +215,13 @@ const InvoiceHistory: React.FC = () => {
 
     const success = await deleteInvoice(deleteConfirm.invoice.id, deleteConfirm.invoice.pdf_url);
     if (success) {
-      // The signed terms carry a signature and a home address, so they go with
-      // the invoice rather than being left behind in storage.
+      // The scans carry a signature and a home address, so they go with the
+      // invoice rather than being left behind in storage.
       if (signedTerms.has(deleteConfirm.invoice.invoice_number)) {
-        await deleteSignedTerms(deleteConfirm.invoice.invoice_number);
+        await deleteScannedDocument('signed_terms', deleteConfirm.invoice.invoice_number);
+      }
+      if (pdiScans.has(deleteConfirm.invoice.invoice_number)) {
+        await deleteScannedDocument('pdi_checklist', deleteConfirm.invoice.invoice_number);
       }
       if (readStoredProofPhotos(deleteConfirm.invoice.metadata).length > 0) {
         await deleteProofPhotos(deleteConfirm.invoice.invoice_number);
@@ -205,7 +229,7 @@ const InvoiceHistory: React.FC = () => {
       showToast(`Invoice ${deleteConfirm.invoice.invoice_number} deleted successfully`, 'success');
       loadInvoices(); // Reload current tab invoices
       loadAllCounts(); // Reload all counts to update all tab badges
-      loadSignedTerms();
+      loadScans();
     } else {
       showToast('Failed to delete invoice. Please try again.', 'error');
     }
@@ -214,7 +238,7 @@ const InvoiceHistory: React.FC = () => {
   // Load all counts on mount
   useEffect(() => {
     loadAllCounts();
-    loadSignedTerms();
+    loadScans();
   }, []);
 
   // Load invoices when tab changes
@@ -278,7 +302,7 @@ const InvoiceHistory: React.FC = () => {
             onClick={() => {
               loadInvoices();
               loadAllCounts();
-              loadSignedTerms();
+              loadScans();
             }}
             className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
           >
@@ -415,6 +439,7 @@ const InvoiceHistory: React.FC = () => {
                   // Regular invoice row
                   const invoice = item.data;
                   const terms = signedTerms.get(invoice.invoice_number);
+                  const pdi = pdiScans.get(invoice.invoice_number);
                   const proofCount = readStoredProofPhotos(invoice.metadata).length;
                   return (
                     <tr key={invoice.id} className="hover:bg-black/[0.03] dark:hover:bg-white/5 transition-colors">
@@ -485,6 +510,21 @@ const InvoiceHistory: React.FC = () => {
                             <Paperclip className="w-4 h-4" />
                           </button>
 
+                          {/* PDI checklist — print it, then attach the signed scan */}
+                          {invoiceHasPdi(invoice) && (
+                            <button
+                              onClick={() => setPdiFor(invoice)}
+                              className={`p-2 rounded-lg transition-colors ${
+                                pdi
+                                  ? 'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/60 hover:bg-green-200 dark:hover:bg-green-900'
+                                  : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                              }`}
+                              title={pdi ? 'Signed PDI checklist attached' : 'PDI checklist'}
+                            >
+                              <ClipboardCheck className="w-4 h-4" />
+                            </button>
+                          )}
+
                           {/* Edit */}
                           <button
                             onClick={() => setEditingInvoice(invoice)}
@@ -549,6 +589,15 @@ const InvoiceHistory: React.FC = () => {
                 {filteredInvoices.filter((inv) => signedTerms.has(inv.invoice_number)).length}
               </span>
               {' '}with signed terms
+              {(activeTab === 'fnt_sale' || activeTab === 'fnt_finance') && (
+                <>
+                  <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {filteredInvoices.filter((inv) => pdiScans.has(inv.invoice_number)).length}
+                  </span>
+                  {' '}with signed PDI
+                </>
+              )}
             </div>
             {showTotals && (
               <div>
@@ -576,12 +625,42 @@ const InvoiceHistory: React.FC = () => {
 
       {/* Signed Terms */}
       {termsFor && (
-        <SignedTermsDialog
+        <ScannedDocumentDialog
+          kind="signed_terms"
           invoiceNumber={termsFor.invoice_number}
           customerName={termsFor.customer_name}
           existing={signedTerms.get(termsFor.invoice_number)}
           onClose={() => setTermsFor(null)}
-          onChanged={loadSignedTerms}
+          onChanged={loadScans}
+        />
+      )}
+
+      {/* PDI Checklist */}
+      {pdiFor && (
+        <ScannedDocumentDialog
+          kind="pdi_checklist"
+          invoiceNumber={pdiFor.invoice_number}
+          customerName={pdiInputFromInvoice(pdiFor).customerName || pdiFor.customer_name}
+          existing={pdiScans.get(pdiFor.invoice_number)}
+          onClose={() => setPdiFor(null)}
+          onChanged={loadScans}
+          intro={
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Print the checklist</p>
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                Comes pre-filled with this sale's customer and vehicle. Tick every item, then have the
+                customer sign, print their name and date it before scanning it back in below.
+              </p>
+              <button
+                onClick={() => printPdi(pdiFor)}
+                disabled={printingPdi}
+                className="mt-3 flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+              >
+                <Printer className="w-4 h-4" />
+                {printingPdi ? 'Building...' : 'Print Checklist'}
+              </button>
+            </div>
+          }
         />
       )}
 
