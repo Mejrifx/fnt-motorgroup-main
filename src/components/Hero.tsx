@@ -2,10 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { List, X, Phone, MapPin } from '@phosphor-icons/react';
 import fntLogo from '../assets/fnt-logo.png';
 import CarFilter from './CarFilter';
+import { BUSINESS } from '../config/business';
 
 interface HeroProps {
   onFilterChange?: (filters: any) => void;
 }
+
+/** Homepage section anchors. Real <a href="#…"> links so crawlers can follow them. */
+const NAV_ITEMS = [
+  { label: 'Home', target: 'home' },
+  { label: 'Showroom', target: 'inventory' },
+  { label: 'Sell Your Car', target: 'services' },
+  { label: 'Reviews', target: 'reviews' },
+  { label: 'About Us', target: 'about' },
+  { label: 'Contact', target: 'contact' },
+];
+
+/** Smooth-scroll to a section while keeping the anchor crawlable. */
+const smoothScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+  const el = document.getElementById(target);
+  if (!el) return; // let the browser follow the href normally
+  e.preventDefault();
+  el.scrollIntoView({ behavior: 'smooth' });
+  history.replaceState(null, '', `#${target}`);
+};
 
 const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -67,7 +87,8 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
         <div className="flex justify-between items-center">
           {/* Mobile Phone Button - Top Left */}
           <a 
-            href="tel:07735770031"
+            href={BUSINESS.phone.href}
+            aria-label={`Call ${BUSINESS.phone.display}`}
             className="p-3 text-white hover:text-fnt-red transition-all duration-300 btn-glass rounded-full"
           >
             <Phone size={24} weight="duotone" />
@@ -109,38 +130,32 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             
             {/* Navigation Links */}
             <nav className="flex-1 flex flex-col justify-center px-8 space-y-2">
-              {[
-                { label: 'Home', target: 'home' },
-                { label: 'Showroom', target: 'inventory' },
-                { label: 'Sell Your Car', target: 'services' },
-                { label: 'Reviews', target: 'reviews' },
-                { label: 'About Us', target: 'about' },
-                { label: 'Contact', target: 'contact' },
-              ].map((item) => (
-                <button
+              {NAV_ITEMS.map((item) => (
+                <a
                   key={item.target}
-                  onClick={() => {
-                    document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' });
+                  href={`#${item.target}`}
+                  onClick={(e) => {
+                    smoothScrollTo(e, item.target);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="text-2xl font-bold text-white hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-white/10"
+                  className="block text-2xl font-bold text-white hover:text-fnt-red transition-all duration-300 text-left py-4 border-b border-white/10"
                   style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}
                 >
                   {item.label}
-                </button>
+                </a>
               ))}
             </nav>
             
             {/* Footer with contact info */}
             <div className="p-8 border-t border-white/10">
               <div className="text-center space-y-3">
-                <p className="text-lg font-semibold text-white">FNT Motor Group</p>
-                <p className="text-gray-400">Clayton Compound<br />Clayton Court<br />City Works<br />Openshaw<br />Manchester<br />M11 2NB</p>
+                <p className="text-lg font-semibold text-white">{BUSINESS.name}</p>
+                <p className="text-gray-400">{BUSINESS.address.streetAddress}<br />{BUSINESS.address.district}, {BUSINESS.address.locality} {BUSINESS.address.postcode}</p>
                 <a 
-                  href="tel:07735770031"
+                  href={BUSINESS.phone.href}
                   className="block text-lg font-bold text-fnt-red hover:text-red-400 transition-colors duration-300"
                 >
-                  07735770031
+                  {BUSINESS.phone.display}
                 </a>
               </div>
             </div>
@@ -166,13 +181,13 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           style={{ left: '80px', pointerEvents: 'auto' }}
         >
           <a 
-            href="https://www.google.com/maps/search/?api=1&query=Clayton%20Compound%2C%20Clayton%20Court%2C%20City%20Works%2C%20Openshaw%2C%20Manchester%2C%20M11%202NB" 
+            href={BUSINESS.address.googleMapsUrl} 
             target="_blank" 
             rel="noopener noreferrer"
             className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"
           >
             <MapPin size={16} weight="duotone" />
-            <span>Manchester M11 2NB</span>
+            <span>{BUSINESS.address.locality} {BUSINESS.address.postcode}</span>
           </a>
         </div>
 
@@ -182,11 +197,11 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
           style={{ right: '120px', pointerEvents: 'auto' }}
         >
           <a 
-            href="tel:07735770031"
+            href={BUSINESS.phone.href}
             className="btn-glass rounded-full px-4 py-2 flex items-center gap-2 text-sm font-medium text-white hover:text-fnt-red"
           >
             <Phone size={16} weight="duotone" />
-            <span>07735770031</span>
+            <span>{BUSINESS.phone.display}</span>
           </a>
         </div>
 
@@ -198,21 +213,15 @@ const Hero: React.FC<HeroProps> = ({ onFilterChange }) => {
             <div className="flex items-center justify-center px-3 py-2">
               {/* Desktop Navigation */}
               <nav className="flex items-center gap-0.5">
-                {[
-                  { label: 'Home', target: 'home' },
-                  { label: 'Showroom', target: 'inventory' },
-                  { label: 'Sell Your Car', target: 'services' },
-                  { label: 'Reviews', target: 'reviews' },
-                  { label: 'About Us', target: 'about' },
-                  { label: 'Contact', target: 'contact' },
-                ].map((item) => (
-                  <button
+                {NAV_ITEMS.map((item) => (
+                  <a
                     key={item.target}
-                    onClick={() => document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth' })}
+                    href={`#${item.target}`}
+                    onClick={(e) => smoothScrollTo(e, item.target)}
                     className="px-4 py-1.5 text-sm font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
                   >
                     {item.label}
-                  </button>
+                  </a>
                 ))}
               </nav>
             </div>

@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
-
-const SITE_URL = 'https://fntmotorgroup.co.uk';
-const SITE_NAME = 'FNT Motor Group';
-const DEFAULT_IMAGE = `${SITE_URL}/fnt-logo.png`;
+import {
+  DEFAULT_OG_IMAGE,
+  DEFAULT_ROBOTS,
+  NOINDEX_ROBOTS,
+  SITE_NAME,
+  SITE_URL,
+  withSiteName,
+} from '../lib/seo';
 
 interface PageMetaOptions {
   /** Page <title>. The site name is appended automatically unless it's already present. */
@@ -15,8 +19,10 @@ interface PageMetaOptions {
   type?: string;
   /** One or more JSON-LD objects to inject as structured data for this page. */
   jsonLd?: object | object[];
-  /** Set true for pages that should not be indexed (e.g. admin). */
+  /** Set true for pages that should not be indexed (e.g. admin, 404). */
   noindex?: boolean;
+  /** Explicit robots directive; overrides `noindex`. */
+  robots?: string;
 }
 
 function upsertMetaByName(name: string, content: string) {
@@ -51,21 +57,24 @@ function upsertCanonical(href: string) {
 
 /**
  * Keeps document.title, meta description, canonical URL, Open Graph /
- * Twitter Card tags, and per-page JSON-LD structured data in sync with the
- * current route. This is a client-side-only implementation (no SSR), but
- * Googlebot renders JS before indexing, so this still gives each page its
- * own crawlable title/description/schema instead of one static index.html
- * shared across every route.
+ * Twitter Card tags, and per-page JSON-LD in sync with the current route
+ * during client-side navigation.
+ *
+ * The FIRST HTML response for each public URL is already correct: index.html
+ * / 404.html are filled at build time and every other route is templated by
+ * netlify/edge-functions/seo.ts. This hook makes sure the values stay right
+ * once the user navigates within the SPA, using the same shared builders from
+ * src/lib/seo.ts so client and server never disagree.
  */
-export function usePageMeta({ title, description, path, image, type = 'website', jsonLd, noindex }: PageMetaOptions) {
+export function usePageMeta({ title, description, path, image, type = 'website', jsonLd, noindex, robots }: PageMetaOptions) {
   useEffect(() => {
-    const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+    const fullTitle = withSiteName(title);
     const url = `${SITE_URL}${path ?? window.location.pathname}`;
-    const ogImage = image ?? DEFAULT_IMAGE;
+    const ogImage = image ?? DEFAULT_OG_IMAGE;
 
     document.title = fullTitle;
     upsertMetaByName('description', description);
-    upsertMetaByName('robots', noindex ? 'noindex, nofollow' : 'index, follow');
+    upsertMetaByName('robots', robots ?? (noindex ? NOINDEX_ROBOTS : DEFAULT_ROBOTS));
     upsertCanonical(url);
 
     upsertMetaByProperty('og:title', fullTitle);
@@ -80,17 +89,19 @@ export function usePageMeta({ title, description, path, image, type = 'website',
     upsertMetaByName('twitter:description', description);
     upsertMetaByName('twitter:image', ogImage);
 
-    const scriptId = 'page-jsonld';
-    const existing = document.getElementById(scriptId);
-    if (existing) existing.remove();
+    // Replace any page-level JSON-LD (server-injected or from a previous route).
+    document.querySelectorAll('script#page-jsonld').forEach((el) => el.remove());
 
     if (jsonLd) {
-      const script = document.createElement('script');
-      script.id = scriptId;
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify(jsonLd);
-      document.head.appendChild(script);
+      const blocks = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+      blocks.forEach((block) => {
+        const script = document.createElement('script');
+        script.id = 'page-jsonld';
+        script.type = 'application/ld+json';
+        script.text = JSON.stringify(block);
+        document.head.appendChild(script);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, description, path, image, type, noindex, JSON.stringify(jsonLd)]);
+  }, [title, description, path, image, type, noindex, robots, JSON.stringify(jsonLd)]);
 }

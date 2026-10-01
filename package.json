@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@netlify/edge-functions": "^4.0.2",
     "@netlify/functions": "^5.1.2",
     "@types/node": "^25.1.0",
     "@types/react": "^18.3.5",

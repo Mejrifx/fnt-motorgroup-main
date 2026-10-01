@@ -9,19 +9,68 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Dynamic sitemap (must come before the SPA catch-all below)
+# ============================================================================
+# ROUTING
+# ----------------------------------------------------------------------------
+# NOTE: there is intentionally NO public/_redirects file. A `_redirects` file
+# is processed before this file, and the old `/* /index.html 200` rule in it
+# was swallowing /sitemap.xml (served the React shell) and made every unknown
+# URL a 200 copy of the homepage.
+#
+# Order matters: rules are matched top to bottom.
+#
+# Per-URL <title>/meta/JSON-LD for the SPA routes is produced by the edge
+# function netlify/edge-functions/seo.ts (see its `config.path`). Edge
+# functions run BEFORE these redirect rules and call context.next() to obtain
+# the shell that the rules below rewrite to.
+# ============================================================================
+
+# Dynamic sitemap (Supabase-backed; lists every available car)
 [[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
   status = 200
+  force = true
 
-# Redirects for SPA routing
+# Known SPA routes -> app shell (200). Keep this list in sync with the
+# <Route>s in src/App.tsx.
 [[redirects]]
-  from = "/*"
+  from = "/car/*"
   to = "/index.html"
   status = 200
-  force = false
-  conditions = {Role = []}
+
+[[redirects]]
+  from = "/warranty-financing"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms-conditions"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy-policy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/cookie-policy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+# Everything else that is not a real file -> real 404 (dist/404.html boots the
+# app, which renders <NotFound />). Existing static assets are never shadowed
+# because this rule is not forced.
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
 
 # Function settings (node bundler applies to all functions)
 [functions]
@@ -50,6 +99,12 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Staff-only area: belt-and-braces noindex on top of robots.txt Disallow
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
 
 # Headers for Netlify Functions
 [[headers]]

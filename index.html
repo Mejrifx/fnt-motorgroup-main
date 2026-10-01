@@ -8,17 +8,21 @@
     <link rel="icon" type="image/png" href="/fnt-logo.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/fnt-logo.png" />
     <link rel="shortcut icon" href="/favicon.svg" />
-    <!-- Critical: Prevent zoom and ensure consistent scaling -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <!-- Prevent text size adjustment on mobile -->
+    <!-- Mobile friendly: users must be able to pinch-zoom (accessibility + Google mobile usability) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Prevent iOS auto-linking numbers; real phone links use explicit tel: hrefs -->
     <meta name="format-detection" content="telephone=no" />
-    <!-- Force consistent rendering -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="theme-color" content="#0b0c0f" />
 
-    <!-- Primary SEO -->
+    <!--
+      Primary SEO. The values below are the homepage defaults and are
+      overwritten at build time from src/lib/seo.ts (STATIC_PAGES['/']) by the
+      Vite plugin in vite.config.ts. For every other public URL the Netlify
+      edge function (netlify/edge-functions/seo.ts) rewrites these tags per
+      request, so the first HTML response is already page-specific.
+    -->
     <title>Used Cars for Sale in Manchester | FNT Motor Group</title>
-    <meta name="description" content="Browse quality used cars for sale at FNT Motor Group in Manchester. Trusted dealer with 6-month warranty, flexible finance and 1,000+ happy customers. Visit our showroom or shop online today." />
+    <meta name="description" content="Browse quality used cars for sale at FNT Motor Group in Manchester." />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://fntmotorgroup.co.uk/" />
 
@@ -26,7 +30,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="FNT Motor Group" />
     <meta property="og:title" content="Used Cars for Sale in Manchester | FNT Motor Group" />
-    <meta property="og:description" content="Browse quality used cars for sale at FNT Motor Group in Manchester. Trusted dealer with 6-month warranty, flexible finance and 1,000+ happy customers." />
+    <meta property="og:description" content="Browse quality used cars for sale at FNT Motor Group in Manchester." />
     <meta property="og:url" content="https://fntmotorgroup.co.uk/" />
     <meta property="og:image" content="https://fntmotorgroup.co.uk/fnt-logo.png" />
     <meta property="og:locale" content="en_GB" />
@@ -34,7 +38,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Used Cars for Sale in Manchester | FNT Motor Group" />
-    <meta name="twitter:description" content="Browse quality used cars for sale at FNT Motor Group in Manchester. Trusted dealer with 6-month warranty, flexible finance and 1,000+ happy customers." />
+    <meta name="twitter:description" content="Browse quality used cars for sale at FNT Motor Group in Manchester." />
     <meta name="twitter:image" content="https://fntmotorgroup.co.uk/fnt-logo.png" />
 
     <!-- Geo / local business hints -->
@@ -47,41 +51,8 @@
     <!-- SimplePDF Integration -->
     <script src="https://unpkg.com/@simplepdf/web-embed-pdf" companyIdentifier="qiml3vqj" defer></script>
 
-    <!-- Site-wide business identity, so Google can build a Knowledge Panel /
-         local pack listing for FNT Motor Group regardless of which page it crawls. -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "AutomotiveBusiness",
-      "@id": "https://fntmotorgroup.co.uk/#business",
-      "name": "FNT Motor Group",
-      "image": "https://fntmotorgroup.co.uk/fnt-logo.png",
-      "url": "https://fntmotorgroup.co.uk/",
-      "telephone": "+447735770031",
-      "email": "fntgroupltd@gmail.com",
-      "priceRange": "££",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Clayton Compound, Clayton Court, City Works, Openshaw",
-        "addressLocality": "Manchester",
-        "postalCode": "M11 2NB",
-        "addressCountry": "GB"
-      },
-      "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-          "opens": "09:00",
-          "closes": "17:00"
-        }
-      ],
-      "sameAs": [
-        "https://www.instagram.com/fnt_motorgroup/",
-        "https://www.tiktok.com/@fntmotorgroup",
-        "https://www.autotrader.co.uk/dealers/lancashire/manchester/fnt-motor-group-10042804"
-      ]
-    }
-    </script>
+    <!-- Site-wide AutoDealer JSON-LD (NAP) is injected here at build time from
+         src/config/business.ts – do not hand-edit business details in this file. -->
   </head>
   <body>
     <div id="root"></div>

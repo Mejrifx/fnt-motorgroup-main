@@ -1,17 +1,13 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { STATIC_PAGES } from '../lib/seo';
+import { ADDRESS_ONE_LINE, BUSINESS } from '../config/business';
 
 const TermsAndConditions: React.FC = () => {
-  const navigate = useNavigate();
-
-  usePageMeta({
-    title: 'Terms & Conditions',
-    description: 'Read the terms and conditions for buying a vehicle from FNT Motor Group, Manchester.',
-    path: '/terms-conditions',
-  });
+  usePageMeta(STATIC_PAGES['/terms-conditions']);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,13 +17,13 @@ const TermsAndConditions: React.FC = () => {
     <div className="min-h-screen glass-scene grain">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => navigate('/')}
+        <Link
+          to="/"
           className="btn-glass flex items-center space-x-2 text-white hover:text-fnt-red px-4 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
-        </button>
+        </Link>
       </div>
 
       {/* Header */}
@@ -427,9 +423,9 @@ const TermsAndConditions: React.FC = () => {
                   
                   <div className="glass-subtle p-4 rounded-xl mt-4">
                     <p className="font-semibold text-white">FNT Motor Group</p>
-                    <p className="text-gray-300 mt-2">Email: fntgroupltd@gmail.com</p>
-                    <p className="text-gray-300">Phone: 07735770031</p>
-                    <p className="text-gray-300">Address: Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB</p>
+                    <p className="text-gray-300 mt-2">Email: {BUSINESS.email}</p>
+                    <p className="text-gray-300">Phone: {BUSINESS.phone.display}</p>
+                    <p className="text-gray-300">Address: {ADDRESS_ONE_LINE}</p>
                   </div>
                   
                   <p className="mt-4">
@@ -497,13 +493,13 @@ const TermsAndConditions: React.FC = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a 
-                  href="tel:07735770031"
+                  href={BUSINESS.phone.href}
                   className="inline-flex items-center justify-center btn-glass-red px-6 py-3 text-white rounded-xl font-semibold"
                 >
-                  Call: 07735770031
+                  Call: {BUSINESS.phone.display}
                 </a>
                 <a 
-                  href="mailto:fntgroupltd@gmail.com"
+                  href={`mailto:${BUSINESS.email}`}
                   className="inline-flex items-center justify-center btn-glass px-6 py-3 text-white rounded-xl font-semibold"
                 >
                   Email Us

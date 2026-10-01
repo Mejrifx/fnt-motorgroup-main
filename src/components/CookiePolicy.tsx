@@ -1,17 +1,13 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { STATIC_PAGES } from '../lib/seo';
+import { ADDRESS_ONE_LINE, BUSINESS } from '../config/business';
 
 const CookiePolicy: React.FC = () => {
-  const navigate = useNavigate();
-
-  usePageMeta({
-    title: 'Cookie Policy',
-    description: 'Learn how FNT Motor Group uses cookies on our website.',
-    path: '/cookie-policy',
-  });
+  usePageMeta(STATIC_PAGES['/cookie-policy']);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,13 +17,13 @@ const CookiePolicy: React.FC = () => {
     <div className="min-h-screen glass-scene grain">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => navigate('/')}
+        <Link
+          to="/"
           className="btn-glass flex items-center space-x-2 text-white hover:text-fnt-red px-4 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
-        </button>
+        </Link>
       </div>
 
       {/* Header */}
@@ -66,7 +62,7 @@ const CookiePolicy: React.FC = () => {
                   This Policy complies with the Privacy and Electronic Communications Regulations 2003 (PECR) and UK GDPR.
                 </p>
                 <p>
-                  For information on how we use your personal data more generally, please see our <button onClick={() => navigate('/privacy-policy')} className="text-fnt-red underline hover:text-red-400">Privacy Notice</button>.
+                  For information on how we use your personal data more generally, please see our <Link to="/privacy-policy" className="text-fnt-red underline hover:text-red-400">Privacy Notice</Link>.
                 </p>
               </div>
             </div>
@@ -409,13 +405,13 @@ const CookiePolicy: React.FC = () => {
                   
                   <div className="glass-subtle p-4 rounded-xl mt-4">
                     <p className="font-semibold text-white mb-2">FNT Motor Group</p>
-                    <p className="text-gray-300">Email: fntgroupltd@gmail.com</p>
-                    <p className="text-gray-300">Phone: 07735770031</p>
-                    <p className="text-gray-300">Address: Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB</p>
+                    <p className="text-gray-300">Email: {BUSINESS.email}</p>
+                    <p className="text-gray-300">Phone: {BUSINESS.phone.display}</p>
+                    <p className="text-gray-300">Address: {ADDRESS_ONE_LINE}</p>
                   </div>
                   
                   <p className="mt-4">
-                    For information on how we use your personal data more generally, please see our <button onClick={() => navigate('/privacy-policy')} className="text-fnt-red underline hover:text-red-400">Privacy Notice</button>.
+                    For information on how we use your personal data more generally, please see our <Link to="/privacy-policy" className="text-fnt-red underline hover:text-red-400">Privacy Notice</Link>.
                   </p>
                 </AccordionItem>
               </Accordion>

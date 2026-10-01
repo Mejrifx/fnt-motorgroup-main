@@ -1,17 +1,13 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Accordion, AccordionItem } from './ui/Accordion';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { STATIC_PAGES } from '../lib/seo';
+import { ADDRESS_ONE_LINE, BUSINESS } from '../config/business';
 
 const PrivacyPolicy: React.FC = () => {
-  const navigate = useNavigate();
-
-  usePageMeta({
-    title: 'Privacy Policy',
-    description: 'Read the FNT Motor Group privacy policy to learn how we collect, use and protect your personal data.',
-    path: '/privacy-policy',
-  });
+  usePageMeta(STATIC_PAGES['/privacy-policy']);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,13 +17,13 @@ const PrivacyPolicy: React.FC = () => {
     <div className="min-h-screen glass-scene grain">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => navigate('/')}
+        <Link
+          to="/"
           className="btn-glass flex items-center space-x-2 text-white hover:text-fnt-red px-4 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
-        </button>
+        </Link>
       </div>
 
       {/* Header */}
@@ -59,7 +55,7 @@ const PrivacyPolicy: React.FC = () => {
               <div className="text-gray-300 leading-relaxed space-y-4">
                 <p>
                   For the purposes of this Notice, the data controller is FNT Motor Group (trading as FNT Motor Group) 
-                  and whose registered office address is at Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB.
+                  and whose registered office address is at {ADDRESS_ONE_LINE}.
                 </p>
                 <p>
                   FNT Motor Group is committed to protecting your privacy and ensuring that your personal data is handled 
@@ -72,9 +68,9 @@ const PrivacyPolicy: React.FC = () => {
                 </p>
                 <div className="glass-subtle border-l-4 !border-l-fnt-red p-4 mt-4">
                   <p className="font-semibold text-white mb-2">Contact our Data Protection team:</p>
-                  <p className="text-gray-300">Email: fntgroupltd@gmail.com</p>
-                  <p className="text-gray-300">Phone: 07735770031</p>
-                  <p className="text-gray-300">Address: Clayton Compound, Clayton Court, City Works, Openshaw, Manchester, M11 2NB</p>
+                  <p className="text-gray-300">Email: {BUSINESS.email}</p>
+                  <p className="text-gray-300">Phone: {BUSINESS.phone.display}</p>
+                  <p className="text-gray-300">Address: {ADDRESS_ONE_LINE}</p>
                 </div>
               </div>
             </div>
@@ -202,7 +198,7 @@ const PrivacyPolicy: React.FC = () => {
                   <ul className="list-disc pl-6 space-y-2 mt-3">
                     <li>Clicking the "unsubscribe" link in any marketing email</li>
                     <li>Updating your preferences in your account settings</li>
-                    <li>Contacting us directly at fntgroupltd@gmail.com</li>
+                    <li>Contacting us directly at {BUSINESS.email}</li>
                   </ul>
                   
                   <p className="mt-4">
@@ -233,7 +229,7 @@ const PrivacyPolicy: React.FC = () => {
                   </ul>
                   
                   <p className="mt-4">
-                    For full details on cookies, please see our <button onClick={() => navigate('/cookie-policy')} className="text-fnt-red underline hover:text-red-400">Cookie Policy</button>.
+                    For full details on cookies, please see our <Link to="/cookie-policy" className="text-fnt-red underline hover:text-red-400">Cookie Policy</Link>.
                   </p>
                 </AccordionItem>
 
@@ -415,8 +411,8 @@ const PrivacyPolicy: React.FC = () => {
                     <p className="text-gray-200 mb-2">
                       <strong>To exercise any of these rights, please contact us:</strong>
                     </p>
-                    <p className="text-gray-200">Email: fntgroupltd@gmail.com</p>
-                    <p className="text-gray-200">Phone: 07735770031</p>
+                    <p className="text-gray-200">Email: {BUSINESS.email}</p>
+                    <p className="text-gray-200">Phone: {BUSINESS.phone.display}</p>
                     <p className="text-gray-200 mt-3">
                       We will respond to your request within 30 days. Some rights may not apply in certain circumstances 
                       (e.g., we cannot erase data if we have a legal obligation to retain it).
@@ -430,7 +426,7 @@ const PrivacyPolicy: React.FC = () => {
                 >
                   <p>
                     If you wish to make a complaint about how your personal data is being processed by FNT Motor Group, 
-                    please contact us first at fntgroupltd@gmail.com or by phone at 07735770031.
+                    please contact us first at {BUSINESS.email} or by phone at {BUSINESS.phone.display}.
                   </p>
                   
                   <h4 className="font-semibold text-white mt-6 mb-3">Right to lodge a complaint with the ICO:</h4>

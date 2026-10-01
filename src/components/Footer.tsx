@@ -1,14 +1,10 @@
 import React from 'react';
 import { InstagramLogo, Phone, EnvelopeSimple, MapPin } from '@phosphor-icons/react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import fntLogo from '../assets/fnt-logo.png';
+import { ADDRESS_LINES, BUSINESS } from '../config/business';
 
 const Footer = () => {
-  const navigate = useNavigate();
-
-  const handleAdminAccess = () => {
-    navigate('/admin/login');
-  };
 
   return (
     <footer className="text-white relative" style={{ backgroundColor: '#08090b' }}>
@@ -29,7 +25,7 @@ const Footer = () => {
             </div>
             <div className="flex space-x-4" style={{ marginTop: '-8px', marginLeft: '30px', transform: 'translateY(-20px)' }}>
               <a 
-                href="https://www.instagram.com/fnt_motorgroup/" 
+                href={BUSINESS.social.instagram} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 glass-chip rounded-full flex items-center justify-center hover:text-fnt-red transition-colors duration-300"
@@ -47,7 +43,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://www.autotrader.co.uk/dealers/lancashire/manchester/fnt-motor-group-10042804" 
+                href={BUSINESS.social.autotrader} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity duration-300 flex items-center"
@@ -64,21 +60,23 @@ const Footer = () => {
 
           <div>
             <h4 className="text-lg font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>Quick Links</h4>
+            {/* Absolute paths (/#section) so these resolve from /car/:id and
+                other routes too, and so crawlers see real site links. */}
             <ul className="space-y-3">
-              <li><a href="#home" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Home</a></li>
-              <li><a href="#inventory" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Inventory</a></li>
-              <li><a href="#services" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Services</a></li>
-              <li><a href="#about" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">About Us</a></li>
-              <li><a href="#contact" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Contact</a></li>
+              <li><a href="/#home" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Home</a></li>
+              <li><a href="/#inventory" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Inventory</a></li>
+              <li><a href="/#services" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Services</a></li>
+              <li><a href="/#about" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">About Us</a></li>
+              <li><a href="/#contact" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Contact</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-lg font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>Services</h4>
             <ul className="space-y-3">
-              <li><a href="#inventory" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Vehicle Sales</a></li>
+              <li><a href="/#inventory" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Vehicle Sales</a></li>
               <li><Link to="/warranty-financing" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Financing</Link></li>
-              <li><a href="#services" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Trade-In</a></li>
+              <li><a href="/#contact" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Sell Your Car / Trade-In</a></li>
               <li><Link to="/warranty-financing" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">Warranty</Link></li>
             </ul>
           </div>
@@ -88,23 +86,22 @@ const Footer = () => {
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
                 <MapPin weight="duotone" className="w-5 h-5 text-fnt-red mt-1 flex-shrink-0" />
-                <div className="text-gray-400">
-                  Clayton Compound<br />
-                  Clayton Court<br />
-                  City Works<br />
-                  Openshaw<br />
-                  Manchester<br />
-                  M11 2NB<br />
-                  United Kingdom
-                </div>
+                <address className="text-gray-400 not-italic">
+                  {ADDRESS_LINES.map((line, i) => (
+                    <React.Fragment key={line}>
+                      {i > 0 && <br />}
+                      {line}
+                    </React.Fragment>
+                  ))}
+                </address>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone weight="duotone" className="w-5 h-5 text-fnt-red flex-shrink-0" />
-                <span className="text-gray-400">07735770031</span>
+                <a href={BUSINESS.phone.href} className="text-gray-400 hover:text-fnt-red transition-colors duration-300">{BUSINESS.phone.display}</a>
               </div>
               <div className="flex items-center space-x-3">
                 <EnvelopeSimple weight="duotone" className="w-5 h-5 text-fnt-red flex-shrink-0" />
-                <span className="text-gray-400">fntgroupltd@gmail.com</span>
+                <a href={`mailto:${BUSINESS.email}`} className="text-gray-400 hover:text-fnt-red transition-colors duration-300">{BUSINESS.email}</a>
               </div>
             </div>
           </div>
@@ -113,12 +110,13 @@ const Footer = () => {
         <div className="border-t border-white/10 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-300 text-sm">
-              © 2026 <button 
-                onClick={handleAdminAccess}
+              © {new Date().getFullYear()} <Link 
+                to="/admin/login"
+                rel="nofollow"
                 className="hover:text-fnt-red transition-colors duration-300 cursor-pointer"
               >
-                FNT Motor Group
-              </button>. All rights reserved.
+                {BUSINESS.name}
+              </Link>. All rights reserved.
             </p>
             
             {/* Watermark in the center */}

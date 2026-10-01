@@ -1,17 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, CaretLeft, CaretRight, Phone, EnvelopeSimple, MapPin, Calendar, GasPump, GearSix, Palette, CarProfile as CarIcon, Door, Money } from '@phosphor-icons/react';
 import { supabase, type Car } from '../lib/supabase';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { BUSINESS } from '../config/business';
+import {
+  PRELOAD_GLOBAL,
+  buildBreadcrumbJsonLd,
+  buildVehicleJsonLd,
+  resolveCarImages,
+  resolveImageUrl,
+  vehicleDescription,
+  vehicleTitle,
+  vehicleNotFoundMeta,
+  type PreloadedCar,
+} from '../lib/seo';
 
 // Replace AutoTrader's {resize} placeholder with actual dimensions
-const resolveUrl = (url: string) => url.replace('{resize}', 'w800');
+const resolveUrl = resolveImageUrl;
+
+/**
+ * On a direct hit to /car/:id the Netlify edge function already fetched the
+ * car and embedded it as window.__FNT_CAR__ (see netlify/edge-functions/seo.ts),
+ * so we can render immediately instead of showing a spinner and re-querying.
+ */
+function readPreloadedCar(id: string | undefined): Car | null {
+  if (!id || typeof window === 'undefined') return null;
+  const preloaded = (window as unknown as Record<string, PreloadedCar | undefined>)[PRELOAD_GLOBAL];
+  return preloaded && preloaded.id === id ? (preloaded.car as unknown as Car) : null;
+}
 
 const CarDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [car, setCar] = useState<Car | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [car, setCar] = useState<Car | null>(() => readPreloadedCar(id));
+  const [loading, setLoading] = useState(() => readPreloadedCar(id) === null);
   const [error, setError] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showFullscreenGallery, setShowFullscreenGallery] = useState(false);
@@ -40,9 +62,17 @@ const CarDetails: React.FC = () => {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchCar(id);
+    if (!id) return;
+    const preloaded = readPreloadedCar(id);
+    if (preloaded) {
+      // Server already supplied this car; hydrate state and skip the round-trip.
+      setCar(preloaded);
+      setError('');
+      setLoading(false);
+      return;
     }
+    setLoading(true);
+    fetchCar(id);
   }, [id]);
 
   const fetchCar = async (carId: string) => {
@@ -69,33 +99,10 @@ const CarDetails: React.FC = () => {
     return resolveUrl(data.publicUrl);
   };
 
-  const getAllImages = (): string[] => {
-    if (!car) return [];
-    
-    const images: string[] = [];
-    
-    // Cover image: prefer Supabase Storage path, then direct URL
-    if (car.cover_image_path) {
-      images.push(getImageUrl(car.cover_image_path));
-    } else if (car.cover_image_url) {
-      images.push(resolveUrl(car.cover_image_url));
-    }
-    
-    // Gallery: prefer manually uploaded paths
-    if (car.gallery_image_paths && car.gallery_image_paths.length > 0) {
-      car.gallery_image_paths.forEach(path => images.push(getImageUrl(path)));
-    }
-    
-    // Gallery: AutoTrader CDN URLs (also resolve {resize})
-    if (car.gallery_images && Array.isArray(car.gallery_images) && car.gallery_images.length > 0) {
-      car.gallery_images.forEach(url => {
-        const resolved = resolveUrl(url);
-        if (!images.includes(resolved)) images.push(resolved);
-      });
-    }
-    
-    return images;
-  };
+  // Cover (Storage path, else direct URL) + uploaded gallery + AutoTrader CDN
+  // gallery, de-duplicated. Shared with the edge function so the og:image /
+  // JSON-LD images match what the page shows.
+  const getAllImages = (): string[] => (car ? resolveCarImages(car, getImageUrl) : []);
 
   const nextImage = () => {
     const images = getAllImages();
@@ -136,60 +143,23 @@ const CarDetails: React.FC = () => {
 
   const pageImages = car ? getAllImages() : [];
 
-  usePageMeta({
-    title: car ? `${car.year} ${car.make} ${car.model} for Sale` : 'Car Details',
-    description: car
-      ? `${car.year} ${car.make} ${car.model} — ${formatMileage(car.mileage)}, ${car.fuel_type}, ${car.transmission}. ${formatPrice(car.price)} at FNT Motor Group, Manchester. 6-month warranty included.`
-      : 'View this vehicle for sale at FNT Motor Group, Manchester.',
-    path: `/car/${id}`,
-    image: pageImages[0],
-    type: 'product',
-    jsonLd: car
+  // Same title/description/JSON-LD builders the edge function used for the
+  // initial HTML, so nothing changes under Google's feet after hydration.
+  const notFoundMeta = vehicleNotFoundMeta(id ?? '');
+  usePageMeta(
+    car
       ? {
-          '@context': 'https://schema.org',
-          '@type': 'Vehicle',
-          name: `${car.year} ${car.make} ${car.model}`,
-          brand: { '@type': 'Brand', name: car.make },
-          model: car.model,
-          vehicleModelDate: String(car.year),
-          fuelType: car.fuel_type,
-          vehicleTransmission: car.transmission,
-          ...(car.colour ? { color: car.colour } : {}),
-          ...(car.doors ? { numberOfDoors: car.doors } : {}),
-          ...(car.mileage
-            ? {
-                mileageFromOdometer: {
-                  '@type': 'QuantitativeValue',
-                  value: parseInt(car.mileage.replace(/[^\d]/g, ''), 10) || undefined,
-                  unitCode: 'SMI',
-                },
-              }
-            : {}),
-          image: pageImages.slice(0, 8),
-          url: `https://fntmotorgroup.co.uk/car/${car.id}`,
-          offers: {
-            '@type': 'Offer',
-            price: car.price,
-            priceCurrency: 'GBP',
-            availability: 'https://schema.org/InStock',
-            itemCondition: 'https://schema.org/UsedCondition',
-            url: `https://fntmotorgroup.co.uk/car/${car.id}`,
-            seller: {
-              '@type': 'AutomotiveBusiness',
-              name: 'FNT Motor Group',
-              telephone: '+447735770031',
-              address: {
-                '@type': 'PostalAddress',
-                streetAddress: 'Clayton Compound, Clayton Court, City Works, Openshaw',
-                addressLocality: 'Manchester',
-                postalCode: 'M11 2NB',
-                addressCountry: 'GB',
-              },
-            },
-          },
+          title: vehicleTitle(car),
+          description: vehicleDescription(car),
+          path: `/car/${car.id}`,
+          image: pageImages[0],
+          type: 'product',
+          jsonLd: [buildVehicleJsonLd(car, pageImages), buildBreadcrumbJsonLd(car)],
         }
-      : undefined,
-  });
+      : loading
+        ? { title: 'Used Car for Sale in Manchester', description: notFoundMeta.description, path: `/car/${id}`, type: 'product' }
+        : { ...notFoundMeta, noindex: true }
+  );
 
   if (loading) {
     return (
@@ -209,12 +179,12 @@ const CarDetails: React.FC = () => {
           <CarIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>Car Not Found</h2>
           <p className="text-gray-400 mb-6">{error}</p>
-          <button
-            onClick={() => navigate('/')}
-            className="btn-glass-red text-white px-6 py-3 rounded-xl font-semibold"
+          <Link
+            to="/"
+            className="btn-glass-red inline-block text-white px-6 py-3 rounded-xl font-semibold"
           >
             Back to Homepage
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -228,16 +198,16 @@ const CarDetails: React.FC = () => {
       <div className="border-b border-white/10 sticky top-0 z-40" style={{ background: 'rgba(11, 12, 15, 0.75)', backdropFilter: 'blur(24px) saturate(140%)', WebkitBackdropFilter: 'blur(24px) saturate(140%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <button
-              onClick={() => navigate('/')}
+            <Link
+              to="/#inventory"
               className="flex items-center space-x-2 text-white hover:text-fnt-red transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               <span className="font-medium">Back to Cars</span>
-            </button>
+            </Link>
             <div className="text-white">
-              <h1 className="text-lg font-bold">{car.make} {car.model}</h1>
-              <p className="text-sm text-gray-400">{car.year}</p>
+              <h1 className="text-lg font-bold">{car.year} {car.make} {car.model}</h1>
+              <p className="text-sm text-gray-400">for sale in {BUSINESS.address.locality}</p>
             </div>
           </div>
         </div>
@@ -453,21 +423,21 @@ const CarDetails: React.FC = () => {
               <h3 className="text-xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.02em' }}>Interested?</h3>
               <div className="space-y-3">
                 <a
-                  href="tel:07735770031"
+                  href={BUSINESS.phone.href}
                   className="btn-glass-red flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"
                 >
                   <Phone className="w-5 h-5" />
                   <span>Call Now</span>
                 </a>
                 <a
-                  href="mailto:fntgroupltd@gmail.com?subject=Inquiry about ${car.make} ${car.model}"
+                  href={`mailto:${BUSINESS.email}?subject=${encodeURIComponent(`Enquiry about ${car.year} ${car.make} ${car.model}`)}`}
                   className="btn-glass flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"
                 >
                   <EnvelopeSimple className="w-5 h-5" />
                   <span>Email Inquiry</span>
                 </a>
                 <a
-                  href="https://www.google.com/maps/search/?api=1&query=Clayton%20Compound%2C%20Clayton%20Court%2C%20City%20Works%2C%20Openshaw%2C%20Manchester%2C%20M11%202NB"
+                  href={BUSINESS.address.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-glass flex items-center justify-center space-x-2 w-full text-white py-3 rounded-xl font-semibold"

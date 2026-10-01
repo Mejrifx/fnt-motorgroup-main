@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin, Phone, EnvelopeSimple, Clock, PaperPlaneTilt } from '@phosphor-icons/react';
+import { ADDRESS_LINES, BUSINESS } from '../config/business';
 
 const Contact = () => {
   return (
@@ -24,15 +25,22 @@ const Contact = () => {
                   <MapPin size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Location</h4>
-                    <p className="text-gray-400">
-                      Clayton Compound<br />
-                      Clayton Court<br />
-                      City Works<br />
-                      Openshaw<br />
-                      Manchester<br />
-                      M11 2NB<br />
-                      United Kingdom
-                    </p>
+                    <address className="text-gray-400 not-italic">
+                      {ADDRESS_LINES.map((line, i) => (
+                        <React.Fragment key={line}>
+                          {i > 0 && <br />}
+                          {line}
+                        </React.Fragment>
+                      ))}
+                    </address>
+                    <a
+                      href={BUSINESS.address.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 text-sm text-fnt-red hover:text-red-400 transition-colors duration-300"
+                    >
+                      Get directions
+                    </a>
                   </div>
                 </div>
 
@@ -40,7 +48,7 @@ const Contact = () => {
                   <Phone size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Phone</h4>
-                    <a href="tel:07735770031" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">07735770031</a>
+                    <a href={BUSINESS.phone.href} className="text-gray-400 hover:text-fnt-red transition-colors duration-300">{BUSINESS.phone.display}</a>
                   </div>
                 </div>
 
@@ -48,7 +56,7 @@ const Contact = () => {
                   <EnvelopeSimple size={22} weight="duotone" className="text-fnt-red flex-shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white mb-1">Email</h4>
-                    <a href="mailto:fntgroupltd@gmail.com" className="text-gray-400 hover:text-fnt-red transition-colors duration-300">fntgroupltd@gmail.com</a>
+                    <a href={`mailto:${BUSINESS.email}`} className="text-gray-400 hover:text-fnt-red transition-colors duration-300">{BUSINESS.email}</a>
                   </div>
                 </div>
 
@@ -57,8 +65,9 @@ const Contact = () => {
                   <div>
                     <h4 className="font-semibold text-white mb-1">Hours</h4>
                     <div className="text-gray-400 text-sm space-y-1">
-                      <p>Monday - Saturday: 9:00 AM - 5:00 PM</p>
-                      <p>Sunday: 9:00 AM - 5:00 PM (No car viewings)</p>
+                      {BUSINESS.openingHoursDisplay.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -73,7 +82,7 @@ const Contact = () => {
                   Our expert consultants are standing by to help you discover the luxury vehicle that matches your lifestyle and preferences.
                 </p>
                 <a 
-                  href="tel:07735770031"
+                  href={BUSINESS.phone.href}
                   className="btn-glass-red inline-block text-white px-6 py-3 rounded-xl font-semibold"
                 >
                   Contact Us Now

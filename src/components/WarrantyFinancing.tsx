@@ -1,16 +1,12 @@
 import React, { useEffect } from 'react';
 import { ShieldCheck, CreditCard, Phone, EnvelopeSimple, MapPin, CheckCircle, Star, Clock, ArrowLeft } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { STATIC_PAGES } from '../lib/seo';
+import { BUSINESS } from '../config/business';
 
 const WarrantyFinancing: React.FC = () => {
-  const navigate = useNavigate();
-
-  usePageMeta({
-    title: 'Warranty & Car Finance in Manchester',
-    description: 'Every car from FNT Motor Group comes with 6 months warranty and breakdown cover. Flexible finance options available on all vehicles in Manchester.',
-    path: '/warranty-financing',
-  });
+  usePageMeta(STATIC_PAGES['/warranty-financing']);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -21,13 +17,13 @@ const WarrantyFinancing: React.FC = () => {
     <div className="min-h-screen glass-scene grain">
       {/* Back Button */}
       <div className="fixed top-4 left-4 z-50">
-        <button
-          onClick={() => navigate('/')}
+        <Link
+          to="/"
           className="btn-glass flex items-center space-x-2 text-white hover:text-fnt-red px-4 py-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
-        </button>
+        </Link>
       </div>
 
       {/* Hero Section */}
@@ -287,8 +283,8 @@ const WarrantyFinancing: React.FC = () => {
                   <Phone className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-white mb-2">Call Us</h3>
-                <a href="tel:07735770031" className="text-fnt-red hover:text-red-400 font-semibold">
-                  07735770031
+                <a href={BUSINESS.phone.href} className="text-fnt-red hover:text-red-400 font-semibold">
+                  {BUSINESS.phone.display}
                 </a>
               </div>
 
@@ -297,8 +293,8 @@ const WarrantyFinancing: React.FC = () => {
                   <EnvelopeSimple className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-white mb-2">Email Us</h3>
-                <a href="mailto:fntgroupltd@gmail.com" className="text-fnt-red hover:text-red-400 font-semibold break-all">
-                  fntgroupltd@gmail.com
+                <a href={`mailto:${BUSINESS.email}`} className="text-fnt-red hover:text-red-400 font-semibold break-all">
+                  {BUSINESS.email}
                 </a>
               </div>
 
@@ -307,7 +303,7 @@ const WarrantyFinancing: React.FC = () => {
                   <MapPin className="w-8 h-8 text-fnt-red" />
                 </div>
                 <h3 className="font-bold text-white mb-2">Visit Us</h3>
-                <p className="text-gray-400">Clayton Compound<br />Clayton Court<br />City Works<br />Openshaw<br />Manchester<br />M11 2NB</p>
+                <p className="text-gray-400">{BUSINESS.address.streetAddress}<br />{BUSINESS.address.district}, {BUSINESS.address.locality} {BUSINESS.address.postcode}</p>
               </div>
             </div>
 
