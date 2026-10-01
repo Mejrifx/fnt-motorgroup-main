@@ -44,8 +44,15 @@ export function drawBrandMark(ctx: Ctx, logo: PDFImage | null, top: number): num
 interface HeaderOptions {
   title: string;
   logo: PDFImage | null;
+  /** A muted line directly under the title. */
+  subtitle?: string;
   /** Rendered as small uppercase label / bold value pairs under the title. */
   meta?: Array<[string, string]>;
+  /**
+   * Draws a write-in line of this width in place of any empty meta value, for
+   * forms that are printed blank and completed by hand.
+   */
+  blankValueWidth?: number;
 }
 
 /**
@@ -76,6 +83,17 @@ export function drawHeader(ctx: Ctx, options: HeaderOptions): number {
   );
 
   let metaBaseline = titleBaseline - 18;
+  if (options.subtitle) {
+    drawText(ctx, options.subtitle, {
+      x: MARGIN.left,
+      y: titleBaseline - 15,
+      size: TYPE.small,
+      font: ctx.regular,
+      color: COLOR.muted,
+    });
+    metaBaseline -= 13;
+  }
+
   for (const [label, value] of options.meta ?? []) {
     drawText(ctx, label.toUpperCase(), {
       x: MARGIN.left,
@@ -92,6 +110,9 @@ export function drawHeader(ctx: Ctx, options: HeaderOptions): number {
       font: ctx.bold,
       color: COLOR.heading,
     });
+    if (!value && options.blankValueWidth) {
+      rule(ctx, MARGIN.left + labelColumn, metaBaseline - 2, options.blankValueWidth, 0.6, COLOR.writeIn);
+    }
     metaBaseline -= 14;
   }
 

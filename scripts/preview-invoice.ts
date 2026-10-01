@@ -10,6 +10,7 @@ import { buildFNTFinanceInvoice, type FinanceInvoiceInput } from '../src/lib/pdf
 import { buildTNTServiceInvoice, type TNTInvoiceInput } from '../src/lib/pdf/tntServiceInvoice';
 import { buildFNTLetter, type LetterInput } from '../src/lib/pdf/fntLetter';
 import { letterTemplate } from '../src/lib/pdf/letterTemplates';
+import { buildPdiChecklist } from '../src/lib/pdf/pdiChecklist';
 
 const OUT_DIR = '/tmp/invoice-preview';
 
@@ -259,6 +260,26 @@ async function main() {
     ),
     ['letter-agreed-works', () => buildFNTLetter(letter, { logo: fntLogo })],
     ['letter-two-page', () => buildFNTLetter(letterLong, { logo: fntLogo })],
+    ['pdi-checklist-blank', () => buildPdiChecklist({}, { logo: fntLogo })],
+    [
+      'pdi-checklist-prefilled',
+      () =>
+        buildPdiChecklist(
+          {
+            invoiceNumber: saleWithPartExchange.invoiceNumber,
+            date: saleWithPartExchange.invoiceDate,
+            customerName: saleWithPartExchange.buyerName,
+            customerPhone: saleWithPartExchange.buyerPhone,
+            vehMake: saleWithPartExchange.vehMake,
+            vehModel: saleWithPartExchange.vehModel,
+            vehReg: saleWithPartExchange.vehReg,
+            vehColour: saleWithPartExchange.vehColour,
+            vehVin: saleWithPartExchange.vehVin,
+            vehMileage: saleWithPartExchange.vehMileage,
+          },
+          { logo: fntLogo },
+        ),
+    ],
   ];
 
   for (const [name, build] of jobs) {

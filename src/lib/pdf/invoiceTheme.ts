@@ -27,6 +27,8 @@ export const COLOR = {
   muted: rgb(0.45, 0.47, 0.51),
   hairline: rgb(0.87, 0.88, 0.9),
   rule: rgb(0.22, 0.23, 0.26),
+  /** Lines and boxes completed by hand: dark enough to survive a photocopy. */
+  writeIn: rgb(0.55, 0.57, 0.61),
 };
 
 export const TYPE = {
