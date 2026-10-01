@@ -1,18 +1,23 @@
 import React, { useRef, useState } from 'react';
 import { Camera, Check, Download, ExternalLink, FileText, Trash2, Upload, X } from 'lucide-react';
 import {
-  deleteSignedTerms,
+  SCAN_KINDS,
+  deleteScannedDocument,
   filesToPdf,
-  getSignedTermsUrl,
-  uploadSignedTerms,
-  type SignedTermsRecord,
-} from '../../lib/signedTerms';
+  getScannedDocumentUrl,
+  uploadScannedDocument,
+  type ScanKind,
+  type ScannedDocumentRecord,
+} from '../../lib/scannedDocuments';
 import { useToast } from '../ui/ToastContainer';
 
-interface SignedTermsDialogProps {
+interface ScannedDocumentDialogProps {
+  kind: ScanKind;
   invoiceNumber: string;
   customerName: string;
-  existing?: SignedTermsRecord;
+  existing?: ScannedDocumentRecord;
+  /** Shown above the attachment controls, e.g. the step that prints the form. */
+  intro?: React.ReactNode;
   onClose: () => void;
   /** Called after an upload or removal so the caller can refresh its list. */
   onChanged: () => void;
@@ -24,14 +29,17 @@ interface PendingPage {
   previewUrl: string;
 }
 
-const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
+const ScannedDocumentDialog: React.FC<ScannedDocumentDialogProps> = ({
+  kind,
   invoiceNumber,
   customerName,
   existing,
+  intro,
   onClose,
   onChanged,
 }) => {
   const { showToast } = useToast();
+  const { label, documentTitle } = SCAN_KINDS[kind];
   const [pages, setPages] = useState<PendingPage[]>([]);
   const [busy, setBusy] = useState(false);
   const cameraInput = useRef<HTMLInputElement>(null);
@@ -67,21 +75,21 @@ const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
   const save = async () => {
     setBusy(true);
     try {
-      const pdf = await filesToPdf(pages.map((page) => page.file));
-      const uploaded = await uploadSignedTerms(invoiceNumber, pdf);
+      const pdf = await filesToPdf(pages.map((page) => page.file), documentTitle);
+      const uploaded = await uploadScannedDocument(kind, invoiceNumber, pdf);
 
       if (!uploaded) {
-        showToast('Could not save the signed terms. Please try again.', 'error');
+        showToast(`Could not save the ${label}. Please try again.`, 'error');
         return;
       }
 
-      showToast(`Signed terms saved for ${invoiceNumber}`, 'success');
+      showToast(`${label} saved for ${invoiceNumber}`, 'success');
       discardPages();
       onChanged();
       onClose();
     } catch (error) {
-      console.error('Failed to build the signed terms PDF:', error);
-      showToast(error instanceof Error ? error.message : 'Could not save the signed terms.', 'error');
+      console.error(`Failed to build the ${label} PDF:`, error);
+      showToast(error instanceof Error ? error.message : `Could not save the ${label}.`, 'error');
     } finally {
       setBusy(false);
     }
@@ -89,14 +97,15 @@ const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
 
   const open = async (mode: 'preview' | 'download') => {
     setBusy(true);
-    const url = await getSignedTermsUrl(
+    const url = await getScannedDocumentUrl(
+      kind,
       invoiceNumber,
-      mode === 'download' ? `${invoiceNumber} - Signed Terms.pdf` : undefined,
+      mode === 'download' ? `${invoiceNumber} - ${label}.pdf` : undefined,
     );
     setBusy(false);
 
     if (!url) {
-      showToast('Could not open the signed terms. Please try again.', 'error');
+      showToast(`Could not open the ${label}. Please try again.`, 'error');
       return;
     }
 
@@ -113,15 +122,15 @@ const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
 
   const remove = async () => {
     setBusy(true);
-    const removed = await deleteSignedTerms(invoiceNumber);
+    const removed = await deleteScannedDocument(kind, invoiceNumber);
     setBusy(false);
 
     if (!removed) {
-      showToast('Could not remove the signed terms. Please try again.', 'error');
+      showToast(`Could not remove the ${label}. Please try again.`, 'error');
       return;
     }
 
-    showToast(`Signed terms removed from ${invoiceNumber}`, 'success');
+    showToast(`${label} removed from ${invoiceNumber}`, 'success');
     onChanged();
     onClose();
   };
@@ -137,7 +146,7 @@ const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
       <div className="w-full sm:max-w-lg bg-white dark:bg-gray-800 rounded-t-2xl sm:rounded-xl shadow-xl max-h-[92vh] overflow-y-auto">
         <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Signed Terms</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{label}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {invoiceNumber}
               {customerName ? ` \u00B7 ${customerName}` : ''}
@@ -153,6 +162,8 @@ const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
         </div>
 
         <div className="p-5 space-y-5">
+          {intro}
+
           {existing && pages.length === 0 && (
             <div className="rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40 p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-green-800 dark:text-green-300">
@@ -317,4 +328,4 @@ const SignedTermsDialog: React.FC<SignedTermsDialogProps> = ({
   );
 };
 
-export default SignedTermsDialog;
+export default ScannedDocumentDialog;
