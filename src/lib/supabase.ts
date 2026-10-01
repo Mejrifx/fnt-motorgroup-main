@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import type { VehicleHealthCheck } from './vehicleHealthCheck'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -83,6 +84,7 @@ export interface StockItem {
   has_video: boolean | null
   has_diagnostic_report: boolean | null
   notes: string | null
+  health_check?: VehicleHealthCheck | null
   created_at: string
   updated_at: string
 }

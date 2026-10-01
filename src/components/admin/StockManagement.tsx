@@ -1,11 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase, type StockItem } from '../../lib/supabase';
 import {
   Search, X, CheckCircle, Clock, Key, FileText,
-  Wrench, ChevronDown, RefreshCw, Filter, Save,
-  Plus, Car as CarIcon, Stethoscope,
+  Wrench, ChevronDown, ChevronLeft, RefreshCw, Filter, Save,
+  Plus, Car as CarIcon, Stethoscope, ClipboardCheck,
 } from 'lucide-react';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import VehicleHealthPanel from './VehicleHealthPanel';
+import {
+  emptyHealthCheck,
+  normalizeHealthCheck,
+  summarizeHealthCheck,
+} from '../../lib/vehicleHealthCheck';
 
 type StockStatus = 'Ready' | 'In Prep' | 'Needs Work';
 type Priority    = 'None' | 'Low' | 'High';
@@ -90,6 +96,7 @@ const emptyItem = (): Partial<StockItem> => ({
   mot_expiry: '', mot_carry_out: false, v5_present: false,
   num_keys: 2, service_history: '', stock_status: 'Ready',
   work_needed: '', priority: 'Low', has_video: false, has_diagnostic_report: false, notes: '',
+  health_check: emptyHealthCheck(),
 });
 
 // ─── Main Component ────────────────────────────────────────────────────────────
@@ -163,14 +170,19 @@ const StockManagement: React.FC = () => {
   const save = async () => {
     setSaving(true);
     try {
+      const { health_check: rawHealth, ...rest } = editData;
+      const healthTouched = isAdding
+        ? summarizeHealthCheck(rawHealth).status !== 'empty'
+        : rawHealth != null;
       const payload = {
-        ...editData,
+        ...rest,
         car_model:       editData.car_model || `${editData.make} ${editData.model}`.trim(),
         registration:    editData.registration    ? editData.registration.replace(/\s/g, '').toUpperCase() : null,
         mot_expiry:      editData.mot_expiry      || null,
         service_history: editData.service_history || null,
         work_needed:     editData.work_needed     || null,
         notes:           editData.notes           || null,
+        ...(healthTouched ? { health_check: normalizeHealthCheck(rawHealth) } : {}),
         updated_at:      new Date().toISOString(),
       };
 
@@ -186,7 +198,11 @@ const StockManagement: React.FC = () => {
       closeDrawer();
     } catch (e) {
       console.error('Error saving stock item:', e);
-      alert('Failed to save. Please try again.');
+      const message = e && typeof e === 'object' && 'message' in e ? String((e as { message: unknown }).message) : '';
+      const hint = /health_check/i.test(message)
+        ? ' Run migrations/019_add_vehicle_health_check.sql in the Supabase SQL editor, then try again.'
+        : '';
+      alert(message ? `Failed to save. ${message}${hint}` : 'Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -355,6 +371,7 @@ const StockManagement: React.FC = () => {
                     className="hover:bg-gray-50/80 dark:hover:bg-gray-700/80 cursor-pointer transition-colors group">
                     <td className="px-4 py-3">
                       <div className="font-semibold text-gray-900 dark:text-white">{item.car_model}</div>
+                      <HealthHint value={item.health_check} />
                     </td>
                     <td className="px-4 py-3">
                       <span className="font-mono text-xs font-bold tracking-widest bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-md">
@@ -406,6 +423,7 @@ const StockManagement: React.FC = () => {
           onSave={save}
           onDelete={selected ? openDeleteConfirm : undefined}
           onClose={closeDrawer}
+          escapeLocked={deleteConfirm.isOpen}
         />
       )}
 
@@ -479,6 +497,18 @@ const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.
 
 // ─── EditDrawer ───────────────────────────────────────────────────────────────
 
+const HealthHint: React.FC<{ value: StockItem['health_check'] }> = ({ value }) => {
+  const summary = summarizeHealthCheck(value);
+  if (summary.status === 'empty') return null;
+  const color =
+    summary.issues > 0
+      ? 'text-red-500'
+      : summary.status === 'clear'
+        ? 'text-emerald-600 dark:text-emerald-400'
+        : 'text-amber-600 dark:text-amber-400';
+  return <div className={`mt-0.5 text-[11px] font-medium ${color}`}>Health · {summary.label}</div>;
+};
+
 const EditDrawer: React.FC<{
   item: StockItem | null;
   isAdding: boolean;
@@ -488,13 +518,69 @@ const EditDrawer: React.FC<{
   onSave: () => void;
   onDelete?: () => void;
   onClose: () => void;
-}> = ({ item, isAdding, data, saving, onChange, onSave, onDelete, onClose }) => {
+  escapeLocked?: boolean;
+}> = ({ item, isAdding, data, saving, onChange, onSave, onDelete, onClose, escapeLocked }) => {
   const motStatus = getMOTStatus(data.mot_expiry as string);
+  const [healthOpen, setHealthOpen] = useState(false);
+  const healthPaneRef = useRef<HTMLDivElement>(null);
+  const health = normalizeHealthCheck(data.health_check);
+  const healthSummary = summarizeHealthCheck(health);
+  const vehicleName = (data.car_model as string) || `${data.make || ''} ${data.model || ''}`.trim();
+
+  useEffect(() => {
+    setHealthOpen(false);
+  }, [item?.id, isAdding]);
+
+  useEffect(() => {
+    const node = healthPaneRef.current;
+    if (!node) return;
+    if (healthOpen) node.removeAttribute('inert');
+    else node.setAttribute('inert', '');
+  }, [healthOpen]);
+
+  useEffect(() => {
+    if (!healthOpen || escapeLocked) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      setHealthOpen(false);
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [healthOpen, escapeLocked]);
 
   return (
     <>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl flex flex-col animate-slide-in-right">
+      <div
+        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md overflow-hidden bg-white shadow-2xl animate-slide-in-right dark:bg-gray-800 lg:max-w-[calc(100vw-1.5rem)] lg:transition-[width] lg:duration-300 lg:ease-spring motion-reduce:transition-none ${
+          healthOpen ? 'lg:w-[52rem]' : 'lg:w-[28rem]'
+        }`}
+      >
+
+        {/* Health check slides out from the seam — the middle of this block — toward the left. */}
+        <div
+          className={`absolute inset-0 z-20 flex min-w-0 justify-end overflow-hidden transition-transform duration-300 ease-spring motion-reduce:transition-none ${
+            healthOpen ? 'pointer-events-auto translate-x-0' : 'pointer-events-none -translate-x-full'
+          } lg:relative lg:inset-auto lg:z-auto lg:shrink-0 lg:translate-x-0 lg:transition-[width] lg:duration-300 ${
+            healthOpen ? 'lg:w-[24rem] lg:pointer-events-auto' : 'lg:w-0 lg:pointer-events-none'
+          }`}
+          aria-hidden={!healthOpen}
+          ref={healthPaneRef}
+        >
+          <div className="h-full w-full shrink-0 border-gray-200 dark:border-gray-700 lg:w-[24rem] lg:border-r">
+              <VehicleHealthPanel
+                vehicleName={vehicleName || (isAdding ? 'New vehicle' : 'This vehicle')}
+                registration={data.registration ? formatReg(data.registration as string) : null}
+                value={health}
+                onChange={next => onChange({ health_check: next })}
+                onClose={() => setHealthOpen(false)}
+              />
+          </div>
+        </div>
+
+        <div className="flex h-full min-h-0 w-full shrink-0 flex-col bg-white dark:bg-gray-800 lg:w-[28rem]">
 
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-700">
@@ -515,6 +601,36 @@ const EditDrawer: React.FC<{
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+          <button
+            type="button"
+            onClick={() => setHealthOpen(open => !open)}
+            aria-expanded={healthOpen}
+            className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition ${
+              healthOpen
+                ? 'border-fnt-red/30 bg-red-50/70 dark:bg-red-950/30'
+                : 'border-gray-200 bg-gray-50/80 hover:border-gray-300 hover:bg-white dark:border-gray-600 dark:bg-gray-700/40 dark:hover:bg-gray-700'
+            }`}
+          >
+            <span
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                healthSummary.issues > 0
+                  ? 'bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400'
+                  : healthSummary.status === 'clear'
+                    ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400'
+                    : 'border border-gray-200 bg-white text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300'
+              }`}
+            >
+              <ClipboardCheck className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-gray-900 dark:text-white">Vehicle health check</span>
+              <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
+                {healthSummary.status === 'empty' ? 'Fuel, punctures, clean, smell' : healthSummary.label}
+              </span>
+            </span>
+            <ChevronLeft className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-300 ${healthOpen ? 'rotate-180' : ''}`} />
+          </button>
 
           {/* Vehicle Info */}
           <Section title="Vehicle" icon={<CarIcon className="w-4 h-4" />}>
@@ -623,6 +739,7 @@ const EditDrawer: React.FC<{
             className="flex-1 py-3 rounded-xl btn-glass-red text-white text-sm font-semibold transition disabled:opacity-60 flex items-center justify-center gap-2">
             {saving ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving…</> : <><Save className="w-4 h-4" /> {isAdding ? 'Add Vehicle' : 'Save Changes'}</>}
           </button>
+        </div>
         </div>
       </div>
     </>
